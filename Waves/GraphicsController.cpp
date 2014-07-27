@@ -43,13 +43,14 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_TestModel = new EntityModel;
 	if (!m_TestModel) return false;
-	result = m_TestModel->Initialize(m_Render->GetDevice());
+
+	result = m_TestModel->Initialize(m_Render->GetDevice(), L"water_tiling.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not Initialize Model", L"Error", MB_OK);
 	}
 
-	m_DefaultShader = new Shader;
+	m_DefaultShader = new TextureShader;
 	if (!m_DefaultShader) return false;
 	m_DefaultShader->Initialize(m_Render->GetDevice(), hwnd);
 	if (!result)
@@ -115,7 +116,7 @@ bool GraphicsController::Render()
 	m_Render->GetProjectionMatrix(projectionMatrix);
 	
 	m_TestModel->Render(m_Render->GetDeviceContext());
-	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
+	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,m_TestModel->GetTexture());
 	if (!result) return false;
 
 	m_Render->PresentBackBuffer();

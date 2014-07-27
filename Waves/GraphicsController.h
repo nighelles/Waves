@@ -5,7 +5,7 @@
 
 #include "Camera.h"
 #include "EntityModel.h"
-#include "Shader.h"
+#include "TextureShader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -32,7 +32,7 @@ private:
 
 	EntityModel* m_TestModel;
 
-	Shader* m_DefaultShader;
+	TextureShader* m_DefaultShader;
 
 	float m_clearColor;
 };

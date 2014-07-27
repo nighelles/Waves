@@ -88,6 +88,8 @@
     <ClCompile Include="EntityModel.cpp" />
     <ClCompile Include="RenderController.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -97,6 +99,8 @@
     <ClInclude Include="EntityModel.h" />
     <ClInclude Include="RenderController.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureShader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="color.ps" />
