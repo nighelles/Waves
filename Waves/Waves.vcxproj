@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GraphicsController.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -88,6 +89,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityModel.cpp" />
     <ClCompile Include="ObjFileUtility.cpp" />
+    <ClCompile Include="ProceduralTerrain.cpp" />
     <ClCompile Include="RenderController.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -95,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="GraphicsController.h" />
     <ClInclude Include="InputController.h" />
     <ClInclude Include="Engine.h" />
@@ -102,12 +105,14 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="LoadObjFile.h" />
     <ClInclude Include="ObjFileUtility.h" />
+    <ClInclude Include="ProceduralTerrain.h" />
     <ClInclude Include="RenderController.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureShader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Specular.ps" />
     <None Include="texture.ps" />
     <None Include="texture.vs" />
   </ItemGroup>

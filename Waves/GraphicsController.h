@@ -8,6 +8,8 @@
 #include "TextureShader.h"
 #include "Light.h"
 
+#include "ProceduralTerrain.h"
+
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -22,17 +24,19 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame();
+	bool Frame(int, int, int, int);
+	bool Render();
 
-private:
-	bool Render(float);
+	int InitializeEntityModel(char* modelFilename, WCHAR* textureFilename);
 
 private:
 	RenderController* m_Render;
 	Camera* m_PlayerCamera;
-	EntityModel* m_TestEntity;
 	TextureShader* m_DefaultShader;
 	Light* m_Light;
+
+	EntityModel* m_playerEntity;
+	ProceduralTerrain* m_waterTerrain;
 
 	float m_clearColor;
 };

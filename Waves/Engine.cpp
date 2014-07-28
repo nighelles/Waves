@@ -30,7 +30,12 @@ bool Engine::Initialize()
 		return false;
 	}
 
-	m_Input->Initialize();
+	result = m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if (!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize DirectInput", L"Error", MB_OK);
+		return false;
+	}
 
 	m_Graphics = new GraphicsController;
 	if (!m_Graphics)
@@ -58,6 +63,7 @@ void Engine::Shutdown()
 
 	if (m_Input)
 	{
+		m_Input->Shutdown();
 		delete m_Input;
 		m_Input = 0;
 	}
@@ -83,7 +89,7 @@ void Engine::Run()
 			DispatchMessage(&msg);
 		}
 
-		if (msg.message == WM_QUIT)
+		if (msg.message == WM_QUIT || m_Input->IsEscapePressed())
 		{
 			done = true;
 		}
@@ -105,41 +111,27 @@ void Engine::Run()
 bool Engine::Update()
 {
 	bool result;
+	int mouseX, mouseY;
+	int mouseDX, mouseDY;
 
-	if (m_Input->IsKeyDown(VK_ESCAPE))
-	{
-		return false;
-	}
+	result = m_Input->Frame(); 
+	if (!result) return false;
 
-	result = m_Graphics->Frame(); //Consider renaming, what is frame vs. render function in graphics controller
-	if (!result)
-	{
-		return false;
-	}
+	m_Input->GetMouseLocation(mouseX, mouseY);
+	m_Input->GetMouseDelta(mouseDX, mouseDY);
+
+	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY);
+	if (!result) return false;
+
+	result = m_Graphics->Render();
+	if (!result) return false;
 
 	return true;
 }
 
 LRESULT CALLBACK Engine::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	switch (umsg)
-	{
-		case WM_KEYDOWN:
-		{
-			m_Input->KeyDown((unsigned int)wparam);
-			return 0;
-		}
-
-		case WM_KEYUP:
-		{
-			m_Input->KeyUp((unsigned int)wparam);
-			return 0;
-		}
-		default:
-		{
-			return DefWindowProc(hwnd, umsg, wparam, lparam);
-		}
-	}
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
 void Engine::InitializeWindows(int& screenWidth, int& screenHeight)

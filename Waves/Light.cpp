@@ -16,6 +16,12 @@ void Light::SetDiffuseColor(float red, float green, float blue, float alpha)
 	return;
 }
 
+void Light::SetFillColor(float red, float green, float blue, float alpha)
+{
+	m_fillColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
 
 void Light::SetDirection(float x, float y, float z)
 {
@@ -29,6 +35,10 @@ D3DXVECTOR4 Light::GetDiffuseColor()
 	return m_diffuseColor;
 }
 
+D3DXVECTOR4 Light::GetFillColor()
+{
+	return m_fillColor;
+}
 
 D3DXVECTOR3 Light::GetDirection()
 {

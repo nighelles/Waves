@@ -4,6 +4,7 @@
 #include <d3dx10math.h>
 
 #include "EntityModel.h"
+#include "GraphicsController.h"
 
 class Entity
 {
@@ -13,17 +14,12 @@ public:
 
 	void Update();
 
+	bool Initialize();
 	void Shutdown();
 
-	bool Initialize();
-	bool InitializeModel(ID3D11Device* device, WCHAR* textureFilename);
-	EntityModel* GetModel();
-
-	void Render(ID3D11DeviceContext*);
+	bool InitializeModel(GraphicsController* graphics, char* modelFilename, WCHAR* textureFilename);
 
 protected:
-	EntityModel* m_Model;
-
 	float m_locationX;
 	float m_locationY;
 	float m_locationZ;
@@ -31,5 +27,7 @@ protected:
 	float m_rotationX;
 	float m_rotationY;
 	float m_rotationZ;
+
+	int m_modelID;
 };
 

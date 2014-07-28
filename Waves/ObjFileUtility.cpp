@@ -147,12 +147,12 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 		modelData[3 * i].y = vertices[vIndex].y;
 		modelData[3 * i].z = vertices[vIndex].z;
 
-		modelData[3 * i].tu = texcoords[vIndex].x;
-		modelData[3 * i].tv = texcoords[vIndex].y;
+		modelData[3 * i].tu = texcoords[tIndex].x;
+		modelData[3 * i].tv = texcoords[tIndex].y;
 
-		modelData[3 * i].nx = normals[vIndex].x;
-		modelData[3 * i].ny = normals[vIndex].y;
-		modelData[3 * i].nz = normals[vIndex].z;
+		modelData[3 * i].nx = normals[nIndex].x;
+		modelData[3 * i].ny = normals[nIndex].y;
+		modelData[3 * i].nz = normals[nIndex].z;
 
 		vIndex = faces[i].vIndex2 - 1;
 		tIndex = faces[i].tIndex2 - 1;
@@ -162,12 +162,12 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 		modelData[3*i + 1].y = vertices[vIndex].y;
 		modelData[3*i + 1].z = vertices[vIndex].z;
 
-		modelData[3 * i + 1].tu = texcoords[vIndex].x;
-		modelData[3 * i + 1].tv = texcoords[vIndex].y;
+		modelData[3 * i + 1].tu = texcoords[tIndex].x;
+		modelData[3 * i + 1].tv = texcoords[tIndex].y;
 
-		modelData[3 * i + 1].nx = normals[vIndex].x;
-		modelData[3 * i + 1].ny = normals[vIndex].y;
-		modelData[3 * i + 1].nz = normals[vIndex].z;
+		modelData[3 * i + 1].nx = normals[nIndex].x;
+		modelData[3 * i + 1].ny = normals[nIndex].y;
+		modelData[3 * i + 1].nz = normals[nIndex].z;
 
 		vIndex = faces[i].vIndex3 - 1;
 		tIndex = faces[i].tIndex3 - 1;
@@ -177,12 +177,12 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 		modelData[3*i + 2].y = vertices[vIndex].y;
 		modelData[3*i + 2].z = vertices[vIndex].z;
 
-		modelData[3 * i + 2].tu = texcoords[vIndex].x;
-		modelData[3 * i + 2].tv = texcoords[vIndex].y;
+		modelData[3 * i + 2].tu = texcoords[tIndex].x;
+		modelData[3 * i + 2].tv = texcoords[tIndex].y;
 
-		modelData[3 * i + 2].nx = normals[vIndex].x;
-		modelData[3 * i + 2].ny = normals[vIndex].y;
-		modelData[3 * i + 2].nz = normals[vIndex].z;
+		modelData[3 * i + 2].nx = normals[nIndex].x;
+		modelData[3 * i + 2].ny = normals[nIndex].y;
+		modelData[3 * i + 2].nz = normals[nIndex].z;
 	}
 
 	return true;
