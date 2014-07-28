@@ -8,6 +8,8 @@ TextureShader::TextureShader()
 	m_matrixBuffer = 0;
 
 	m_sampleState = 0;
+
+	m_lightBuffer = 0;
 }
 
 
@@ -38,11 +40,12 @@ void TextureShader::Shutdown()
 }
 
 bool TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix,
-	D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+	D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
+	D3DXVECTOR3 lightDirection, D3DXVECTOR4 diffuseColor)
 {
 	bool result;
 
-	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
 	if (!result) return false;
 
 	RenderShader(deviceContext, indexCount);
@@ -56,10 +59,11 @@ bool TextureShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
 	ID3D10Blob* pixelShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
 
 	errorMessage = 0;
 	vertexShaderBuffer = 0;
@@ -116,6 +120,14 @@ bool TextureShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
 
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 	result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_layout);
 	if (FAILED(result)) return false;
@@ -156,11 +168,26 @@ bool TextureShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 	result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
 	if (FAILED(result)) return false;
 
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBuffer);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
+	if (FAILED(result)) return false;
+
 	return true;
 }
 
 void TextureShader::ShutdownShader()
 {
+	if (m_lightBuffer)
+	{
+		m_lightBuffer->Release();
+		m_lightBuffer = 0;
+	}
 	if (m_sampleState)
 	{
 		m_sampleState->Release();
@@ -213,11 +240,13 @@ void TextureShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd
 	return;
 }
 
-bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
+	D3DXVECTOR3 lightDirection, D3DXVECTOR4 diffuseColor)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBuffer* dataPtr;
+	LightBuffer*  dataPtr2;
 	unsigned int bufferNumber;
 
 	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
@@ -239,6 +268,17 @@ bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DX
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
 	deviceContext->PSSetShaderResources(0, 1, &texture);
+
+	result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(result)) return false;
+
+	dataPtr2 = (LightBuffer*)mappedResource.pData;
+	dataPtr2->diffuseColor = diffuseColor;
+	dataPtr2->lightDirection = lightDirection;
+	dataPtr2->padding = 0.0f;
+	deviceContext->Unmap(m_lightBuffer, 0);
+	bufferNumber = 0;
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
 	return true;
 }

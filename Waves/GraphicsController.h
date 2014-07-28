@@ -4,9 +4,9 @@
 #include "RenderController.h"
 
 #include "Camera.h"
-#include "Entity.h"
 #include "EntityModel.h"
 #include "TextureShader.h"
+#include "Light.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -25,15 +25,14 @@ public:
 	bool Frame();
 
 private:
-	bool Render();
+	bool Render(float);
 
 private:
 	RenderController* m_Render;
 	Camera* m_PlayerCamera;
-
-	Entity* m_TestEntity;
-
+	EntityModel* m_TestEntity;
 	TextureShader* m_DefaultShader;
+	Light* m_Light;
 
 	float m_clearColor;
 };

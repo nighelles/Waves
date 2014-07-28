@@ -7,7 +7,7 @@ GraphicsController::GraphicsController()
 	m_PlayerCamera = 0;
 	m_TestEntity = 0;
 	m_DefaultShader = 0;
-
+	m_Light = 0;
 	m_clearColor = 0.0f;
 }
 
@@ -39,16 +39,16 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
-	m_PlayerCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	m_PlayerCamera->SetPosition(0.0f, 0.0f, -30.0f);
 
-	m_TestEntity = new Entity;
+	m_TestEntity = new EntityModel;
 	if (!m_TestEntity) return false;
-	m_TestEntity->Initialize();
 
-	result = m_TestEntity->InitializeModel(m_Render->GetDevice(), L"water_tiling.dds");
+	result = m_TestEntity->Initialize(m_Render->GetDevice(), "Boat.obj", L"wood_tiling.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not Initialize Model", L"Error", MB_OK);
+		return false;
 	}
 
 	m_DefaultShader = new TextureShader;
@@ -60,12 +60,22 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 		return false;
 	}
 
+	m_Light = new Light;
+	if (!m_Light) return false;
+	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light->SetDirection(0.5f, -0.5f, 1.0f);
+
 	return true;
 }
 
 
 void GraphicsController::Shutdown()
 {
+	if (m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
 	if (m_DefaultShader)
 	{
 		m_DefaultShader->Shutdown();
@@ -96,15 +106,19 @@ void GraphicsController::Shutdown()
 bool GraphicsController::Frame()
 {
 	bool result;
+	static float rotation = 0.0f;
 
-	result = Render();
+	rotation += (float)D3DX_PI*0.01f;
+	if (rotation > 360.0f) rotation -= 360.0f;
+
+	result = Render(rotation);
 	if (!result) return false;
 
 	return true;
 }
 
 
-bool GraphicsController::Render()
+bool GraphicsController::Render(float rotation)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
 	bool result;
@@ -115,9 +129,11 @@ bool GraphicsController::Render()
 	m_PlayerCamera->GetViewMatrix(viewMatrix);
 	m_Render->GetWorldMatrix(worldMatrix);
 	m_Render->GetProjectionMatrix(projectionMatrix);
+
+	D3DXMatrixRotationY(&worldMatrix, rotation);
 	
 	m_TestEntity->Render(m_Render->GetDeviceContext());
-	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestEntity->GetModel()->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_TestEntity->GetModel()->GetTexture());
+	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestEntity->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_TestEntity->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor());
 	if (!result) return false;
 
 	m_Render->PresentBackBuffer();

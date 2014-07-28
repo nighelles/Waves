@@ -1,4 +1,5 @@
 #include "EntityModel.h"
+#include "ObjFileUtility.h"
 
 
 EntityModel::EntityModel()
@@ -6,6 +7,7 @@ EntityModel::EntityModel()
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
+	m_model = 0;
 }
 
 EntityModel::EntityModel(const EntityModel& other)
@@ -16,9 +18,12 @@ EntityModel::~EntityModel()
 {
 }
 
-bool EntityModel::Initialize(ID3D11Device* device, WCHAR* textureFilename)
+bool EntityModel::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
 {
 	bool result;
+
+	result = LoadModel(modelFilename);
+	if (!result) return false;
 
 	result = InitializeBuffers(device);
 	if (!result) return false;
@@ -34,6 +39,8 @@ void EntityModel::Shutdown()
 	ReleaseTexture();
 
 	ShutdownBuffers();
+
+	ReleaseModel();
 
 	return;
 }
@@ -62,10 +69,7 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-
-	// CODE TO LOAD MODEL HERE
-	m_vertexCount = 3;
-	m_indexCount = 3;
+	int i;
 
 	vertices = new Vertex[m_vertexCount];
 	if (!vertices) return false;
@@ -73,19 +77,13 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	indices = new unsigned long[m_indexCount];
 	if (!indices) return false;
 
-	vertices[0].position = D3DXVECTOR3(-1.0f, -1.0f, 0.0f);
-	vertices[0].texture = D3DXVECTOR2(0.0f, 1.0f);
-
-	vertices[1].position = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	vertices[1].texture = D3DXVECTOR2(0.05f, 0.0f);
-
-	vertices[2].position = D3DXVECTOR3(1.0f, -1.0f, 0.0f);
-	vertices[2].texture = D3DXVECTOR2(1.0f, 1.0f);
-
-	indices[0] = 0;
-	indices[1] = 1;
-	indices[2] = 2;
-	// END CODE TO LOAD MODEL
+	for (i = 0; i != m_vertexCount; ++i)
+	{
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		indices[i] = i;
+	}
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(Vertex) * m_vertexCount;
@@ -177,4 +175,33 @@ void EntityModel::ReleaseTexture()
 	}
 
 	return;
+}
+
+void EntityModel::ReleaseModel()
+{
+	if (m_model)
+	{
+		delete[] m_model;
+		m_model = 0;
+	}
+
+	return;
+}
+
+bool EntityModel::LoadModel(char* filename)
+{
+	bool result;
+	ObjFileUtility *objLoader = new ObjFileUtility;
+	m_vertexCount = objLoader->loadNumberOfVertices(filename);
+	m_indexCount = m_vertexCount;
+	if (m_vertexCount < 1) return false;
+
+	m_model = new Model[m_vertexCount];
+	result = objLoader->LoadObjFile(filename, m_model);
+	if (!result) return false;
+
+	objLoader->Shutdown();
+	delete objLoader;
+
+	return true;
 }
