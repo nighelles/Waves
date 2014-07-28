@@ -4,6 +4,7 @@
 #include "RenderController.h"
 
 #include "Camera.h"
+#include "Entity.h"
 #include "EntityModel.h"
 #include "TextureShader.h"
 
@@ -30,7 +31,7 @@ private:
 	RenderController* m_Render;
 	Camera* m_PlayerCamera;
 
-	EntityModel* m_TestModel;
+	Entity* m_TestEntity;
 
 	TextureShader* m_DefaultShader;
 

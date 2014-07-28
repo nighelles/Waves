@@ -5,7 +5,7 @@ GraphicsController::GraphicsController()
 {
 	m_Render = 0;
 	m_PlayerCamera = 0;
-	m_TestModel = 0;
+	m_TestEntity = 0;
 	m_DefaultShader = 0;
 
 	m_clearColor = 0.0f;
@@ -41,10 +41,11 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	if (!m_PlayerCamera) return false;
 	m_PlayerCamera->SetPosition(0.0f, 0.0f, -10.0f);
 
-	m_TestModel = new EntityModel;
-	if (!m_TestModel) return false;
+	m_TestEntity = new Entity;
+	if (!m_TestEntity) return false;
+	m_TestEntity->Initialize();
 
-	result = m_TestModel->Initialize(m_Render->GetDevice(), L"water_tiling.dds");
+	result = m_TestEntity->InitializeModel(m_Render->GetDevice(), L"water_tiling.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not Initialize Model", L"Error", MB_OK);
@@ -71,11 +72,11 @@ void GraphicsController::Shutdown()
 		delete m_DefaultShader;
 		m_DefaultShader = 0;
 	}
-	if (m_TestModel)
+	if (m_TestEntity)
 	{
-		m_TestModel->Shutdown();
-		delete m_TestModel;
-		m_TestModel = 0;
+		m_TestEntity->Shutdown();
+		delete m_TestEntity;
+		m_TestEntity = 0;
 	}
 	if (m_PlayerCamera)
 	{
@@ -115,8 +116,8 @@ bool GraphicsController::Render()
 	m_Render->GetWorldMatrix(worldMatrix);
 	m_Render->GetProjectionMatrix(projectionMatrix);
 	
-	m_TestModel->Render(m_Render->GetDeviceContext());
-	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestModel->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,m_TestModel->GetTexture());
+	m_TestEntity->Render(m_Render->GetDeviceContext());
+	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestEntity->GetModel()->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_TestEntity->GetModel()->GetTexture());
 	if (!result) return false;
 
 	m_Render->PresentBackBuffer();
