@@ -4,6 +4,7 @@
 
 #include "InputController.h"
 #include "GraphicsController.h"
+#include "Entity.h"
 
 class Engine
 {
@@ -30,6 +31,11 @@ private:
 
 	InputController* m_Input;
 	GraphicsController* m_Graphics;
+
+	Entity* m_playerBoat;
+
+	int m_Time;
+	int m_oldTime;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

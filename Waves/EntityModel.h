@@ -10,7 +10,7 @@ using namespace std;
 
 class EntityModel
 {
-private:
+protected:
 	struct Vertex
 	{
 		D3DXVECTOR3 position;
@@ -36,13 +36,17 @@ public:
 	void Render(ID3D11DeviceContext*);
 
 	int GetIndexCount();
+	void SetLocation(float x, float y, float z);
+	void SetRotation(float x, float y, float z);
+
+	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
 	ID3D11ShaderResourceView* GetTexture();
 
 protected:
-	bool InitializeBuffers(ID3D11Device*);
+	virtual bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
-	void RenderBuffers(ID3D11DeviceContext*);
+	virtual void RenderBuffers(ID3D11DeviceContext*);
 
 	bool LoadTexture(ID3D11Device*, WCHAR*);
 	void ReleaseTexture();
@@ -51,10 +55,15 @@ protected:
 	void ReleaseModel();
 
 protected:
+	float m_locationX, m_locationY, m_locationZ;
+	float m_rotationX, m_rotationY, m_rotationZ;
+
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 
 	Texture* m_Texture; // ADD multiple textures?
+
+	ID3D11Device* m_device;
 
 	Model* m_model;
 };

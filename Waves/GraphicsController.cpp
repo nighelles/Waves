@@ -9,8 +9,9 @@ GraphicsController::GraphicsController()
 	m_Light = 0;
 	m_clearColor = 0.0f;
 
-	m_TestEntity = 0;
 	m_waterTerrain = 0;
+	
+	m_numEntities = 0;
 }
 
 
@@ -23,10 +24,34 @@ GraphicsController::~GraphicsController()
 {
 }
 
+int GraphicsController::InitializeEntityModel(char* modelFilename, WCHAR* textureFilename)
+{
+	bool result;
+
+	m_modelEntities[m_numEntities] = new EntityModel;
+	if (!m_modelEntities[m_numEntities]) return -1;
+
+	result = m_modelEntities[m_numEntities]->Initialize(m_Render->GetDevice(), modelFilename, textureFilename);
+	if (!result)
+	{
+		MessageBox(m_hwnd, L"Could not Initialize Model", L"Error", MB_OK);
+		return -1;
+	}
+
+	m_numEntities += 1;
+	return (m_numEntities - 1);
+}
+
+EntityModel* GraphicsController::GetEntityModel(int entityID)
+{
+	return (m_modelEntities[entityID]);
+}
 
 bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	bool result;
+
+	m_hwnd = hwnd;
 
 	m_Render = new RenderController;
 	if (!m_Render) return false;
@@ -42,16 +67,6 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
 	m_PlayerCamera->SetPosition(0.0f, 2.0f, -30.0f);
-
-	m_TestEntity = new EntityModel;
-	if (!m_TestEntity) return false;
-
-	result = m_TestEntity->Initialize(m_Render->GetDevice(), "Boat.obj", L"wood_tiling.dds");
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not Initialize Model", L"Error", MB_OK);
-		return false;
-	}
 
 	m_waterTerrain = new ProceduralTerrain();
 	if (!m_waterTerrain) return false;
@@ -75,8 +90,8 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_Light = new Light;
 	if (!m_Light) return false;
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light->SetFillColor (0.2f, 0.2f, 0.2f, 1.0f);
-	m_Light->SetDirection(0.1f,-1.0f,0.1f);
+	m_Light->SetFillColor (0.1f, 0.1f, 0.1f, 1.0f);
+	m_Light->SetDirection(0.0f,-1.f,0.0f);
 
 	return true;
 }
@@ -95,11 +110,14 @@ void GraphicsController::Shutdown()
 		delete m_DefaultShader;
 		m_DefaultShader = 0;
 	}
-	if (m_TestEntity)
+	for (int i = 0; i != m_numEntities; ++i)
 	{
-		m_TestEntity->Shutdown();
-		delete m_TestEntity;
-		m_TestEntity = 0;
+		if (m_modelEntities[i])
+		{
+			m_modelEntities[i]->Shutdown();
+			delete m_modelEntities[i];
+			m_modelEntities[i] = 0;
+		}
 	}
 	if (m_waterTerrain)
 	{
@@ -122,14 +140,27 @@ void GraphicsController::Shutdown()
 }
 
 
-bool GraphicsController::Frame(int mouseX, int mouseY, int mouseDX, int mouseDY)
+bool GraphicsController::Frame(int mouseX, int mouseY, int mouseDX, int mouseDY, float time)
 {
 	bool result;
 	static float rotation = 0.0f;
+	
+	float loopCompletion = time / 60000.0f;
+	m_waterTerrain->Update(loopCompletion);
 
 	m_PlayerCamera->ApplyRotation(mouseDY/2.0f,mouseDX/2.0f,0.0f);
 
 	return true;
+}
+
+Camera* GraphicsController::GetPlayerCamera()
+{
+	return m_PlayerCamera;
+}
+
+ProceduralTerrain* GraphicsController::GetTerrain()
+{
+	return m_waterTerrain;
 }
 
 
@@ -145,10 +176,17 @@ bool GraphicsController::Render()
 	m_Render->GetWorldMatrix(worldMatrix);
 	m_Render->GetProjectionMatrix(projectionMatrix);
 	
-	m_TestEntity->Render(m_Render->GetDeviceContext());
-	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_TestEntity->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_TestEntity->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
-	if (!result) return false;
+	for (int i = 0; i != m_numEntities; ++i)
+	{
+		m_Render->GetWorldMatrix(worldMatrix);
 
+		m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
+		m_modelEntities[i]->Render(m_Render->GetDeviceContext());
+		result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+		if (!result) return false;
+	}
+
+	m_Render->GetWorldMatrix(worldMatrix);
 	m_waterTerrain->Render(m_Render->GetDeviceContext());
 	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_waterTerrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_waterTerrain->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
 	if (!result) return false;

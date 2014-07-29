@@ -14,11 +14,10 @@ public:
 	void SetPosition(float, float, float);
 	void SetRotation(float, float, float);
 	void ApplyRotation(float x, float y, float z);
+	void ApplyTranslation(float x, float y, float z);
 
 	D3DXVECTOR3 GetPosition();
 	D3DXVECTOR3 GetRotation();
-
-
 
 	void Render();
 	void GetViewMatrix(D3DXMATRIX&);

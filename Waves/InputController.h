@@ -22,6 +22,8 @@ public:
 	void GetMouseLocation(int&, int&);
 	void GetMouseDelta(int&, int&);
 
+	bool IsKeyPressed(int key);
+
 private:
 	bool ReadKeyboard();
 	bool ReadMouse();

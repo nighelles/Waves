@@ -24,10 +24,14 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame(int, int, int, int);
+	bool Frame(int, int, int, int, float);
 	bool Render();
 
 	int InitializeEntityModel(char* modelFilename, WCHAR* textureFilename);
+	EntityModel* GetEntityModel(int entityID);
+
+	Camera* GetPlayerCamera();
+	ProceduralTerrain* GetTerrain();
 
 private:
 	RenderController* m_Render;
@@ -38,5 +42,10 @@ private:
 	EntityModel* m_playerEntity;
 	ProceduralTerrain* m_waterTerrain;
 
+	EntityModel* m_modelEntities[10];
+	int m_numEntities;
+
 	float m_clearColor;
+
+	HWND m_hwnd;
 };

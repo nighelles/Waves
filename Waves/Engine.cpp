@@ -4,6 +4,7 @@ Engine::Engine()
 {
 	m_Input = 0;
 	m_Graphics = 0;
+
 }
 
 Engine::Engine(const Engine& other)
@@ -49,6 +50,14 @@ bool Engine::Initialize()
 		return false;
 	}
 
+	// Initialize a boat model
+	m_playerBoat = new Entity;
+
+	result = m_playerBoat->Initialize();
+	if (!result) return false;
+
+	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+
 	return true;
 }
 
@@ -65,6 +74,12 @@ void Engine::Shutdown()
 	{
 		m_Input->Shutdown();
 		delete m_Input;
+		m_Input = 0;
+	}
+	if (m_playerBoat)
+	{
+		m_playerBoat->Shutdown();
+		delete m_playerBoat;
 		m_Input = 0;
 	}
 
@@ -113,6 +128,13 @@ bool Engine::Update()
 	bool result;
 	int mouseX, mouseY;
 	int mouseDX, mouseDY;
+	float playerCameraX, playerCameraY, playerCameraZ;
+	int deltaT;
+	SYSTEMTIME sysTime;
+	
+	GetSystemTime(&sysTime);
+	m_oldTime = m_Time;
+	m_Time = sysTime.wSecond * 1000 + sysTime.wMilliseconds;
 
 	result = m_Input->Frame(); 
 	if (!result) return false;
@@ -120,7 +142,48 @@ bool Engine::Update()
 	m_Input->GetMouseLocation(mouseX, mouseY);
 	m_Input->GetMouseDelta(mouseDX, mouseDY);
 
-	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY);
+	if (m_Input->IsKeyPressed(DIK_W))
+		m_playerBoat->ApplyTranslationRelative(0.0f, 0.0f, 1.0f);
+	if (m_Input->IsKeyPressed(DIK_A))
+		m_playerBoat->ApplyRotation(0.f, -1.0f, 0.0f);
+	if (m_Input->IsKeyPressed(DIK_S))
+		m_playerBoat->ApplyTranslationRelative(0.0f, 0.0f, -1.0f);
+	if (m_Input->IsKeyPressed(DIK_D))
+		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
+
+	// CALCULATE BOAT HEIGHT
+	D3DXVECTOR3 a, b, c, d;
+	float fr, fl, br, bl;
+	float roll, pitch;
+
+	roll = 0; pitch = 0;
+
+	float x, y, z;
+	m_playerBoat->GetLocation(x, y, z);
+	m_playerBoat->GetBoundingBox(a, b, c, d);
+
+	fr = m_Graphics->GetTerrain()->CalculateDeterministicHeight(b.x, b.z, m_Time / 60000.0f);
+	fl = m_Graphics->GetTerrain()->CalculateDeterministicHeight(a.x, a.z, m_Time / 60000.0f);
+	bl = m_Graphics->GetTerrain()->CalculateDeterministicHeight(d.x, d.z, m_Time / 60000.0f);
+	br = m_Graphics->GetTerrain()->CalculateDeterministicHeight(c.x, c.z, m_Time / 60000.0f);
+
+	roll = -180.0f/3.14f*atan2(((fl + bl) - (fr + br)) / 2.0, 3); // fix absolue 3 as width
+	m_playerBoat->SetRotation(NULL, NULL, roll);
+
+	pitch = -180.0f/3.14f*atan2(((fl + fr) - (bl + br)) / 2.0, 5);
+	m_playerBoat->SetRotation(pitch, NULL, NULL);
+
+
+	m_playerBoat->SetLocation(NULL,m_Graphics->GetTerrain()->CalculateDeterministicHeight(x, z, m_Time / 60000.0f) + 1,NULL);
+
+	m_playerBoat->Update(m_Graphics);
+
+	m_playerBoat->GetCameraLocation(playerCameraX, playerCameraY, playerCameraZ);
+	m_Graphics->GetPlayerCamera()->SetPosition(playerCameraX,playerCameraY,playerCameraZ);
+
+	// END CALCULATE BOAT HEIGHT
+
+	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY, m_Time);
 	if (!result) return false;
 
 	result = m_Graphics->Render();

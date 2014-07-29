@@ -8,6 +8,15 @@ EntityModel::EntityModel()
 	m_indexBuffer = 0;
 	m_Texture = 0;
 	m_model = 0;
+
+	m_locationX = 0.0f;
+	m_locationY = 0.0f;
+	m_locationZ = 0.0f;
+
+	m_rotationX = 0.0f;
+	m_rotationY = 0.0f;
+	m_rotationZ = 0.0f;
+
 }
 
 EntityModel::EntityModel(const EntityModel& other)
@@ -21,6 +30,8 @@ EntityModel::~EntityModel()
 bool EntityModel::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
 {
 	bool result;
+
+	m_device = device;
 
 	result = LoadModel(modelFilename);
 	if (!result) return false;
@@ -204,4 +215,30 @@ bool EntityModel::LoadModel(char* filename)
 	delete objLoader;
 
 	return true;
+}
+
+void EntityModel::SetLocation(float x, float y, float z)
+{
+	m_locationX = x;
+	m_locationY = y;
+	m_locationZ = z;
+}
+
+void EntityModel::SetRotation(float x, float y, float z)
+{
+	m_rotationX = x;
+	m_rotationY = y;
+	m_rotationZ = z;
+}
+
+
+void EntityModel::ApplyEntityMatrix(D3DXMATRIX& entityMatrix)
+{
+	D3DXMATRIX translation, rotation;
+	D3DXMatrixTranslation(&translation, m_locationX, m_locationY, m_locationZ);
+	D3DXMatrixRotationYawPitchRoll(&rotation, m_rotationY*0.0174532925f, m_rotationX*0.0174532925f, m_rotationZ*0.0174532925f);
+
+	entityMatrix = translation;
+	D3DXMatrixMultiply(&entityMatrix, &rotation, &entityMatrix);
+	return;
 }

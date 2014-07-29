@@ -14,6 +14,7 @@ protected:
 		D3DXMATRIX world;
 		D3DXMATRIX view;
 		D3DXMATRIX projection;
+		D3DXMATRIX local;
 	};
 	struct LightBuffer
 	{
