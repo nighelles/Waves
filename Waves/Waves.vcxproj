@@ -90,6 +90,7 @@
     <ClCompile Include="EntityModel.cpp" />
     <ClCompile Include="ObjFileUtility.cpp" />
     <ClCompile Include="ProceduralTerrain.cpp" />
+    <ClCompile Include="ProceduralTerrainShader.cpp" />
     <ClCompile Include="RenderController.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -106,12 +107,14 @@
     <ClInclude Include="LoadObjFile.h" />
     <ClInclude Include="ObjFileUtility.h" />
     <ClInclude Include="ProceduralTerrain.h" />
+    <ClInclude Include="ProceduralTerrainShader.h" />
     <ClInclude Include="RenderController.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureShader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="proceduralTerrainVertexShader.vs" />
     <None Include="Specular.ps" />
     <None Include="texture.ps" />
     <None Include="texture.vs" />

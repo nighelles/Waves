@@ -60,6 +60,9 @@
     <ClCompile Include="Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ProceduralTerrainShader.cpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -104,6 +107,9 @@
     <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProceduralTerrainShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="texture.vs">
@@ -113,6 +119,9 @@
       <Filter>Header Files\Shaders</Filter>
     </None>
     <None Include="texture.ps">
+      <Filter>Header Files\Shaders</Filter>
+    </None>
+    <None Include="proceduralTerrainVertexShader.vs">
       <Filter>Header Files\Shaders</Filter>
     </None>
   </ItemGroup>

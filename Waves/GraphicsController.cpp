@@ -5,7 +5,10 @@ GraphicsController::GraphicsController()
 {
 	m_Render = 0;
 	m_PlayerCamera = 0;
+	
 	m_DefaultShader = 0;
+	m_WaterShader = 0;
+
 	m_Light = 0;
 	m_clearColor = 0.0f;
 
@@ -83,7 +86,16 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_DefaultShader->Initialize(m_Render->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not Initialize Shader", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not Initialize Default Shader", L"Error", MB_OK);
+		return false;
+	}
+
+	m_WaterShader = new ProceduralTerrainShader;
+	if (!m_WaterShader) return false;
+	m_WaterShader->Initialize(m_Render->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Initialize Water Shader", L"Error", MB_OK);
 		return false;
 	}
 
@@ -109,6 +121,12 @@ void GraphicsController::Shutdown()
 		m_DefaultShader->Shutdown();
 		delete m_DefaultShader;
 		m_DefaultShader = 0;
+	}
+	if (m_WaterShader)
+	{
+		m_WaterShader->Shutdown();
+		delete m_WaterShader;
+		m_WaterShader = 0;
 	}
 	for (int i = 0; i != m_numEntities; ++i)
 	{
@@ -145,8 +163,8 @@ bool GraphicsController::Frame(int mouseX, int mouseY, int mouseDX, int mouseDY,
 	bool result;
 	static float rotation = 0.0f;
 	
-	float loopCompletion = time / 60000.0f;
-	m_waterTerrain->Update(loopCompletion);
+	m_timeLoopCompletion = time;
+	m_waterTerrain->Update(m_timeLoopCompletion);
 
 	m_PlayerCamera->ApplyRotation(mouseDY/2.0f,mouseDX/2.0f,0.0f);
 
@@ -163,7 +181,7 @@ ProceduralTerrain* GraphicsController::GetTerrain()
 	return m_waterTerrain;
 }
 
-
+// Time here is between 0 and 1
 bool GraphicsController::Render()
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
@@ -188,7 +206,7 @@ bool GraphicsController::Render()
 
 	m_Render->GetWorldMatrix(worldMatrix);
 	m_waterTerrain->Render(m_Render->GetDeviceContext());
-	result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_waterTerrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_waterTerrain->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+	result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_waterTerrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_waterTerrain->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
 	if (!result) return false;
 
 	m_Render->PresentBackBuffer();

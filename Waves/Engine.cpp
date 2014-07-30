@@ -183,7 +183,7 @@ bool Engine::Update()
 
 	// END CALCULATE BOAT HEIGHT
 
-	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY, m_Time);
+	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY, m_Time / 60000.0f);
 	if (!result) return false;
 
 	result = m_Graphics->Render();

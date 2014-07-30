@@ -9,6 +9,7 @@
 #include "Light.h"
 
 #include "ProceduralTerrain.h"
+#include "ProceduralTerrainShader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -36,7 +37,10 @@ public:
 private:
 	RenderController* m_Render;
 	Camera* m_PlayerCamera;
+
 	TextureShader* m_DefaultShader;
+	ProceduralTerrainShader* m_WaterShader;
+	
 	Light* m_Light;
 
 	EntityModel* m_playerEntity;
@@ -46,6 +50,8 @@ private:
 	int m_numEntities;
 
 	float m_clearColor;
+
+	float m_timeLoopCompletion;
 
 	HWND m_hwnd;
 };

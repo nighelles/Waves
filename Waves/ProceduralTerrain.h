@@ -21,6 +21,6 @@ protected:
 	virtual void regenerateModelFromTerrainMap();
 	void RenderBuffers(ID3D11DeviceContext*);
 
-	float terrainMap[200][200];
+	float terrainMap[1000][1000];
 };
 
