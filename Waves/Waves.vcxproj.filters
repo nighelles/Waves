@@ -13,8 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Shaders">
+    <Filter Include="Shaders">
       <UniqueIdentifier>{c4d4e304-2130-4041-a701-97ed5a5d8015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Networking">
+      <UniqueIdentifier>{0ad17408-bccf-4de2-9630-641fdc27659e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -49,10 +52,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </ClCompile>
     <ClCompile Include="TextureShader.cpp">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </ClCompile>
     <ClCompile Include="ProceduralTerrain.cpp">
       <Filter>Source Files</Filter>
@@ -61,7 +64,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProceduralTerrainShader.cpp">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkController.cpp">
+      <Filter>Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkClient.cpp">
+      <Filter>Networking</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,10 +105,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="TextureShader.h">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="ProceduralTerrain.h">
       <Filter>Header Files</Filter>
@@ -108,21 +117,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProceduralTerrainShader.h">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkController.h">
+      <Filter>Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkClient.h">
+      <Filter>Networking</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="texture.vs">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="Specular.ps">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="texture.ps">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="proceduralTerrainVertexShader.vs">
-      <Filter>Header Files\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
