@@ -110,6 +110,7 @@
     <ClInclude Include="LoadObjFile.h" />
     <ClInclude Include="NetworkClient.h" />
     <ClInclude Include="NetworkController.h" />
+    <ClInclude Include="NetworkDefinitions.h" />
     <ClInclude Include="NetworkServer.h" />
     <ClInclude Include="ObjFileUtility.h" />
     <ClInclude Include="ProceduralTerrain.h" />

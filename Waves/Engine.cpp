@@ -110,11 +110,13 @@ void Engine::Run()
 		}
 		else
 		{
+			// Main game logic
 			result = Update();
-			if (!result)
-			{
-				done = true;
-			}
+			if (!result) done = true;
+			result = Render();
+			if (!result) done = true;
+			result = PostUpdate();
+			if (!result) done = true;
 		}
 
 	}
@@ -126,8 +128,6 @@ void Engine::Run()
 bool Engine::Update()
 {
 	bool result;
-	int mouseX, mouseY;
-	int mouseDX, mouseDY;
 	float playerCameraX, playerCameraY, playerCameraZ;
 	int deltaT;
 	SYSTEMTIME sysTime;
@@ -138,9 +138,6 @@ bool Engine::Update()
 
 	result = m_Input->Frame(); 
 	if (!result) return false;
-
-	m_Input->GetMouseLocation(mouseX, mouseY);
-	m_Input->GetMouseDelta(mouseDX, mouseDY);
 
 	if (m_Input->IsKeyPressed(DIK_W))
 		m_playerBoat->ApplyTranslationRelative(0.0f, 0.0f, 1.0f);
@@ -183,6 +180,20 @@ bool Engine::Update()
 
 	// END CALCULATE BOAT HEIGHT
 
+	return true;
+}
+
+bool Engine::Render()
+{
+	// Render the current frame
+	int mouseX, mouseY;
+	int mouseDX, mouseDY;
+	bool result;
+
+	// This will have to be changed once the player is just a physics object
+	m_Input->GetMouseLocation(mouseX, mouseY);
+	m_Input->GetMouseDelta(mouseDX, mouseDY);
+
 	result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY, m_Time / 60000.0f);
 	if (!result) return false;
 
@@ -191,6 +202,13 @@ bool Engine::Update()
 
 	return true;
 }
+
+bool Engine::PostUpdate()
+{
+	// Anything that needs to happen after the frame has rendered
+	return true;
+}
+
 
 LRESULT CALLBACK Engine::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {

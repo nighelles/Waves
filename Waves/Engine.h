@@ -21,6 +21,9 @@ public:
 
 private:
 	bool Update();
+	bool Render();
+	bool PostUpdate();
+
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
 

@@ -131,6 +131,9 @@
     <ClInclude Include="NetworkServer.h">
       <Filter>Networking</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkDefinitions.h">
+      <Filter>Networking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="texture.vs">

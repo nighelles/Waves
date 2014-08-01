@@ -2,6 +2,8 @@
 
 #include <D3DX10math.h>
 
+#include "Entity.h"
+
 #define TORADIANS 0.0174532925f;
 
 class Camera
