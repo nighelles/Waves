@@ -1,5 +1,8 @@
 #include "Engine.h"
 
+#include <atldef.h>
+#include <atlstr.h>
+
 Engine::Engine()
 {
 	m_Input = 0;
@@ -21,8 +24,33 @@ Engine::~Engine()
 {
 }
 
+bool Engine::LoadConfiguration()
+{
+	ifstream fin;
+	char input;
+
+	fin.open("config.txt");
+	if (fin.fail()) return false;
+
+	fin.get(input);
+	while (input != ':') fin.get(input);
+	fin >> m_isServer;
+	fin.get(input);
+	while (input != ':') fin.get(input);
+	fin >> m_serverAddress;
+
+	if (m_isServer) 
+		MessageBox(m_hwnd, L"Server", L"Note", MB_OK);
+	else 
+		MessageBox(m_hwnd, L"Not Server", L"Note", MB_OK);
+
+	MessageBox(m_hwnd, ATL::CA2W(m_serverAddress), L"Note", MB_OK);
+}
+
 bool Engine::Initialize()
 {
+	LoadConfiguration();
+
 	// GAMESTATE
 	m_gameState = GAME_LOADING;
 

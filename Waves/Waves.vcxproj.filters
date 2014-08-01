@@ -42,9 +42,6 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ObjFileUtility.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
@@ -90,6 +87,9 @@
     <ClCompile Include="PhysicsEntity.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
+    <ClCompile Include="ObjFileUtility.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -102,9 +102,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LoadObjFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjFileUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
@@ -155,6 +152,9 @@
     <ClInclude Include="PhysicsEntity.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="ObjFileUtility.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="texture.vs">
@@ -172,6 +172,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Cube.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="config.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

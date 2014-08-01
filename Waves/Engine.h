@@ -2,6 +2,9 @@
 
 #include <windows.h>
 
+#include <iostream>
+#include <fstream>
+
 #include "InputController.h"
 #include "GraphicsController.h"
 #include "PhysicsEntity.h"
@@ -18,6 +21,7 @@ public:
 	~Engine();
 
 	bool Initialize();
+	bool LoadConfiguration();
 	bool InitializeGame();
 
 	void Shutdown();
@@ -52,6 +56,7 @@ private:
 	int m_oldTime;
 
 	bool m_isServer;
+	char m_serverAddress[16];
 
 	GameState m_gameState;
 };

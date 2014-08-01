@@ -54,23 +54,17 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 		return false;
 	}
 
-	// Initialize the indexes.
 	vertexIndex = 0;
 	texcoordIndex = 0;
 	normalIndex = 0;
 	faceIndex = 0;
 
-	// Open the file.
 	fin.open(filename);
 
-	// Check if it was successful in opening the file.
-	if (fin.fail() == true)
-	{
-		return false;
-	}
+	if (fin.fail()) return false;
 
-	// Read in the vertices, texture coordinates, and normals into the data structures.
-	// Important: Also convert to left hand coordinate system since Maya uses right hand coordinate system.
+
+	// REMEMBER TO CONVERT FROM LEFT HANDED COORDINATE SYSTEM
 	fin.get(input);
 	while (!fin.eof())
 	{
@@ -78,44 +72,36 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 		{
 			fin.get(input);
 
-			// Read in the vertices.
 			if (input == ' ')
 			{
 				fin >> vertices[vertexIndex].x >> vertices[vertexIndex].y >> vertices[vertexIndex].z;
 
-				// Invert the Z vertex to change to left hand system.
 				vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
 				vertexIndex++;
 			}
 
-			// Read in the texture uv coordinates.
 			if (input == 't')
 			{
 				fin >> texcoords[texcoordIndex].x >> texcoords[texcoordIndex].y;
 
-				// Invert the V texture coordinates to left hand system.
 				texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
 				texcoordIndex++;
 			}
 
-			// Read in the normals.
 			if (input == 'n')
 			{
 				fin >> normals[normalIndex].x >> normals[normalIndex].y >> normals[normalIndex].z;
 
-				// Invert the Z normal to change to left hand system.
 				normals[normalIndex].z = normals[normalIndex].z * -1.0f;
 				normalIndex++;
 			}
 		}
 
-		// Read in the faces.
 		if (input == 'f')
 		{
 			fin.get(input);
 			if (input == ' ')
 			{
-				// Read the face data in backwards to convert it to a left hand system from right hand system.
 				fin >> faces[faceIndex].vIndex3 >> input2 >> faces[faceIndex].tIndex3 >> input2 >> faces[faceIndex].nIndex3
 					>> faces[faceIndex].vIndex2 >> input2 >> faces[faceIndex].tIndex2 >> input2 >> faces[faceIndex].nIndex2
 					>> faces[faceIndex].vIndex1 >> input2 >> faces[faceIndex].tIndex1 >> input2 >> faces[faceIndex].nIndex1;
@@ -123,20 +109,16 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 			}
 		}
 
-		// Read in the remainder of the line.
 		while (input != '\n')
 		{
 			fin.get(input);
 		}
 
-		// Start reading the beginning of the next line.
 		fin.get(input);
 	}
 
-	// Close the file.
 	fin.close();
 
-	// Now loop through all the faces and output the three vertices for each face.
 	for (int i = 0; i!=m_faceCount; ++i)
 	{
 		vIndex = faces[i].vIndex1 - 1;
