@@ -19,6 +19,9 @@
     <Filter Include="Networking">
       <UniqueIdentifier>{0ad17408-bccf-4de2-9630-641fdc27659e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{a83deef4-ed14-428c-9bf2-83015a7246f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,12 +37,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
@@ -60,9 +57,6 @@
     <ClCompile Include="ProceduralTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ProceduralTerrainShader.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
@@ -74,6 +68,18 @@
     </ClCompile>
     <ClCompile Include="NetworkServer.cpp">
       <Filter>Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityModel.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsEntity.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,12 +93,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
@@ -116,9 +116,6 @@
     <ClInclude Include="ProceduralTerrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ProceduralTerrainShader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
@@ -133,6 +130,18 @@
     </ClInclude>
     <ClInclude Include="NetworkDefinitions.h">
       <Filter>Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityModel.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsEntity.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

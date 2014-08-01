@@ -1,15 +1,8 @@
 #include "Camera.h"
 
 
-Camera::Camera()
+Camera::Camera() : Entity()
 {
-	m_positionX = 0.0f;
-	m_positionY = 0.0f;
-	m_positionZ = 0.0f;
-	
-	m_rotationX = 0.0f;
-	m_rotationY = 0.0f;
-	m_rotationZ = 0.0f;
 }
 
 Camera::Camera(const Camera& other)
@@ -18,31 +11,6 @@ Camera::Camera(const Camera& other)
 
 Camera::~Camera()
 {
-}
-
-void Camera::SetPosition(float x, float y, float z)
-{
-	m_positionX = x;
-	m_positionY = y;
-	m_positionZ = z;
-	return;
-}
-
-void Camera::SetRotation(float x, float y, float z)
-{
-	m_rotationX = x;
-	m_rotationY = y;
-	m_rotationZ = z;
-}
-
-D3DXVECTOR3 Camera::GetPosition()
-{
-	return D3DXVECTOR3(m_positionX, m_positionY, m_positionZ);
-}
-
-D3DXVECTOR3 Camera::GetRotation()
-{
-	return D3DXVECTOR3(m_rotationX, m_rotationY, m_rotationZ);
 }
 
 void Camera::ApplyRotation(float x, float y, float z)
@@ -68,9 +36,9 @@ void Camera::ApplyTranslation(float x, float y, float z)
 
 	D3DXVec3TransformCoord(&translation, &translation, &rotationMatrix);
 	
-	m_positionX += translation.x; 
-	m_positionY += translation.y; 
-	m_positionZ += translation.z;
+	m_locationX += translation.x; 
+	m_locationY += translation.y; 
+	m_locationZ += translation.z;
 }
 void Camera::Render()
 {
@@ -81,9 +49,9 @@ void Camera::Render()
 	up.x = 0.0f; 
 	up.y = 1.0f; 
 	up.z = 0.0f;
-	position.x = m_positionX; 
-	position.y = m_positionY; 
-	position.z = m_positionZ;
+	position.x = m_locationX; 
+	position.y = m_locationY; 
+	position.z = m_locationZ;
 	
 	lookAt.x = 0.0f;
 	lookAt.y = 0.0f;

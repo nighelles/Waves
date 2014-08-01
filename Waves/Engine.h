@@ -4,7 +4,8 @@
 
 #include "InputController.h"
 #include "GraphicsController.h"
-#include "Entity.h"
+#include "PhysicsEntity.h"
+#include "Camera.h"
 
 class Engine
 {
@@ -35,7 +36,7 @@ private:
 	InputController* m_Input;
 	GraphicsController* m_Graphics;
 
-	Entity* m_playerBoat;
+	PhysicsEntity* m_playerBoat;
 
 	int m_Time;
 	int m_oldTime;

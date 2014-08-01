@@ -51,7 +51,7 @@ bool Engine::Initialize()
 	}
 
 	// Initialize a boat model
-	m_playerBoat = new Entity;
+	m_playerBoat = new PhysicsEntity;
 
 	result = m_playerBoat->Initialize();
 	if (!result) return false;
@@ -176,7 +176,7 @@ bool Engine::Update()
 	m_playerBoat->Update(m_Graphics);
 
 	m_playerBoat->GetCameraLocation(playerCameraX, playerCameraY, playerCameraZ);
-	m_Graphics->GetPlayerCamera()->SetPosition(playerCameraX,playerCameraY,playerCameraZ);
+	m_Graphics->GetPlayerCamera()->SetLocation(playerCameraX,playerCameraY,playerCameraZ);
 
 	// END CALCULATE BOAT HEIGHT
 

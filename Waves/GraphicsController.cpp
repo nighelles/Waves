@@ -69,7 +69,7 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
-	m_PlayerCamera->SetPosition(0.0f, 2.0f, -30.0f);
+	m_PlayerCamera->SetLocation(0.0f, 2.0f, -30.0f);
 
 	m_waterTerrain = new ProceduralTerrain();
 	if (!m_waterTerrain) return false;
