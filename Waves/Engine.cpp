@@ -9,9 +9,14 @@ Engine::Engine()
 	m_Graphics = 0;
 
 	m_playerBoat = 0;
+	m_otherBoat = 0;
+
 	m_waterTerrain = 0;
 
 	m_menuBitmap = 0;
+
+	m_server = 0;
+	m_client = 0;
 
 	m_gameState = GAME_MENU;
 }
@@ -104,6 +109,8 @@ bool Engine::InitializeGame()
 {
 	bool result;
 
+	// Change these to the new Register model structuring
+
 	// Initialize a boat model
 	m_playerBoat = new PhysicsEntity;
 
@@ -115,6 +122,14 @@ bool Engine::InitializeGame()
 
 	// Attach Camera to boat model
 	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
+
+	// Initialize other person's boat
+	m_otherBoat = new PhysicsEntity;
+	result = m_otherBoat->Initialize();
+	if (!result) return false;
+	result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+	if (!result) return false;
+
 
 	// Deal with creating water
 	m_waterTerrain = new ProceduralTerrain();
@@ -133,6 +148,22 @@ bool Engine::InitializeGame()
 	// GAME_STATE
 
 	m_menuBitmap->SetVisible(false);
+
+	// NETWORKING INITIALIZATION
+
+	if (m_isServer)
+	{
+		m_server = new NetworkServer;
+		m_server->Initialize();
+
+		m_server->WaitForClient();
+	}
+	else {
+		m_client = new NetworkClient;
+		m_client->Initialize();
+
+		m_client->ConnectToServer(m_serverAddress);
+	}
 
 	return true;
 }

@@ -10,6 +10,7 @@ public:
 
 	bool ConnectToServer(char* address);
 	bool SendDataToServer(char* data, int datasize);
+	bool GetDataFromServer(ServerNetworkMessage* serverMessage);
 
 private:
 	addrinfo *m_serverInfo;

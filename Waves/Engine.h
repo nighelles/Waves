@@ -11,6 +11,9 @@
 #include "ProceduralTerrain.h"
 #include "Camera.h"
 
+#include "NetworkClient.h"
+#include "NetworkServer.h"
+
 class Engine
 {
 public:
@@ -46,6 +49,7 @@ private:
 	GraphicsController* m_Graphics;
 
 	PhysicsEntity* m_playerBoat;
+	PhysicsEntity* m_otherBoat;
 
 	ProceduralTerrain* m_waterTerrain;
 
@@ -54,6 +58,9 @@ private:
 
 	int m_Time;
 	int m_oldTime;
+
+	NetworkServer* m_server;
+	NetworkClient* m_client;
 
 	bool m_isServer;
 	char m_serverAddress[16];
