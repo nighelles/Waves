@@ -18,7 +18,7 @@ bool NetworkController::Initialize()
 	addrinfo *server_info, *p;
 
 	result = WSAStartup(MAKEWORD(2, 2), &WsaData);
-	if (!result) return false;
+	if (result != 0) return false;
 
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
