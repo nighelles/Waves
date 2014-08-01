@@ -10,6 +10,9 @@ using namespace std;
 
 class EntityModel
 {
+public:
+	enum ShaderType { TEXTURE_SHADER=1, WATER_SHADER };
+
 protected:
 	struct Vertex
 	{
@@ -42,6 +45,8 @@ public:
 	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
 	ID3D11ShaderResourceView* GetTexture();
+
+	ShaderType m_shaderType;
 
 protected:
 	virtual bool InitializeBuffers(ID3D11Device*);

@@ -22,6 +22,12 @@
     <Filter Include="Entities">
       <UniqueIdentifier>{a83deef4-ed14-428c-9bf2-83015a7246f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Menu">
+      <UniqueIdentifier>{2fbf19a3-60c1-4279-87e9-2c54b797fca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{eb05aed9-06a1-4e53-b579-c4da38e9f641}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -30,19 +36,10 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InputController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ObjFileUtility.cpp">
@@ -78,27 +75,30 @@
     <ClCompile Include="EntityModel.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Bitmap.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsController.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderController.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="PhysicsEntity.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InputController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LoadObjFile.h">
@@ -140,8 +140,20 @@
     <ClInclude Include="EntityModel.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Bitmap.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsController.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderController.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="PhysicsEntity.h">
-      <Filter>Header Files</Filter>
+      <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

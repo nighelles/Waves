@@ -155,6 +155,14 @@ bool InputController::IsKeyPressed(int key)
 	return false;
 }
 
+void InputController::IsMouseClicked(bool& left, bool& right)
+{
+	left = m_mouseState.rgbButtons[0];
+	right = m_mouseState.rgbButtons[2];
+
+	return;
+}
+
 void InputController::GetMouseLocation(int& mouseX, int& mouseY)
 {
 	mouseX = m_mouseX;

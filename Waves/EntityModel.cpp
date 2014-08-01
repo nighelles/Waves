@@ -17,6 +17,7 @@ EntityModel::EntityModel()
 	m_rotationY = 0.0f;
 	m_rotationZ = 0.0f;
 
+	m_shaderType = TEXTURE_SHADER;
 }
 
 EntityModel::EntityModel(const EntityModel& other)

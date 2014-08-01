@@ -8,6 +8,8 @@
 #include "TextureShader.h"
 #include "Light.h"
 
+#include "Bitmap.h"
+
 #include "ProceduralTerrain.h"
 #include "ProceduralTerrainShader.h"
 
@@ -28,8 +30,14 @@ public:
 	bool Frame(int, int, int, int, float);
 	bool Render();
 
+	RenderController* GetRenderController();
+
 	int InitializeEntityModel(char* modelFilename, WCHAR* textureFilename);
 	EntityModel* GetEntityModel(int entityID);
+
+	int RegisterEntityModel(EntityModel* model);
+
+	int RegisterBitmap(Bitmap* bitmap);
 
 	Camera* GetPlayerCamera();
 	ProceduralTerrain* GetTerrain();
@@ -44,14 +52,17 @@ private:
 	Light* m_Light;
 
 	EntityModel* m_playerEntity;
-	ProceduralTerrain* m_waterTerrain;
 
 	EntityModel* m_modelEntities[10];
 	int m_numEntities;
+
+	Bitmap* m_bitmaps[10];
+	int m_numBitmaps;
 
 	float m_clearColor;
 
 	float m_timeLoopCompletion;
 
 	HWND m_hwnd;
+	int m_screenWidth, m_screenHeight;
 };

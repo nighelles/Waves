@@ -19,6 +19,8 @@ public:
 	bool Frame();
 
 	bool IsEscapePressed();
+
+	void IsMouseClicked(bool& left, bool& right);
 	void GetMouseLocation(int&, int&);
 	void GetMouseDelta(int&, int&);
 
