@@ -76,3 +76,14 @@ void Camera::GetViewMatrix(D3DXMATRIX& viewMatrix)
 	viewMatrix = m_viewMatrix;
 	return;
 }
+
+void Camera::Update()
+{
+	if (m_binded)
+	{
+		float x, y, z;
+		m_bindedEntity->GetCameraLocation(x, y, z);
+		SetLocation(x, y, z);
+	}
+	return;
+}

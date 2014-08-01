@@ -18,6 +18,9 @@ Entity::Entity()
 	m_width = 3.0f;
 	m_height = 1.0f;
 	m_depth = 5.0f;
+
+	m_binded = false;
+	m_bindedEntity = 0;
 }
 
 
@@ -32,8 +35,16 @@ bool Entity::Initialize() {
 
 void Entity::Shutdown()
 {
-
+	if (m_bindedEntity)
+	{
+		m_bindedEntity->Shutdown();
+		delete m_bindedEntity;
+		m_bindedEntity = 0;
+	}
 }
+
+
+//These two functions need to be modified to load this information from a file.
 
 void Entity::GetCameraLocation(float& x, float& y, float& z)
 {
@@ -57,6 +68,12 @@ void Entity::GetCameraLocation(float& x, float& y, float& z)
 	x = m_locationX + cameraLocation.x;
 	y = m_locationY + cameraLocation.y;
 	z = m_locationZ + cameraLocation.z;
+	return;
+}
+
+void Entity::GetBindLocation(float& x, float& y, float& z)
+{
+	GetCameraLocation(x, y, z);
 	return;
 }
 
@@ -126,4 +143,32 @@ void Entity::GetRotation(float& x, float& y, float& z)
 	x = m_rotationX;
 	y = m_rotationY;
 	z = m_rotationY;
+}
+
+void Entity::BindToEntity(Entity* entity)
+{
+	m_bindedEntity = entity;
+	m_binded = true;
+
+	return;
+}
+
+void Entity::UnbindFromEntity()
+{
+	m_binded = false;
+
+	return;
+}
+
+void Entity::Update()
+{
+	if (m_binded)
+	{
+		float x, y, z;
+		m_bindedEntity->GetBindLocation(x, y, z);
+		SetLocation(x, y, z);
+		m_bindedEntity->GetRotation(x, y, z);
+		SetRotation(x, y, z);
+	}
+	return;
 }

@@ -12,7 +12,11 @@ public:
 	bool Initialize();
 	void Shutdown();
 
+	virtual void Update();
+
 	void GetCameraLocation(float&, float&, float&);
+	void GetBindLocation(float&, float&, float&);
+
 	void SetRotation(float x, float y, float z);
 	void SetLocation(float x, float y, float z);
 	virtual void ApplyTranslation(float x, float y, float z);
@@ -22,7 +26,14 @@ public:
 	void GetLocation(float&, float&, float&);
 	void GetRotation(float&, float&, float&);
 
+	virtual void BindToEntity(Entity* entity);
+	virtual void UnbindFromEntity();
+
 protected:
+
+	Entity* m_bindedEntity;
+	bool	m_binded;
+
 	float m_locationX;
 	float m_locationY;
 	float m_locationZ;

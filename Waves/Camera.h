@@ -14,6 +14,8 @@ public:
 	void ApplyRotation(float x, float y, float z);
 	void ApplyTranslation(float x, float y, float z);
 
+	void Update();
+
 	D3DXVECTOR3 GetPosition();
 	D3DXVECTOR3 GetRotation();
 
