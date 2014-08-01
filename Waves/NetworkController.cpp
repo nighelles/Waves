@@ -27,6 +27,7 @@ bool NetworkController::Initialize()
 	if (getaddrinfo(NULL, GAME_NETWORK_PORT, &hints, &server_info) != 0)
 		return false;
 
+	p = server_info;
 	// could be multiple entries, probably should fix this
 	m_socketHandle = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 	if (m_socketHandle == -1) return false;

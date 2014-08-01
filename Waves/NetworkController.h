@@ -10,22 +10,12 @@
 class NetworkController
 {
 public:
+	enum NetworkMessageType {JOINREQUEST=556656, JOINACCEPT};
+	
 	typedef struct
 	{
-		bool 	forward;
-		bool 	backward;
-		bool 	left;
-		bool 	right;
-
-		int 	mouseX;
-		int		mouseY;
-	} PlayerInput;
-
-	typedef struct
-	{
-		int clientID;
-		PlayerInput playerInput;
-	} ClientNetworkPacket;
+		NetworkMessageType messageType;
+	} NetworkMessage;
 
 public:
 	NetworkController();
@@ -38,7 +28,7 @@ public:
 
 	void CloseSocket();
 
-private:
+protected:
 	int m_socketHandle;
 
 };
