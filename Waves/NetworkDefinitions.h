@@ -2,23 +2,34 @@ enum NetworkMessageType { JOINREQUEST = 556656, JOINACCEPT, CLIENTSENDINPUT, SER
 
 typedef struct
 {
-	int physicsObjectID;
+	int physicsEntityID;
 	float x;
 	float y;
 	float z;
 	float yaw;
 	float pitch;
 	float roll;
-} MessageBlock;
-
-typedef struct
-{
-	int	numMessageBlocks;
-	MessageBlock* messageBlocks;
-} NetworkMessageBody;
+} ServerMessageBlock;
 
 typedef struct
 {
 	NetworkMessageType messageType;
-	NetworkMessageBody messageBody;
 } NetworkMessage;
+
+typedef struct
+{
+	NetworkMessageType	messageType;
+	int					numEntityStates;
+	ServerMessageBlock	entityStates[10];
+} ServerNetworkMessage;
+
+typedef struct
+{
+	NetworkMessageType	messageType;
+	bool	forward;
+	bool	backward;
+	bool	left;
+	bool	right;
+	float	mouseDX;
+	float	mouseDY;
+} ClientNetworkMessage;
