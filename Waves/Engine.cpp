@@ -151,6 +151,7 @@ bool Engine::InitializeGame()
 
 	// NETWORKING INITIALIZATION
 
+	/*
 	if (m_isServer)
 	{
 		m_server = new NetworkServer;
@@ -164,6 +165,7 @@ bool Engine::InitializeGame()
 
 		m_client->ConnectToServer(m_serverAddress);
 	}
+	*/
 
 	return true;
 }
