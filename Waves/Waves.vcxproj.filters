@@ -178,4 +178,9 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Object Include="Boat.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+  </ItemGroup>
 </Project>
