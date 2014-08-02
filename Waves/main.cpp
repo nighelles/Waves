@@ -12,6 +12,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	}
 
 	result = MainEngine->Initialize();
+
 	if (result)
 	{
 		MainEngine->Run();

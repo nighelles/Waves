@@ -11,6 +11,8 @@ RenderController::RenderController()
 	m_depthStencilState = 0;
 	m_depthStencilView = 0;
 	m_rasterState = 0;
+
+	m_noDepthStencilState = 0;
 }
 
 RenderController::RenderController(const RenderController& other)
@@ -42,6 +44,8 @@ bool RenderController::Initialize(int screenWidth, int screenHeight, bool vsync,
 	D3D11_RASTERIZER_DESC	rasterDesc;
 	D3D11_VIEWPORT			viewport;
 	float fieldOfView, screenAspect;
+
+	D3D11_DEPTH_STENCIL_DESC noDepthStencilDesc;
 
 	m_vsync_enabled = vsync;
 
@@ -216,6 +220,25 @@ bool RenderController::Initialize(int screenWidth, int screenHeight, bool vsync,
 
 	D3DXMatrixOrthoLH(&m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
 
+	ZeroMemory(&noDepthStencilDesc, sizeof(noDepthStencilDesc));
+	noDepthStencilDesc.DepthEnable = false;
+	noDepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	noDepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	noDepthStencilDesc.StencilEnable = true;
+	noDepthStencilDesc.StencilReadMask = 0xFF;
+	noDepthStencilDesc.StencilWriteMask = 0xFF;
+	noDepthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	noDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	noDepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	noDepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	noDepthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	noDepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	noDepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	noDepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	result = m_device->CreateDepthStencilState(&noDepthStencilDesc, &m_noDepthStencilState);
+	if (FAILED(result)) return false;
+
 	return true;
 }
 
@@ -239,6 +262,11 @@ void RenderController::Shutdown()
 	{
 		m_depthStencilState->Release();
 		m_depthStencilState = 0;
+	}
+	if (m_noDepthStencilState)
+	{
+		m_noDepthStencilState->Release();
+		m_noDepthStencilState = 0;
 	}
 	if (m_depthStencilBuffer)
 	{
@@ -311,7 +339,6 @@ void RenderController::GetWorldMatrix(D3DXMATRIX& worldMatrix)
 	return;
 }
 
-
 void RenderController::GetOrthoMatrix(D3DXMATRIX& orthoMatrix)
 {
 	orthoMatrix = m_orthoMatrix;
@@ -323,4 +350,15 @@ void RenderController::GetVideoCardInfo(char* cardName, int& memory)
 	strcpy_s(cardName, 128, m_videoCardDescription);
 	memory = m_videoCardMemory;
 	return;
+}
+
+void RenderController::DisableZBuffer()
+{
+	m_deviceContext->OMSetDepthStencilState(m_noDepthStencilState, 1);
+	return;
+}
+
+void RenderController::EnableZBuffer()
+{
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
 }

@@ -11,8 +11,6 @@ GraphicsController::GraphicsController()
 
 	m_Light = 0;
 	m_clearColor = 0.0f;
-
-	m_waterTerrain = 0;
 	
 	m_numEntities = 0;
 }
@@ -25,6 +23,11 @@ GraphicsController::GraphicsController(const GraphicsController& other)
 
 GraphicsController::~GraphicsController()
 {
+}
+
+RenderController* GraphicsController::GetRenderController()
+{
+	return m_Render;
 }
 
 int GraphicsController::InitializeEntityModel(char* modelFilename, WCHAR* textureFilename)
@@ -45,9 +48,38 @@ int GraphicsController::InitializeEntityModel(char* modelFilename, WCHAR* textur
 	return (m_numEntities - 1);
 }
 
+// This is the new method, depreciating old method
+int GraphicsController::RegisterEntityModel(EntityModel* model)
+{
+	m_modelEntities[m_numEntities] = model;
+	if (!m_modelEntities[m_numEntities])
+	{
+		MessageBox(m_hwnd, L"Could not Register Model", L"Error", MB_OK);
+		return -1;
+	}
+
+	m_numEntities += 1;
+	return (m_numEntities - 1);
+}
+
 EntityModel* GraphicsController::GetEntityModel(int entityID)
 {
 	return (m_modelEntities[entityID]);
+}
+
+int GraphicsController::RegisterBitmap(Bitmap* bitmap)
+{
+	bool result;
+
+	m_bitmaps[m_numBitmaps] = bitmap;
+	if (!m_bitmaps[m_numBitmaps]) 
+	{
+		MessageBox(m_hwnd, L"Could not Initialize Bitmap", L"Error", MB_OK);
+		return -1;
+	}
+
+	m_numBitmaps += 1;
+	return (m_numBitmaps - 1);
 }
 
 bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd)
@@ -55,6 +87,8 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	bool result;
 
 	m_hwnd = hwnd;
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
 
 	m_Render = new RenderController;
 	if (!m_Render) return false;
@@ -69,17 +103,7 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
-	m_PlayerCamera->SetPosition(0.0f, 2.0f, -30.0f);
-
-	m_waterTerrain = new ProceduralTerrain();
-	if (!m_waterTerrain) return false;
-
-	result = m_waterTerrain->Initialize(m_Render->GetDevice(), L"water_tiling.dds");
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not Initialize Water Terrain", L"Error", MB_OK);
-		return false;
-	}
+	m_PlayerCamera->SetLocation(0.0f, 2.0f, -30.0f);
 
 	m_DefaultShader = new TextureShader;
 	if (!m_DefaultShader) return false;
@@ -128,21 +152,16 @@ void GraphicsController::Shutdown()
 		delete m_WaterShader;
 		m_WaterShader = 0;
 	}
+	// We don't own these, so just set them to zero
 	for (int i = 0; i != m_numEntities; ++i)
 	{
-		if (m_modelEntities[i])
-		{
-			m_modelEntities[i]->Shutdown();
-			delete m_modelEntities[i];
-			m_modelEntities[i] = 0;
-		}
+		m_modelEntities[i] = 0;
 	}
-	if (m_waterTerrain)
+	for (int i = 0; i != m_numBitmaps; ++i)
 	{
-		m_waterTerrain->Shutdown();
-		delete m_waterTerrain;
-		m_waterTerrain = 0;
+		m_bitmaps[i] = 0;
 	}
+
 	if (m_PlayerCamera)
 	{
 		delete m_PlayerCamera;
@@ -164,7 +183,6 @@ bool GraphicsController::Frame(int mouseX, int mouseY, int mouseDX, int mouseDY,
 	static float rotation = 0.0f;
 	
 	m_timeLoopCompletion = time;
-	m_waterTerrain->Update(m_timeLoopCompletion);
 
 	m_PlayerCamera->ApplyRotation(mouseDY/2.0f,mouseDX/2.0f,0.0f);
 
@@ -176,15 +194,10 @@ Camera* GraphicsController::GetPlayerCamera()
 	return m_PlayerCamera;
 }
 
-ProceduralTerrain* GraphicsController::GetTerrain()
-{
-	return m_waterTerrain;
-}
-
 // Time here is between 0 and 1
 bool GraphicsController::Render()
 {
-	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix;
 	bool result;
 
 	m_Render->ClearBuffers(m_clearColor, m_clearColor, m_clearColor, 1.0f);
@@ -200,14 +213,32 @@ bool GraphicsController::Render()
 
 		m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
 		m_modelEntities[i]->Render(m_Render->GetDeviceContext());
-		result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+		if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
+		{
+			result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+		}
+		else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
+		{
+			result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
+		}
 		if (!result) return false;
 	}
 
-	m_Render->GetWorldMatrix(worldMatrix);
-	m_waterTerrain->Render(m_Render->GetDeviceContext());
-	result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_waterTerrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_waterTerrain->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
-	if (!result) return false;
+	m_Render->DisableZBuffer();
+
+	for (int i = 0; i != m_numBitmaps; ++i)
+	{
+		if (m_bitmaps[i]->GetVisible())
+		{
+			m_Render->GetWorldMatrix(worldMatrix);
+			m_Render->GetOrthoMatrix(orthoMatrix);
+
+			m_bitmaps[i]->Render(m_Render->GetDeviceContext(), 0, 0);
+			result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_bitmaps[i]->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_bitmaps[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+		}
+	}
+
+	m_Render->EnableZBuffer();
 
 	m_Render->PresentBackBuffer();
 

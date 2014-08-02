@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GraphicsController.cpp" />
@@ -88,7 +89,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityModel.cpp" />
+    <ClCompile Include="NetworkClient.cpp" />
+    <ClCompile Include="NetworkController.cpp" />
+    <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="ObjFileUtility.cpp" />
+    <ClCompile Include="PhysicsEntity.cpp" />
     <ClCompile Include="ProceduralTerrain.cpp" />
     <ClCompile Include="ProceduralTerrainShader.cpp" />
     <ClCompile Include="RenderController.cpp" />
@@ -97,6 +102,7 @@
     <ClCompile Include="TextureShader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bitmap.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GraphicsController.h" />
@@ -105,7 +111,12 @@
     <ClInclude Include="EntityModel.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LoadObjFile.h" />
+    <ClInclude Include="NetworkClient.h" />
+    <ClInclude Include="NetworkController.h" />
+    <ClInclude Include="NetworkDefinitions.h" />
+    <ClInclude Include="NetworkServer.h" />
     <ClInclude Include="ObjFileUtility.h" />
+    <ClInclude Include="PhysicsEntity.h" />
     <ClInclude Include="ProceduralTerrain.h" />
     <ClInclude Include="ProceduralTerrainShader.h" />
     <ClInclude Include="RenderController.h" />
@@ -120,6 +131,7 @@
     <None Include="texture.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="config.txt" />
     <Text Include="Cube.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
