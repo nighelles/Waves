@@ -103,7 +103,7 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
-	m_PlayerCamera->SetLocation(0.0f, 2.0f, -30.0f);
+	m_PlayerCamera->SetLocation(0.0f, 0.0f, 0.0f);
 
 	m_DefaultShader = new TextureShader;
 	if (!m_DefaultShader) return false;
@@ -199,6 +199,7 @@ bool GraphicsController::Render()
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix;
 	bool result;
+	int i;
 
 	m_Render->ClearBuffers(m_clearColor, m_clearColor, m_clearColor, 1.0f);
 	
@@ -207,7 +208,7 @@ bool GraphicsController::Render()
 	m_Render->GetWorldMatrix(worldMatrix);
 	m_Render->GetProjectionMatrix(projectionMatrix);
 	
-	for (int i = 0; i != m_numEntities; ++i)
+	for (i = 0; i != m_numEntities; ++i)
 	{
 		m_Render->GetWorldMatrix(worldMatrix);
 
@@ -226,7 +227,7 @@ bool GraphicsController::Render()
 
 	m_Render->DisableZBuffer();
 
-	for (int i = 0; i != m_numBitmaps; ++i)
+	for (i = 0; i != m_numBitmaps; ++i)
 	{
 		if (m_bitmaps[i]->GetVisible())
 		{

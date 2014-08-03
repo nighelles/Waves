@@ -130,10 +130,6 @@ bool Engine::InitializeGame()
 	result = m_island->InitializeModel(m_Graphics, "Island.obj", L"sand_tiling.dds");
 	if (!result) return false;
 
-	// Attach Camera to boat model
-	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
-	m_Graphics->GetPlayerCamera()->Update();
-
 	// Initialize other person's boat
 	m_otherBoat = new PhysicsEntity;
 	result = m_otherBoat->Initialize();
@@ -142,12 +138,15 @@ bool Engine::InitializeGame()
 	if (!result) return false;
 
 	// Put things in place
-	m_playerBoat->SetLocation(40.0f, 0, 0);
+	m_playerBoat->SetLocation(100.0f, 0, 0);
 	m_playerBoat->Update(m_Graphics);
 
-	m_otherBoat->SetLocation(40.0f, 0, 0);
+	m_otherBoat->SetLocation(100.0f, 0, 20.0f);
 	m_otherBoat->Update(m_Graphics);
 
+	// Attach Camera to boat model
+	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
+	m_Graphics->GetPlayerCamera()->Update();
 
 	// Deal with creating water
 	m_waterTerrain = new ProceduralTerrain();

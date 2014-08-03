@@ -22,11 +22,9 @@ bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFil
 {
 	bool result;
 
-	result = graphics->InitializeEntityModel(modelFilename, textureFilename);
-	if (result == -1)
+	m_modelID = graphics->InitializeEntityModel(modelFilename, textureFilename);
+	if (m_modelID == -1)
 		return false;
-	else
-		m_modelID = result;
 
 	return true;
 }
@@ -63,7 +61,6 @@ void PhysicsEntity::Update(GraphicsController* graphics)
 
 	graphics->GetEntityModel(m_modelID)->SetLocation(m_locationX, m_locationY, m_locationZ);
 	graphics->GetEntityModel(m_modelID)->SetRotation(m_rotationX, m_rotationY, m_rotationZ);
-
 }
 
 // DEAL WITH THIS LATER?
