@@ -11,6 +11,8 @@ Engine::Engine()
 	m_playerBoat = 0;
 	m_otherBoat = 0;
 
+	m_island = 0;
+
 	m_waterTerrain = 0;
 
 	m_menuBitmap = 0;
@@ -120,6 +122,14 @@ bool Engine::InitializeGame()
 	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
 	if (!result) return false;
 
+	// Initialize island
+
+	m_island = new PhysicsEntity;
+	result = m_island->Initialize();
+	if (!result) return false;
+	result = m_island->InitializeModel(m_Graphics, "Island.obj", L"sand_tiling.dds");
+	if (!result) return false;
+
 	// Attach Camera to boat model
 	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
 	m_Graphics->GetPlayerCamera()->Update();
@@ -130,6 +140,13 @@ bool Engine::InitializeGame()
 	if (!result) return false;
 	result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
 	if (!result) return false;
+
+	// Put things in place
+	m_playerBoat->SetLocation(40.0f, 0, 0);
+	m_playerBoat->Update(m_Graphics);
+
+	m_otherBoat->SetLocation(40.0f, 0, 0);
+	m_otherBoat->Update(m_Graphics);
 
 
 	// Deal with creating water
@@ -189,6 +206,18 @@ void Engine::Shutdown()
 	{
 		m_playerBoat->Shutdown();
 		delete m_playerBoat;
+		m_Input = 0;
+	}
+	if (m_otherBoat)
+	{
+		m_otherBoat->Shutdown();
+		delete m_otherBoat;
+		m_Input = 0;
+	}
+	if (m_island)
+	{
+		m_island->Shutdown();
+		delete m_island;
 		m_Input = 0;
 	}
 	if (m_waterTerrain)
@@ -294,6 +323,7 @@ void Engine::UpdateEntities()
 {
 	m_playerBoat->Update(m_Graphics);
 	m_otherBoat->Update(m_Graphics);
+	m_island->Update(m_Graphics);
 
 	m_playerBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
 	m_otherBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);

@@ -55,6 +55,8 @@ private:
 	PhysicsEntity* m_playerBoat;
 	PhysicsEntity* m_otherBoat;
 
+	PhysicsEntity* m_island;
+
 	ProceduralTerrain* m_waterTerrain;
 
 	Bitmap* m_menuBitmap;

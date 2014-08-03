@@ -36,7 +36,7 @@ PixelInputType ProceduralTerrainVertexShader(VertexInputType input)
 	output.position = input.position;
 
 	// THIS HAS TO BE THE SAME AS THE GAMELOGIC IN PROCEDURALTERRAIN.CPP OR IT WILL BE WIGGITY WHACK
-	output.position.y =  5.0*sin((6.28*output.position.x / 100.0) + (3.14 * 5 * time)) + 10.0*sin(((3.14*output.position.x) / 100.0) + (2 * 3.14 * time));
+	output.position.y =  2.0*sin(6.28*output.position.x / 100.0 + 3.14*5*time);
     
 	output.position = mul(output.position, worldMatrix);
 
@@ -44,7 +44,7 @@ PixelInputType ProceduralTerrainVertexShader(VertexInputType input)
 
 	//These ALSO HAVE TO MATCH, DERIVATIVES AND WHATNOT
 	output.normal.y = 0.5;
-	output.normal.x = (6.28/100*5.0*cos((6.28*output.position.x / 100.0) + (3.14 * 5 * time)) + 3.14/100*10.0*cos(((3.14*output.position.x) / 100.0) + (2 * 3.14 * time)));
+	output.normal.x = 6.28/100*2.0*cos((6.28*output.position.x / 100.0) + (3.14 * 5 * time));
 	output.normal.z = 0.0;
 
 	// Do this after normal so our view doesn't change it

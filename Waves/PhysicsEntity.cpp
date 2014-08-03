@@ -35,9 +35,6 @@ void PhysicsEntity::Update(GraphicsController* graphics)
 {
 	Entity::Update();
 
-	graphics->GetEntityModel(m_modelID)->SetLocation(m_locationX, m_locationY, m_locationZ);
-	graphics->GetEntityModel(m_modelID)->SetRotation(m_rotationX, m_rotationY, m_rotationZ);
-
 	if (m_impulseX != 0.0f)
 	{
 		m_velocityX += m_impulseX;
@@ -63,6 +60,10 @@ void PhysicsEntity::Update(GraphicsController* graphics)
 	m_velocityZ -= m_velocityZ*m_velocityDamping;
 
 	ApplyTranslationRelative(m_velocityX, m_velocityY, m_velocityZ); 
+
+	graphics->GetEntityModel(m_modelID)->SetLocation(m_locationX, m_locationY, m_locationZ);
+	graphics->GetEntityModel(m_modelID)->SetRotation(m_rotationX, m_rotationY, m_rotationZ);
+
 }
 
 // DEAL WITH THIS LATER?
