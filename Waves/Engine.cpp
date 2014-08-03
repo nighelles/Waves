@@ -3,6 +3,8 @@
 #include <atldef.h>
 #include <atlstr.h>
 
+#define USE_NETWORKING 0
+
 Engine::Engine()
 {
 	m_Input = 0;
@@ -169,7 +171,7 @@ bool Engine::InitializeGame()
 
 	// NETWORKING INITIALIZATION
 
-	/*
+#if USE_NETWORKING
 	if (m_isServer)
 	{
 		m_server = new NetworkServer;
@@ -183,7 +185,7 @@ bool Engine::InitializeGame()
 
 		m_client->ConnectToServer(m_serverAddress);
 	}
-	*/
+#endif // #if USE_NETWORKING
 
 	return true;
 }
