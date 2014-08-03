@@ -270,8 +270,11 @@ void Engine::Run()
 			{
 				if (mouse1)
 				{
-					result = InitializeGame();
-					if (!result) done=true;
+					if (!InitializeGame())
+					{
+						done = true;
+						break;
+					}
 					m_gameState = GAME_PLAYING;
 				}
 
