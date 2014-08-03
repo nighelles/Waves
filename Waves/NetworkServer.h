@@ -14,5 +14,6 @@ public:
 
 private:
 	sockaddr_in m_clientAddr;
+
 };
 

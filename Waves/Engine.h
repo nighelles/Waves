@@ -16,10 +16,19 @@
 #include "NetworkClient.h"
 #include "NetworkServer.h"
 
+#include "NetworkSyncController.h"
+
 class Engine
 {
 public:
 	enum GameState { GAME_MENU, GAME_LOADING, GAME_PLAYING, GAME_PAUSED };
+
+	typedef struct  
+	{
+		bool forward, backward, left, right;
+		float mouseDX, mouseDY;
+	} NetworkPlayer;
+
 public:
 	Engine();
 	Engine(const Engine&);
@@ -67,6 +76,10 @@ private:
 
 	NetworkServer* m_server;
 	NetworkClient* m_client;
+
+	NetworkSyncController* m_networkSyncController;
+
+	NetworkPlayer m_networkPlayer;
 
 	bool m_isServer;
 	char m_serverAddress[16];

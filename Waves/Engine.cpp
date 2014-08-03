@@ -22,6 +22,9 @@ Engine::Engine()
 	m_server = 0;
 	m_client = 0;
 
+	m_networkSyncController = 0;
+	m_networkPlayer = { };
+
 	m_gameState = GAME_MENU;
 }
 
@@ -54,6 +57,8 @@ bool Engine::LoadConfiguration()
 		MessageBox(m_hwnd, L"Not Server", L"Note", MB_OK);
 
 	MessageBox(m_hwnd, ATL::CA2W(m_serverAddress), L"Note", MB_OK);
+
+	return true;
 }
 
 bool Engine::Initialize()
@@ -172,19 +177,30 @@ bool Engine::InitializeGame()
 	// NETWORKING INITIALIZATION
 
 #if USE_NETWORKING
+	m_networkSyncController = new NetworkSyncController;
+	
 	if (m_isServer)
 	{
 		m_server = new NetworkServer;
 		m_server->Initialize();
 
 		m_server->WaitForClient();
+		
+		m_networkSyncController->Initialize(m_isServer, m_server);
 	}
 	else {
 		m_client = new NetworkClient;
 		m_client->Initialize();
 
 		m_client->ConnectToServer(m_serverAddress);
+
+		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
+
+	m_networkSyncController->RegisterEntity(m_playerBoat);
+	m_networkSyncController->RegisterEntity(m_otherBoat);
+	m_networkSyncController->RegisterEntity(m_island);
+
 #endif // #if USE_NETWORKING
 
 	return true;
@@ -233,6 +249,24 @@ void Engine::Shutdown()
 		m_menuBitmap->Shutdown();
 		delete m_menuBitmap;
 		m_menuBitmap = 0;
+	}
+	if (m_client)
+	{
+		m_client->Shutdown();
+		delete m_client;
+		m_client = 0;
+	}
+	if (m_server)
+	{
+		m_server->Shutdown();
+		delete m_server;
+		m_server = 0;
+	}
+	if (m_networkSyncController)
+	{
+		m_networkSyncController->Shutdown();
+		delete m_networkSyncController;
+		m_networkSyncController = 0;
 	}
 	ShutdownWindows();
 
@@ -321,6 +355,34 @@ bool Engine::Update()
 
 	UpdateEntities();
 
+#if USE_NETWORKING
+
+	bool forward,backward,left,right;
+	float mouseDX,mouseDY;
+
+	if(!m_isServer)
+	{
+		forward = m_Input->IsKeyPressed(DIK_W);
+		backward = m_Input->IsKeyPressed(DIK_S);
+		left = m_Input->IsKeyPressed(DIK_A);
+		right = m_Input->IsKeyPressed(DIK_D);
+		m_Input->GetMouseDelta(mouseDX, mouseDY);
+	}
+
+	NetworkSyncController->SyncPlayerInput(forward, backward, left, right, mouseDX, mouseDY);
+
+	if (m_isServer)
+	{
+		m_networkPlayer.forward = forward;
+		m_networkPlayer.backward = backward;
+		m_networkPlayer.left = left;
+		m_networkPlayer.right = right;
+		m_networkPlayer.mouseDX = mouseDX;
+		m_networkPlayer.mouseDY = mouseDY;
+	}
+
+#endif //#if USE_NETWORKING
+
 
 	return true;
 }
@@ -372,6 +434,13 @@ bool Engine::Render()
 bool Engine::PostUpdate()
 {
 	// Anything that needs to happen after the frame has rendered
+
+#if USE_NETWORKING
+
+		m_networkSyncController->SyncEntityStates();
+
+#endif //#if USE_NETWORKING
+
 	return true;
 }
 

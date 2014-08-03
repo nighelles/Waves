@@ -90,6 +90,9 @@
     <ClCompile Include="ObjFileUtility.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkSyncController.cpp">
+      <Filter>Networking</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -154,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="ObjFileUtility.h">
       <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSyncController.h">
+      <Filter>Networking</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
