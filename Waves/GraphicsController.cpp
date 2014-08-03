@@ -103,7 +103,7 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 
 	m_PlayerCamera = new Camera;
 	if (!m_PlayerCamera) return false;
-	m_PlayerCamera->SetLocation(0.0f, 0.0f, 0.0f);
+	m_PlayerCamera->SetLocation(0.0f, 0.0f, -1.0f);
 
 	m_DefaultShader = new TextureShader;
 	if (!m_DefaultShader) return false;

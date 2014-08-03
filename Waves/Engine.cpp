@@ -147,6 +147,7 @@ bool Engine::InitializeGame()
 	// Attach Camera to boat model
 	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
 	m_Graphics->GetPlayerCamera()->Update();
+	m_Graphics->GetPlayerCamera()->Render();
 
 	// Deal with creating water
 	m_waterTerrain = new ProceduralTerrain();
