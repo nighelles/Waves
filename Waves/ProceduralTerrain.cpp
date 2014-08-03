@@ -135,9 +135,9 @@ bool ProceduralTerrain::LoadModel()
 
 	m_model = new Model[m_indexCount];
 
-	for (int x = 0; x != 100; ++x) // generate initial map heights
+	for (int x = 0; x != 1000; ++x) // generate initial map heights
 	{
-		for (int z = 0; z != 100; ++z)
+		for (int z = 0; z != 1000; ++z)
 		{
 			terrainMap[x][z] = 0.0;
 		}
@@ -151,7 +151,7 @@ bool ProceduralTerrain::LoadModel()
 float ProceduralTerrain::CalculateDeterministicHeight(float x, float y, float t)
 {
 	// Rolling waves with a slower wave
-	return 5.0*sin(6.28*x / 100.0 + 3.14 * 5 * t) +10.0*sin(3.14*x / 100.0 + 2 * 3.14*t);
+	return 2.0*sin(6.28*x / 100.0 + 3.14 * 5 * t);// +3.0*sin(3.14*x / 100.0 + 2 * 3.14*t);
 	//Rolling waves intersecting in x and y
 	//return 5.0*sin(6.28*x / 100.0 + 3.14 * 5 * t) + 5.0*sin(6.28*y / 100.0 + 3.14 * 5 * t);
 	//return 5.0f*sin(y/20.0f);
@@ -166,58 +166,58 @@ void ProceduralTerrain::regenerateModelFromTerrainMap()
 {
 	int index = 0;
 
-	for (int x = 0; x != 99; ++x)
+	for (int x = 0; x != 999; ++x)
 	{
-		for (int z = 0; z != 99; ++z)
+		for (int z = 0; z != 999; ++z)
 		{
-			m_model[index].x = x*40-2000;
+			m_model[index].x = x*4-200;
 			m_model[index].y = terrainMap[x][z];
-			m_model[index].z = z*40 - 2000;
+			m_model[index].z = z*4 - 200;
 			m_model[index].tu = 0.0f;
 			m_model[index].tv = 0.0f;
 			m_model[index].nx = 0.0f;
 			m_model[index].ny = 1.0f;
 			m_model[index].nz = 0.0f;
 
-			m_model[index + 1].x = (x + 1) * 40 - 2000;
+			m_model[index + 1].x = (x + 1) * 4 - 200;
 			m_model[index+1].y = terrainMap[x+1][z+1];
-			m_model[index + 1].z = (z + 1) * 40 - 2000;
+			m_model[index + 1].z = (z + 1) * 4 - 200;
 			m_model[index+1].tu = 1.0f;
 			m_model[index+1].tv = 1.0f;
 			m_model[index+1].nx = 0.0f;
 			m_model[index+1].ny = 1.0f;
 			m_model[index+1].nz = 0.0f;
 
-			m_model[index + 2].x = (x + 1)*40 - 2000;
+			m_model[index + 2].x = (x + 1)*4 - 200;
 			m_model[index+2].y = terrainMap[x+1][z];
-			m_model[index + 2].z = z* 40 - 2000;
+			m_model[index + 2].z = z* 4 - 200;
 			m_model[index+2].tu = 1.0f;
 			m_model[index+2].tv = 0.0f;
 			m_model[index+2].nx = 0.0f;
 			m_model[index+2].ny = 1.0f;
 			m_model[index+2].nz = 0.0f;
 
-			m_model[index + 3].x = x*40 - 2000;;
+			m_model[index + 3].x = x*4 - 200;;
 			m_model[index+3].y = terrainMap[x][z];
-			m_model[index + 3].z = z*40 - 2000;
+			m_model[index + 3].z = z*4 - 200;
 			m_model[index+3].tu = 0.0f;
 			m_model[index+3].tv = 0.0f;
 			m_model[index+3].nx = 0.0f;
 			m_model[index+3].ny = 1.0f;
 			m_model[index+3].nz = 0.0f;
 
-			m_model[index + 4].x = x * 40 - 2000;
+			m_model[index + 4].x = x * 4 - 200;
 			m_model[index+4].y = terrainMap[x][z+1];
-			m_model[index + 4].z = (z + 1) * 40 - 2000;
+			m_model[index + 4].z = (z + 1) * 4 - 200;
 			m_model[index+4].tu = 0.0f;
 			m_model[index+4].tv = 1.0f;
 			m_model[index+4].nx = 0.0f;
 			m_model[index+4].ny = 1.0f;
 			m_model[index+4].nz = 0.0f;
 
-			m_model[index + 5].x = (x + 1) * 40 - 2000;
+			m_model[index + 5].x = (x + 1) * 4 - 200;
 			m_model[index+5].y = terrainMap[x+1][z+1];
-			m_model[index + 5].z = (z + 1) * 40 - 2000;
+			m_model[index + 5].z = (z + 1) * 4 - 200;
 			m_model[index+5].tu = 1.0f;
 			m_model[index+5].tv = 1.0f;
 			m_model[index+5].nx = 0.0f;

@@ -1,5 +1,7 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 
 #include <iostream>
@@ -10,6 +12,9 @@
 #include "PhysicsEntity.h"
 #include "ProceduralTerrain.h"
 #include "Camera.h"
+
+#include "NetworkClient.h"
+#include "NetworkServer.h"
 
 class Engine
 {
@@ -34,6 +39,8 @@ private:
 	bool Render();
 	bool PostUpdate();
 
+	void UpdateEntities();
+
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
 
@@ -46,6 +53,9 @@ private:
 	GraphicsController* m_Graphics;
 
 	PhysicsEntity* m_playerBoat;
+	PhysicsEntity* m_otherBoat;
+
+	PhysicsEntity* m_island;
 
 	ProceduralTerrain* m_waterTerrain;
 
@@ -54,6 +64,9 @@ private:
 
 	int m_Time;
 	int m_oldTime;
+
+	NetworkServer* m_server;
+	NetworkClient* m_client;
 
 	bool m_isServer;
 	char m_serverAddress[16];

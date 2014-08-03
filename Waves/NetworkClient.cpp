@@ -48,6 +48,30 @@ bool NetworkClient::ConnectToServer(char* address)
 	return true;
 }
 
+bool NetworkClient::GetDataFromServer(ServerNetworkMessage* serverMessage)
+{
+	unsigned char packet_data[256];
+	unsigned int max_packet_size = sizeof(packet_data);
+
+	sockaddr_in from;
+	int fromLength = sizeof(from);
+
+	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+	if (bytes <= 0) return false;
+
+	if (((NetworkMessage*)&packet_data)->messageType == SERVERSENDSTATE)
+	{
+		serverMessage = (ServerNetworkMessage*)&packet_data;
+	}
+	else
+	{
+		return false;
+	}
+
+	// ADD timeout
+	return true;
+}
+
 bool NetworkClient::SendDataToServer(char* data, int datasize)
 {
 	return SendData((sockaddr_in*)m_serverInfo->ai_addr, data, datasize);
