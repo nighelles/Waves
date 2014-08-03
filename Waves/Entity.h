@@ -19,8 +19,10 @@ public:
 
 	void SetRotation(float x, float y, float z);
 	void SetLocation(float x, float y, float z);
+
 	virtual void ApplyTranslation(float x, float y, float z);
 	virtual void ApplyRotation(float x, float y, float z);
+
 	void ApplyTranslationRelative(float x, float y, float z);
 
 	void GetLocation(float&, float&, float&);

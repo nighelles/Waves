@@ -122,6 +122,7 @@ bool Engine::InitializeGame()
 
 	// Attach Camera to boat model
 	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
+	m_Graphics->GetPlayerCamera()->Update();
 
 	// Initialize other person's boat
 	m_otherBoat = new PhysicsEntity;
@@ -266,7 +267,6 @@ void Engine::Run()
 bool Engine::Update()
 {
 	bool result;
-	float playerCameraX, playerCameraY, playerCameraZ;
 	int deltaT;
 	SYSTEMTIME sysTime;
 	
@@ -275,49 +275,32 @@ bool Engine::Update()
 	m_Time = sysTime.wSecond * 1000 + sysTime.wMilliseconds;
 
 	if (m_Input->IsKeyPressed(DIK_W))
-		m_playerBoat->ApplyTranslationRelative(0.0f, 0.0f, 1.0f);
+		m_playerBoat->ApplyImpulse(0.0f, 0.0f, 1.0f);
 	if (m_Input->IsKeyPressed(DIK_A))
 		m_playerBoat->ApplyRotation(0.f, -1.0f, 0.0f);
 	if (m_Input->IsKeyPressed(DIK_S))
-		m_playerBoat->ApplyTranslationRelative(0.0f, 0.0f, -1.0f);
+		m_playerBoat->ApplyImpulse(0.0f, 0.0f, -1.0f);
 	if (m_Input->IsKeyPressed(DIK_D))
 		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
 
-	// CALCULATE BOAT HEIGHT
-	D3DXVECTOR3 a, b, c, d;
-	float fr, fl, br, bl;
-	float roll, pitch;
 
-	roll = 0; pitch = 0;
+	UpdateEntities();
 
-	float x, y, z;
-	m_playerBoat->GetLocation(x, y, z);
-	m_playerBoat->GetBoundingBox(a, b, c, d);
-
-	fr = m_waterTerrain->CalculateDeterministicHeight(b.x, b.z, m_Time / 60000.0f);
-	fl = m_waterTerrain->CalculateDeterministicHeight(a.x, a.z, m_Time / 60000.0f);
-	bl = m_waterTerrain->CalculateDeterministicHeight(d.x, d.z, m_Time / 60000.0f);
-	br = m_waterTerrain->CalculateDeterministicHeight(c.x, c.z, m_Time / 60000.0f);
-
-	roll = -180.0f/3.14f*atan2(((fl + bl) - (fr + br)) / 2.0, 3); // fix absolue 3 as width
-	m_playerBoat->SetRotation(NULL, NULL, roll);
-
-	pitch = -180.0f/3.14f*atan2(((fl + fr) - (bl + br)) / 2.0, 5);
-	m_playerBoat->SetRotation(pitch, NULL, NULL);
-
-
-	m_playerBoat->SetLocation(NULL, m_waterTerrain->CalculateDeterministicHeight(x, z, m_Time / 60000.0f) + 1, NULL);
-
-	m_playerBoat->Update(m_Graphics);
-
-	m_playerBoat->GetCameraLocation(playerCameraX, playerCameraY, playerCameraZ);
-	//m_Graphics->GetPlayerCamera()->SetLocation(playerCameraX,playerCameraY,playerCameraZ);
-
-	m_Graphics->GetPlayerCamera()->Update();
-
-	// END CALCULATE BOAT HEIGHT
 
 	return true;
+}
+
+void Engine::UpdateEntities()
+{
+	m_playerBoat->Update(m_Graphics);
+	m_otherBoat->Update(m_Graphics);
+
+	m_playerBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
+	m_otherBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
+	
+	m_Graphics->GetPlayerCamera()->Update();
+
+	return;
 }
 
 bool Engine::Render()

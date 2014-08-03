@@ -39,6 +39,8 @@ private:
 	bool Render();
 	bool PostUpdate();
 
+	void UpdateEntities();
+
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
 

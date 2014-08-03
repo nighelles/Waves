@@ -134,9 +134,6 @@
     <Text Include="config.txt" />
     <Text Include="Cube.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Object Include="Boat.obj" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
