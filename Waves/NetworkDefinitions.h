@@ -1,3 +1,5 @@
+#pragma once
+
 enum NetworkMessageType { JOINREQUEST = 556656, JOINACCEPT, CLIENTSENDINPUT, SERVERSENDSTATE };
 
 typedef struct

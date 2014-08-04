@@ -1,6 +1,5 @@
 #include "NetworkSyncController.h"
 
-
 NetworkSyncController::NetworkSyncController()
 {
 	m_isServer = 0;
@@ -126,12 +125,15 @@ bool NetworkSyncController::SyncPlayerInput(bool& forward, bool& backward, bool&
 	{
 		((NetworkServer*)m_networkController)->GetDataFromClient(&m_clientMessage);
 
-		forward = m_clientMessage.forward;
-		backward = m_clientMessage.backward;
-		left = m_clientMessage.left;
-		right = m_clientMessage.right;
-		mouseDX = m_clientMessage.mouseDX;
-		mouseDY = m_clientMessage.mouseDY;
+		if (m_clientMessage.messageType = CLIENTSENDINPUT)
+		{
+			forward = m_clientMessage.forward;
+			backward = m_clientMessage.backward;
+			left = m_clientMessage.left;
+			right = m_clientMessage.right;
+			mouseDX = m_clientMessage.mouseDX;
+			mouseDY = m_clientMessage.mouseDY;
+		}
 	}
 	else
 	{

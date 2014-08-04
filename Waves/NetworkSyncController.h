@@ -2,7 +2,7 @@
 
 #include "Entity.h"
 
-#include "NetworkController.h"
+//#include "NetworkController.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
@@ -18,8 +18,9 @@ public:
 	int RegisterEntity(Entity* entity);
 
 	bool SyncEntityStates();
-	bool SyncPlayerInput(bool& forward, bool& backward, bool& left, bool& right, 
-						float& mouseDX, float& mouseDY);
+	bool SyncPlayerInput(bool& forward, bool& backward, 
+						 bool& left, bool& right,
+						 float& mouseDX, float& mouseDY);
 
 private:
 	bool m_isServer;

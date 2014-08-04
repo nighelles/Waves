@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 
 #include <windows.h>
 
@@ -13,10 +15,8 @@
 #include "ProceduralTerrain.h"
 #include "Camera.h"
 
-#include "NetworkClient.h"
-#include "NetworkServer.h"
-
 #include "NetworkSyncController.h"
+
 
 class Engine
 {
