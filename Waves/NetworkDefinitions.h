@@ -32,6 +32,6 @@ typedef struct
 	bool	backward;
 	bool	left;
 	bool	right;
-	float	mouseDX;
-	float	mouseDY;
+	int	mouseDX;
+	int	mouseDY;
 } ClientNetworkMessage;

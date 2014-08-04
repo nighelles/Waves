@@ -9,14 +9,16 @@
 #include <iostream>
 #include <fstream>
 
+#include "NetworkSyncController.h"
+#include "NetworkController.h"
+#include "NetworkClient.h"
+#include "NetworkServer.h"
+
 #include "InputController.h"
 #include "GraphicsController.h"
 #include "PhysicsEntity.h"
 #include "ProceduralTerrain.h"
 #include "Camera.h"
-
-#include "NetworkSyncController.h"
-
 
 class Engine
 {
@@ -26,7 +28,7 @@ public:
 	typedef struct  
 	{
 		bool forward, backward, left, right;
-		float mouseDX, mouseDY;
+		int mouseDX, mouseDY;
 	} NetworkPlayer;
 
 public:

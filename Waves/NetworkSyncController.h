@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Entity.h"
-
 //#include "NetworkController.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
+
+#include "Entity.h"
 
 class NetworkSyncController
 {
@@ -20,7 +20,7 @@ public:
 	bool SyncEntityStates();
 	bool SyncPlayerInput(bool& forward, bool& backward, 
 						 bool& left, bool& right,
-						 float& mouseDX, float& mouseDY);
+						 int& mouseDX, int& mouseDY);
 
 private:
 	bool m_isServer;

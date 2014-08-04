@@ -11,7 +11,7 @@ NetworkController::~NetworkController()
 
 bool NetworkController::Initialize()
 {
-	bool result;
+	int result;
 	WSADATA WsaData;
 	
 	addrinfo hints {0};

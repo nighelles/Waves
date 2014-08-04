@@ -8,9 +8,6 @@ NetworkSyncController::NetworkSyncController()
 
 	m_numEntities = 0;
 
-	m_clientMessage = { };
-	m_serverMessage = { };
-
 	return;
 }
 
@@ -115,7 +112,7 @@ bool NetworkSyncController::SyncEntityStates()
 	return result;
 }
 
-bool NetworkSyncController::SyncPlayerInput(bool& forward, bool& backward, bool& left, bool& right, float& mouseDX, float& mouseDY)
+bool NetworkSyncController::SyncPlayerInput(bool& forward, bool& backward, bool& left, bool& right, int& mouseDX, int& mouseDY)
 {
 	bool result;
 

@@ -3,7 +3,7 @@
 #include <atldef.h>
 #include <atlstr.h>
 
-#define USE_NETWORKING 0
+#define USE_NETWORKING 1
 
 Engine::Engine()
 {
@@ -358,7 +358,7 @@ bool Engine::Update()
 #if USE_NETWORKING
 
 	bool forward,backward,left,right;
-	float mouseDX,mouseDY;
+	int mouseDX,mouseDY;
 
 	if(!m_isServer)
 	{
@@ -369,7 +369,7 @@ bool Engine::Update()
 		m_Input->GetMouseDelta(mouseDX, mouseDY);
 	}
 
-	NetworkSyncController->SyncPlayerInput(forward, backward, left, right, mouseDX, mouseDY);
+	m_networkSyncController->SyncPlayerInput(forward, backward, left, right, mouseDX, mouseDY);
 
 	if (m_isServer)
 	{
