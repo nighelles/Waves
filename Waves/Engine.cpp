@@ -148,7 +148,7 @@ bool Engine::InitializeGame()
 	m_playerBoat->SetLocation(100.0f, 0, 0);
 	m_playerBoat->Update(m_Graphics);
 
-	m_otherBoat->SetLocation(100.0f, 0, 20.0f);
+	m_otherBoat->SetLocation(100.0f, 0, 0);
 	m_otherBoat->Update(m_Graphics);
 
 	// Attach Camera to boat model
