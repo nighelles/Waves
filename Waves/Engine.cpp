@@ -381,6 +381,16 @@ bool Engine::Update()
 		m_networkPlayer.mouseDY = mouseDY;
 	}
 
+
+	if (m_networkPlayer.forward)
+		m_otherBoat->ApplyImpulse(0.0f, 0.0f, 1.0f);
+	if (m_networkPlayer.left)
+		m_playerBoat->ApplyRotation(0.f, -1.0f, 0.0f);
+	if (m_networkPlayer.backward)
+		m_playerBoat->ApplyImpulse(0.0f, 0.0f, -1.0f);
+	if (m_networkPlayer.right)
+		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
+
 #endif //#if USE_NETWORKING
 
 
