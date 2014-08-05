@@ -1,2 +1,3 @@
 isServer: 1
 serverIP: 127.0.0.1
+mapName: levels\editor3.txt

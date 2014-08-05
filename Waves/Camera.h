@@ -17,6 +17,7 @@ public:
 	void Update();
 
 	D3DXVECTOR3 GetPosition();
+	D3DXVECTOR3 GetDirection();
 	D3DXVECTOR3 GetRotation();
 
 	void Render();

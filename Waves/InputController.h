@@ -25,6 +25,8 @@ public:
 	void GetMouseDelta(int&, int&);
 
 	bool IsKeyPressed(int key);
+	bool IsKeyDown(int key);
+	bool IsKeyUp(int key);
 
 private:
 	bool ReadKeyboard();
@@ -37,6 +39,7 @@ private:
 	IDirectInputDevice8* m_mouse;
 
 	unsigned char m_keyboardState[256];
+	unsigned char m_keyboardStateOld[256];
 	DIMOUSESTATE m_mouseState;
 
 	int m_screenWidth, m_screenHeight;

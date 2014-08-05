@@ -97,8 +97,10 @@
     <ClCompile Include="PhysicsEntity.cpp" />
     <ClCompile Include="ProceduralTerrain.cpp" />
     <ClCompile Include="ProceduralTerrainShader.cpp" />
+    <ClCompile Include="raytriangle.cpp" />
     <ClCompile Include="RenderController.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureShader.cpp" />
   </ItemGroup>
@@ -111,7 +113,6 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EntityModel.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="LoadObjFile.h" />
     <ClInclude Include="NetworkClient.h" />
     <ClInclude Include="NetworkController.h" />
     <ClInclude Include="NetworkDefinitions.h" />
@@ -121,8 +122,10 @@
     <ClInclude Include="PhysicsEntity.h" />
     <ClInclude Include="ProceduralTerrain.h" />
     <ClInclude Include="ProceduralTerrainShader.h" />
+    <ClInclude Include="raytriangle.h" />
     <ClInclude Include="RenderController.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureShader.h" />
   </ItemGroup>

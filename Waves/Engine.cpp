@@ -3,8 +3,6 @@
 #include <atldef.h>
 #include <atlstr.h>
 
-#define USE_NETWORKING 1
-
 Engine::Engine()
 {
 	m_Input = 0;
@@ -13,9 +11,12 @@ Engine::Engine()
 	m_playerBoat = 0;
 	m_otherBoat = 0;
 
-	m_island = 0;
+#if EDITOR_BUILD
+	m_editCursor = 0;
+#endif
 
 	m_waterTerrain = 0;
+	m_landTerrain = 0;
 
 	m_menuBitmap = 0;
 
@@ -50,13 +51,18 @@ bool Engine::LoadConfiguration()
 	fin.get(input);
 	while (input != ':') fin.get(input);
 	fin >> m_serverAddress;
+	fin.get(input);
+	while (input != ':') fin.get(input);
+	fin >> m_terrainMapFilename;
 
 	if (m_isServer) 
-		MessageBox(m_hwnd, L"Server", L"Note", MB_OK);
+		OutputDebugString(L"Server\n");
 	else 
-		MessageBox(m_hwnd, L"Not Server", L"Note", MB_OK);
+		OutputDebugString(L"Not Server\n");
 
-	MessageBox(m_hwnd, ATL::CA2W(m_serverAddress), L"Note", MB_OK);
+	OutputDebugString(L"Server Address: ");
+	OutputDebugString(ATL::CA2W(m_serverAddress));
+	OutputDebugString(L"\n");
 
 	return true;
 }
@@ -120,6 +126,7 @@ bool Engine::InitializeGame()
 
 	// Change these to the new Register model structuring
 
+#if GAME_BUILD
 	// Initialize a boat model
 	m_playerBoat = new PhysicsEntity;
 
@@ -127,14 +134,6 @@ bool Engine::InitializeGame()
 	if (!result) return false;
 
 	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-	if (!result) return false;
-
-	// Initialize island
-
-	m_island = new PhysicsEntity;
-	result = m_island->Initialize();
-	if (!result) return false;
-	result = m_island->InitializeModel(m_Graphics, "Island.obj", L"sand_tiling.dds");
 	if (!result) return false;
 
 	// Initialize other person's boat
@@ -155,6 +154,15 @@ bool Engine::InitializeGame()
 	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
 	m_Graphics->GetPlayerCamera()->Update();
 	m_Graphics->GetPlayerCamera()->Render();
+#endif //#if GAME_BUILD
+
+#if EDITOR_BUILD
+	m_Graphics->GetPlayerCamera()->SetLocation(0.0f,100.0f,0.0f);
+	m_editCursor = new PhysicsEntity;
+	result = m_editCursor->Initialize();
+	if (!result) return false;
+	result = m_editCursor->InitializeModel(m_Graphics, "EditorCursor.obj", L"cursor.dds");
+#endif //#if EDITOR_BUILD
 
 	// Deal with creating water
 	m_waterTerrain = new ProceduralTerrain();
@@ -163,12 +171,42 @@ bool Engine::InitializeGame()
 	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"water_tiling.dds");
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not Initialize Water Terrain", L"Error", MB_OK);
+		OutputDebugString(L"Could not Initialize Water Terrain");
 		return false;
 	}
 	m_waterTerrain->m_shaderType = EntityModel::WATER_SHADER;
 
 	m_Graphics->RegisterEntityModel(m_waterTerrain);
+
+	m_landTerrain = new Terrain();
+	if (!m_landTerrain) return false;
+
+	result = m_landTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"sand_tiling.dds");
+	if (!result)
+	{
+		OutputDebugString(L"Could not Initialize Sand Terrain");
+		return false;
+	}
+	m_landTerrain->m_shaderType = EntityModel::TEXTURE_SHADER;
+
+	m_Graphics->RegisterEntityModel(m_landTerrain);
+
+	result = m_landTerrain->LoadTerrainMap(m_terrainMapFilename);
+
+#if GAME_BUILD
+	if (!result)
+	{
+		OutputDebugString(L"Couldn't load map!\n");
+		return false;
+	}
+#endif // #if GAME_BUILD
+
+#if EDITOR_BUILD
+	if (!result)
+	{
+		OutputDebugString(L"Creating new map.\n");
+	}
+#endif // #if EDITOR_BUILD
 
 	// GAME_STATE
 
@@ -224,25 +262,33 @@ void Engine::Shutdown()
 	{
 		m_playerBoat->Shutdown();
 		delete m_playerBoat;
-		m_Input = 0;
+		m_playerBoat = 0;
 	}
 	if (m_otherBoat)
 	{
 		m_otherBoat->Shutdown();
 		delete m_otherBoat;
-		m_Input = 0;
+		m_otherBoat = 0;
 	}
-	if (m_island)
+#if EDITOR_BUILD
+	if (m_editCursor)
 	{
-		m_island->Shutdown();
-		delete m_island;
-		m_Input = 0;
+		m_editCursor->Shutdown();
+		delete m_editCursor;
+		m_editCursor = 0;
 	}
+#endif
 	if (m_waterTerrain)
 	{
 		m_waterTerrain->Shutdown();
 		delete m_waterTerrain;
 		m_waterTerrain = 0;
+	}
+	if (m_landTerrain)
+	{
+		m_landTerrain->Shutdown();
+		delete m_landTerrain;
+		m_landTerrain = 0;
 	}
 	if (m_menuBitmap)
 	{
@@ -292,6 +338,7 @@ void Engine::Run()
 
 		if (msg.message == WM_QUIT || m_Input->IsEscapePressed())
 		{
+			PrepareToExit();
 			done = true;
 		}
 		else
@@ -333,6 +380,19 @@ void Engine::Run()
 
 }
 
+void Engine::PrepareToExit()
+{
+#if EDITOR_BUILD
+	if (m_editedSomething)
+	{
+		OutputDebugString(L"Saving Map\n");
+		m_landTerrain->SaveTerrainMap(m_terrainMapFilename);
+	}
+#endif
+
+	return;
+}
+
 bool Engine::Update()
 {
 	bool result;
@@ -343,6 +403,8 @@ bool Engine::Update()
 	m_oldTime = m_Time;
 	m_Time = sysTime.wSecond * 1000 + sysTime.wMilliseconds;
 
+#if GAME_BUILD
+
 	if (m_Input->IsKeyPressed(DIK_W))
 		m_playerBoat->ApplyImpulse(0.0f, 0.0f, 1.0f);
 	if (m_Input->IsKeyPressed(DIK_A))
@@ -352,6 +414,53 @@ bool Engine::Update()
 	if (m_Input->IsKeyPressed(DIK_D))
 		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
 
+#endif // #if GAME_BUILD
+
+#if EDITOR_BUILD
+	if (m_Input->IsKeyPressed(DIK_W))
+		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, 5.0f);
+	if (m_Input->IsKeyPressed(DIK_A))
+		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(-5.0f, 0.0f, 0.0f);
+	if (m_Input->IsKeyPressed(DIK_S))
+		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, -5.0f);
+	if (m_Input->IsKeyPressed(DIK_D))
+		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(5.0f, 0.0f, 0.0f);
+	if (m_Input->IsKeyDown(DIK_F))
+		m_waterTerrain->IsVisible(!m_waterTerrain->IsVisible());
+	
+	D3DXVECTOR3 editorRayOrigin, editorRayDirection, editorRayIntersection;
+	bool editorRayIntersected;
+
+	editorRayOrigin = m_Graphics->GetPlayerCamera()->GetPosition();
+	editorRayDirection = m_Graphics->GetPlayerCamera()->GetDirection();
+
+	editorRayIntersected = m_landTerrain->GetRayIntersection(&editorRayOrigin, &editorRayDirection, editorRayIntersection);
+
+	if (editorRayIntersected)
+	{
+		float cursorY = editorRayIntersection.y;
+		if (cursorY < 5.0f && m_waterTerrain->IsVisible()) cursorY = 5.0f;
+
+		m_editCursor->SetLocation(editorRayIntersection.x, cursorY, editorRayIntersection.z);
+		
+		if (m_Input->IsKeyPressed(DIK_Q))
+		{
+			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, -10.0);
+			m_editedSomething = true;
+		}
+		if (m_Input->IsKeyPressed(DIK_E))
+		{
+			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 10.0);
+			m_editedSomething = true;
+		}
+		if (m_Input->IsKeyPressed(DIK_R))
+		{
+			m_landTerrain->ResetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0);
+			m_editedSomething = true;
+		}
+	}
+
+#endif
 
 	UpdateEntities();
 
@@ -399,13 +508,18 @@ bool Engine::Update()
 
 void Engine::UpdateEntities()
 {
+#if GAME_BUILD
 	m_playerBoat->Update(m_Graphics);
 	m_otherBoat->Update(m_Graphics);
-	m_island->Update(m_Graphics);
 
 	m_playerBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
 	m_otherBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
-	
+#endif // #if GAME_BUILD
+
+#if EDITOR_BUILD
+	m_editCursor->Update(m_Graphics);
+#endif
+
 	m_Graphics->GetPlayerCamera()->Update();
 
 	return;

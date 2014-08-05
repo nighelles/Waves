@@ -210,19 +210,22 @@ bool GraphicsController::Render()
 	
 	for (i = 0; i != m_numEntities; ++i)
 	{
-		m_Render->GetWorldMatrix(worldMatrix);
+		if (m_modelEntities[i]->IsVisible())
+		{
+			m_Render->GetWorldMatrix(worldMatrix);
 
-		m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
-		m_modelEntities[i]->Render(m_Render->GetDeviceContext());
-		if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
-		{
-			result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+			m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
+			m_modelEntities[i]->Render(m_Render->GetDeviceContext());
+			if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
+			{
+				result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+			}
+			else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
+			{
+				result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
+			}
+			if (!result) return false;
 		}
-		else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
-		{
-			result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
-		}
-		if (!result) return false;
 	}
 
 	m_Render->DisableZBuffer();

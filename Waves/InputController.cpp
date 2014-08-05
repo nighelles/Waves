@@ -100,6 +100,8 @@ bool InputController::ReadKeyboard()
 {
 	HRESULT result;
 	
+	memcpy(m_keyboardStateOld, m_keyboardState, sizeof(m_keyboardState));
+
 	result = m_keyboard->GetDeviceState(sizeof(m_keyboardState), (LPVOID)&m_keyboardState);
 	if (FAILED(result))
 	{
@@ -149,6 +151,24 @@ bool InputController::IsEscapePressed()
 bool InputController::IsKeyPressed(int key)
 {
 	if (m_keyboardState[key] & 0x80)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool InputController::IsKeyDown(int key)
+{
+	if ((m_keyboardState[key] & 0x80) && !(m_keyboardStateOld[key] & 0x80))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool InputController::IsKeyUp(int key)
+{
+	if ((m_keyboardStateOld[key] & 0x80) && !(m_keyboardState[key] & 0x80))
 	{
 		return true;
 	}

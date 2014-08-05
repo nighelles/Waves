@@ -18,6 +18,8 @@ EntityModel::EntityModel()
 	m_rotationZ = 0.0f;
 
 	m_shaderType = TEXTURE_SHADER;
+
+	m_isVisible = true;
 }
 
 EntityModel::EntityModel(const EntityModel& other)
@@ -242,4 +244,33 @@ void EntityModel::ApplyEntityMatrix(D3DXMATRIX& entityMatrix)
 	entityMatrix = translation;
 	D3DXMatrixMultiply(&entityMatrix, &rotation, &entityMatrix);
 	return;
+}
+
+bool EntityModel::GetRayIntersection(D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3& point)
+{
+	// I'm going to comment this, the t returned is DISTANCE TO THE POINT OF INTERSECTION
+	// u,v is coordinates within triangle
+	double t, u, v;
+	bool intersected;
+
+	D3DXVECTOR3 v0, v1, v2, dir, pos;
+
+	D3DXVec3Normalize(&dir, indir);
+
+	for (int i = 0; i != m_vertexCount; i += 3)
+	{
+		v0.x = m_model[i + 0].x + m_locationX; v0.y = m_model[i + 0].y + m_locationY; v0.z = m_model[i + 0].z + m_locationZ;
+		v1.x = m_model[i + 1].x + m_locationX; v1.y = m_model[i + 1].y + m_locationY; v1.z = m_model[i + 1].z + m_locationZ;
+		v2.x = m_model[i + 2].x + m_locationX; v2.y = m_model[i + 2].y + m_locationY; v2.z = m_model[i + 2].z + m_locationZ;
+
+		intersected = intersect_triangle(orig, &dir, &v0, &v1, &v2, t, u, v);
+
+		if (intersected)
+		{
+			point.x = v0.x; point.y = v0.y; point.z = v0.z;
+			return true;
+		}
+	}
+
+	return false;
 }

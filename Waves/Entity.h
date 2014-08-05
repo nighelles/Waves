@@ -9,7 +9,7 @@ public:
 	Entity();
 	~Entity();
 
-	bool Initialize();
+	virtual bool Initialize();
 	void Shutdown();
 
 	virtual void Update();

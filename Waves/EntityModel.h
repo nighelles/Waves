@@ -6,6 +6,8 @@
 
 #include "Texture.h"
 
+#include "raytriangle.h"
+
 using namespace std;
 
 class EntityModel
@@ -13,7 +15,7 @@ class EntityModel
 public:
 	enum ShaderType { TEXTURE_SHADER=1, WATER_SHADER };
 
-protected:
+public:
 	struct Vertex
 	{
 		D3DXVECTOR3 position;
@@ -48,6 +50,11 @@ public:
 
 	ShaderType m_shaderType;
 
+	bool GetRayIntersection(D3DXVECTOR3* orig, D3DXVECTOR3* dir, D3DXVECTOR3& point);
+
+	bool IsVisible() const { return m_isVisible; }
+	void IsVisible(bool val) { m_isVisible = val; }
+
 protected:
 	virtual bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
@@ -60,6 +67,8 @@ protected:
 	void ReleaseModel();
 
 protected:
+	bool m_isVisible;
+
 	float m_locationX, m_locationY, m_locationZ;
 	float m_rotationX, m_rotationY, m_rotationZ;
 

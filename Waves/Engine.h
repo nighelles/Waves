@@ -20,10 +20,14 @@
 #include "ProceduralTerrain.h"
 #include "Camera.h"
 
+#define USE_NETWORKING 0
+#define EDITOR_BUILD 1
+#define GAME_BUILD 0
+
 class Engine
 {
 public:
-	enum GameState { GAME_MENU, GAME_LOADING, GAME_PLAYING, GAME_PAUSED };
+	enum GameState { GAME_MENU, GAME_LOADING, GAME_PLAYING, GAME_PAUSED, GAME_EDITOR };
 
 	typedef struct  
 	{
@@ -50,6 +54,8 @@ private:
 	bool Render();
 	bool PostUpdate();
 
+	void PrepareToExit();
+
 	void UpdateEntities();
 
 	void InitializeWindows(int&, int&);
@@ -66,9 +72,8 @@ private:
 	PhysicsEntity* m_playerBoat;
 	PhysicsEntity* m_otherBoat;
 
-	PhysicsEntity* m_island;
-
 	ProceduralTerrain* m_waterTerrain;
+	Terrain* m_landTerrain;
 
 	Bitmap* m_menuBitmap;
 	Bitmap* m_menuCursor;
@@ -87,6 +92,16 @@ private:
 	char m_serverAddress[16];
 
 	GameState m_gameState;
+
+	char m_terrainMapFilename[256];
+
+#if EDITOR_BUILD
+
+	PhysicsEntity* m_editCursor;
+
+	bool m_editedSomething;
+
+#endif // #if EDITOR_BUILD
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
