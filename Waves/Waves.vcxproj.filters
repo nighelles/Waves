@@ -17,9 +17,6 @@
     <Filter Include="GameEngine\Graphics">
       <UniqueIdentifier>{eb05aed9-06a1-4e53-b579-c4da38e9f641}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameEngine\Menu">
-      <UniqueIdentifier>{2fbf19a3-60c1-4279-87e9-2c54b797fca3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameEngine\Networking">
       <UniqueIdentifier>{0ad17408-bccf-4de2-9630-641fdc27659e}</UniqueIdentifier>
     </Filter>
@@ -34,6 +31,12 @@
     </Filter>
     <Filter Include="GameEngine\Core\Game">
       <UniqueIdentifier>{39bbb565-6aab-4051-9d92-ab5b5006dc1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\2D">
+      <UniqueIdentifier>{2fbf19a3-60c1-4279-87e9-2c54b797fca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\Core\Physics">
+      <UniqueIdentifier>{666f5a25-e343-411e-a5f6-346bd4d27861}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -62,7 +65,7 @@
       <Filter>GameEngine\Entities</Filter>
     </ClCompile>
     <ClCompile Include="Bitmap.cpp">
-      <Filter>GameEngine\Menu</Filter>
+      <Filter>GameEngine\2D</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsController.cpp">
       <Filter>GameEngine\Graphics</Filter>
@@ -106,6 +109,9 @@
     <ClCompile Include="main.cpp">
       <Filter>GameEngine\Core\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>GameEngine\Core\Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -136,7 +142,7 @@
       <Filter>GameEngine\Entities</Filter>
     </ClInclude>
     <ClInclude Include="Bitmap.h">
-      <Filter>GameEngine\Menu</Filter>
+      <Filter>GameEngine\2D</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsController.h">
       <Filter>GameEngine\Graphics</Filter>
@@ -176,6 +182,9 @@
     </ClInclude>
     <ClInclude Include="Engine.h">
       <Filter>GameEngine\Core\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>GameEngine\Core\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

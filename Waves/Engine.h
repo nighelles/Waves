@@ -20,6 +20,8 @@
 #include "ProceduralTerrain.h"
 #include "Camera.h"
 
+#include "Physics.h"
+
 #define USE_NETWORKING 0
 #define EDITOR_BUILD 1
 #define GAME_BUILD 0

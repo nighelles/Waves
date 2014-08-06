@@ -19,6 +19,9 @@ public:
 	
 	void ApplyImpulse(float x, float y, float z);
 
+	D3DXVECTOR3 GetVelocity() { return D3DXVECTOR3(m_velocityX, m_velocityY, m_velocityZ); };
+
+
 protected:
 	int m_modelID;
 

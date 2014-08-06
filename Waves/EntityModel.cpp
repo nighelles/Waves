@@ -83,7 +83,7 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-	int i;
+	int i, vIndex, tIndex, nIndex;
 
 	vertices = new Vertex[m_vertexCount];
 	if (!vertices) return false;
@@ -91,13 +91,40 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	indices = new unsigned long[m_indexCount];
 	if (!indices) return false;
 
-	for (i = 0; i != m_vertexCount; ++i)
+	for (i = 0; i != uniqueFaceCount*3; ++i)
 	{
-		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
-		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
-		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 		indices[i] = i;
 	}
+
+	for (int i = 0; i != uniqueFaceCount; ++i)
+	{
+		vIndex = m_modelDesc[i].vIndex1 - 1;
+		tIndex = m_modelDesc[i].tIndex1 - 1;
+		nIndex = m_modelDesc[i].nIndex1 - 1;
+
+		vertices[3 * i].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+		vIndex = m_modelDesc[i].vIndex2 - 1;
+		tIndex = m_modelDesc[i].tIndex2 - 1;
+		nIndex = m_modelDesc[i].nIndex2 - 1;
+
+		vertices[3 * i+1].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i+1].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i+1].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+		vIndex = m_modelDesc[i].vIndex3 - 1;
+		tIndex = m_modelDesc[i].tIndex3 - 1;
+		nIndex = m_modelDesc[i].nIndex3 - 1;
+
+		vertices[3 * i+2].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i+2].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i+2].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+	}
+
+
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(Vertex) * m_vertexCount;
@@ -311,33 +338,4 @@ void EntityModel::ApplyEntityMatrix(D3DXMATRIX& entityMatrix)
 	entityMatrix = translation;
 	D3DXMatrixMultiply(&entityMatrix, &rotation, &entityMatrix);
 	return;
-}
-
-bool EntityModel::GetRayIntersection(D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3& point)
-{
-	// I'm going to comment this, the t returned is DISTANCE TO THE POINT OF INTERSECTION
-	// u,v is coordinates within triangle
-	double t, u, v;
-	bool intersected;
-
-	D3DXVECTOR3 v0, v1, v2, dir, pos;
-
-	D3DXVec3Normalize(&dir, indir);
-
-	for (int i = 0; i != m_vertexCount; i += 3)
-	{
-		v0.x = m_model[i + 0].x + m_locationX; v0.y = m_model[i + 0].y + m_locationY; v0.z = m_model[i + 0].z + m_locationZ;
-		v1.x = m_model[i + 1].x + m_locationX; v1.y = m_model[i + 1].y + m_locationY; v1.z = m_model[i + 1].z + m_locationZ;
-		v2.x = m_model[i + 2].x + m_locationX; v2.y = m_model[i + 2].y + m_locationY; v2.z = m_model[i + 2].z + m_locationZ;
-
-		intersected = intersect_triangle(orig, &dir, &v0, &v1, &v2, t, u, v);
-
-		if (intersected)
-		{
-			point.x = v0.x; point.y = v0.y; point.z = v0.z;
-			return true;
-		}
-	}
-
-	return false;
 }

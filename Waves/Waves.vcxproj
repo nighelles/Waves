@@ -94,6 +94,7 @@
     <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="NetworkSyncController.cpp" />
     <ClCompile Include="ObjFileUtility.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PhysicsEntity.cpp" />
     <ClCompile Include="ProceduralTerrain.cpp" />
     <ClCompile Include="ProceduralTerrainShader.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="NetworkServer.h" />
     <ClInclude Include="NetworkSyncController.h" />
     <ClInclude Include="ObjFileUtility.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="PhysicsEntity.h" />
     <ClInclude Include="ProceduralTerrain.h" />
     <ClInclude Include="ProceduralTerrainShader.h" />

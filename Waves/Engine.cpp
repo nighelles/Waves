@@ -434,7 +434,7 @@ bool Engine::Update()
 	editorRayOrigin = m_Graphics->GetPlayerCamera()->GetPosition();
 	editorRayDirection = m_Graphics->GetPlayerCamera()->GetDirection();
 
-	editorRayIntersected = m_landTerrain->GetRayIntersection(&editorRayOrigin, &editorRayDirection, editorRayIntersection);
+	editorRayIntersected = PHY_GetRayIntersection(m_landTerrain, &editorRayOrigin, &editorRayDirection, &editorRayIntersection);
 
 	if (editorRayIntersected)
 	{

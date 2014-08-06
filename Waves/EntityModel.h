@@ -6,9 +6,6 @@
 
 #include "Texture.h"
 
-#include "raytriangle.h"
-
-
 using namespace std;
 
 class EntityModel
@@ -63,10 +60,17 @@ public:
 
 	ShaderType m_shaderType;
 
-	bool GetRayIntersection(D3DXVECTOR3* orig, D3DXVECTOR3* dir, D3DXVECTOR3& point);
-
 	bool IsVisible() const { return m_isVisible; }
 	void IsVisible(bool val) { m_isVisible = val; }
+
+	// These need to be public for utility functions in physics to work
+	// Probably didn't need to be a class.
+
+	Model* m_model;
+	int m_vertexCount, m_indexCount;
+	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
+	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
+	UniqueFace* m_modelDesc;
 
 protected:
 	virtual bool InitializeBuffers(ID3D11Device*);
@@ -87,15 +91,8 @@ protected:
 	float m_rotationX, m_rotationY, m_rotationZ;
 
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-	int m_vertexCount, m_indexCount;
 
 	Texture* m_Texture; // ADD multiple textures?
 
 	ID3D11Device* m_device;
-
-	Model* m_model;
-
-	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
-	UniqueFace* m_modelDesc;
-	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
 };
