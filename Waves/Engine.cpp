@@ -455,7 +455,7 @@ bool Engine::Update()
 		}
 		if (m_Input->IsKeyPressed(DIK_R))
 		{
-			m_landTerrain->ResetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0);
+			m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 0.0f);
 			m_editedSomething = true;
 		}
 	}

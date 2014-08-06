@@ -206,16 +206,83 @@ bool EntityModel::LoadModel(char* filename)
 {
 	bool result;
 	ObjFileUtility *objLoader = new ObjFileUtility;
-	m_vertexCount = objLoader->loadNumberOfVertices(filename);
+
+	objLoader->loadStats(filename, uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount);
+
+	m_modelDesc = new UniqueFace[uniqueFaceCount];
+	uniqueVertices = new UniqueVertex[uniqueVertexCount];
+	uniqueTexcoords = new UniqueVertex[uniqueTextureCount];
+	uniqueNormals = new UniqueVertex[uniqueNormalCount];
+
+	result = objLoader->LoadObjFile(filename, uniqueVertices, uniqueTexcoords, uniqueNormals, m_modelDesc);
+
+	m_vertexCount = uniqueFaceCount * 3;
+
 	m_indexCount = m_vertexCount;
+
 	if (m_vertexCount < 1) return false;
 
 	m_model = new Model[m_vertexCount];
-	result = objLoader->LoadObjFile(filename, m_model);
+
+	result = BuildModel();
 	if (!result) return false;
 
 	objLoader->Shutdown();
 	delete objLoader;
+
+	return true;
+}
+
+bool EntityModel::BuildModel()
+{
+	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
+	for (int i = 0; i != uniqueFaceCount; ++i)
+	{
+		vIndex = m_modelDesc[i].vIndex1 - 1;
+		tIndex = m_modelDesc[i].tIndex1 - 1;
+		nIndex = m_modelDesc[i].nIndex1 - 1;
+
+		m_model[3 * i].x = uniqueVertices[vIndex].x;
+		m_model[3 * i].y = uniqueVertices[vIndex].y;
+		m_model[3 * i].z = uniqueVertices[vIndex].z;
+
+		m_model[3 * i].tu = uniqueTexcoords[tIndex].x;
+		m_model[3 * i].tv = uniqueTexcoords[tIndex].y;
+
+		m_model[3 * i].nx = uniqueNormals[nIndex].x;
+		m_model[3 * i].ny = uniqueNormals[nIndex].y;
+		m_model[3 * i].nz = uniqueNormals[nIndex].z;
+
+		vIndex = m_modelDesc[i].vIndex2 - 1;
+		tIndex = m_modelDesc[i].tIndex2 - 1;
+		nIndex = m_modelDesc[i].nIndex2 - 1;
+
+		m_model[3 * i + 1].x = uniqueVertices[vIndex].x;
+		m_model[3 * i + 1].y = uniqueVertices[vIndex].y;
+		m_model[3 * i + 1].z = uniqueVertices[vIndex].z;
+
+		m_model[3 * i + 1].tu = uniqueTexcoords[tIndex].x;
+		m_model[3 * i + 1].tv = uniqueTexcoords[tIndex].y;
+
+		m_model[3 * i + 1].nx = uniqueNormals[nIndex].x;
+		m_model[3 * i + 1].ny = uniqueNormals[nIndex].y;
+		m_model[3 * i + 1].nz = uniqueNormals[nIndex].z;
+
+		vIndex = m_modelDesc[i].vIndex3 - 1;
+		tIndex = m_modelDesc[i].tIndex3 - 1;
+		nIndex = m_modelDesc[i].nIndex3 - 1;
+
+		m_model[3 * i + 2].x = uniqueVertices[vIndex].x;
+		m_model[3 * i + 2].y = uniqueVertices[vIndex].y;
+		m_model[3 * i + 2].z = uniqueVertices[vIndex].z;
+
+		m_model[3 * i + 2].tu = uniqueTexcoords[tIndex].x;
+		m_model[3 * i + 2].tv = uniqueTexcoords[tIndex].y;
+
+		m_model[3 * i + 2].nx = uniqueNormals[nIndex].x;
+		m_model[3 * i + 2].ny = uniqueNormals[nIndex].y;
+		m_model[3 * i + 2].nz = uniqueNormals[nIndex].z;
+	}
 
 	return true;
 }

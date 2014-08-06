@@ -163,67 +163,88 @@ void Terrain::regenerateModelFromTerrainMap()
 
 	int index = 0;
 
-	for (int x = 0; x != MAPSIZE-1; ++x)
+	for (int x = 0; x != MAPSIZE - 1; ++x)
 	{
-		for (int z = 0; z != MAPSIZE-1; ++z)
+		for (int z = 0; z != MAPSIZE - 1; ++z)
 		{
 			m_model[index].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index].y = terrainMap[x][z] + m_initialHeight;
 			m_model[index].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index].tu = 0.0f;
 			m_model[index].tv = 0.0f;
-			m_model[index].nx = 0.0f;
-			m_model[index].ny = 1.0f;
-			m_model[index].nz = 0.0f;
 
 			m_model[index + 1].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 1].y = terrainMap[x + 1][z + 1] + m_initialHeight;
 			m_model[index + 1].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 1].tu = 1.0f;
 			m_model[index + 1].tv = 1.0f;
-			m_model[index + 1].nx = 0.0f;
-			m_model[index + 1].ny = 1.0f;
-			m_model[index + 1].nz = 0.0f;
 
 			m_model[index + 2].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 2].y = terrainMap[x + 1][z] + m_initialHeight;
 			m_model[index + 2].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 2].tu = 1.0f;
 			m_model[index + 2].tv = 0.0f;
-			m_model[index + 2].nx = 0.0f;
-			m_model[index + 2].ny = 1.0f;
-			m_model[index + 2].nz = 0.0f;
 
 			m_model[index + 3].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 3].y = terrainMap[x][z] + m_initialHeight;
 			m_model[index + 3].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 3].tu = 0.0f;
 			m_model[index + 3].tv = 0.0f;
-			m_model[index + 3].nx = 0.0f;
-			m_model[index + 3].ny = 1.0f;
-			m_model[index + 3].nz = 0.0f;
 
 			m_model[index + 4].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 4].y = terrainMap[x][z + 1] + m_initialHeight;
 			m_model[index + 4].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 4].tu = 0.0f;
 			m_model[index + 4].tv = 1.0f;
-			m_model[index + 4].nx = 0.0f;
-			m_model[index + 4].ny = 1.0f;
-			m_model[index + 4].nz = 0.0f;
 
 			m_model[index + 5].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 5].y = terrainMap[x + 1][z + 1] + m_initialHeight;
 			m_model[index + 5].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
 			m_model[index + 5].tu = 1.0f;
 			m_model[index + 5].tv = 1.0f;
-			m_model[index + 5].nx = 0.0f;
-			m_model[index + 5].ny = 1.0f;
-			m_model[index + 5].nz = 0.0f;
 
 			index += 6;
 		}
 	}
+	regenerateNormals();
+
+	return;
+}
+
+void Terrain::regenerateNormals()
+{
+	// Regenerate normals
+	D3DXVECTOR3 vt1, vt2, vt3;
+	D3DXVECTOR3 edge1, edge2;
+	D3DXVECTOR3 normal;
+
+	D3DXVECTOR3 normalMap[MAPSIZE*2][MAPSIZE];
+
+	int flip = 0;
+
+	for (int i = 0; i != m_vertexCount; i += 3)
+	{
+		vt1.x = m_model[i + 0].x; vt1.y = m_model[i + 0].y; vt1.z = m_model[i + 0].z;
+		vt2.x = m_model[i + 1].x; vt2.y = m_model[i + 1].y; vt2.z = m_model[i + 1].z;
+		vt3.x = m_model[i + 2].x; vt3.y = m_model[i + 2].y; vt3.z = m_model[i + 2].z;
+
+		D3DXVec3Subtract(&edge1, &vt3, &vt1);
+		D3DXVec3Subtract(&edge2, &vt2, &vt1);
+
+		D3DXVec3Cross(&normal, &edge2, &edge1);
+
+		D3DXVec3Normalize(&normal,&normal);
+
+		m_model[i + 0].nx = normal.x; m_model[i + 0].ny = normal.y; m_model[i + 0].nz = normal.z;
+		m_model[i + 1].nx = normal.x; m_model[i + 1].ny = normal.y; m_model[i + 1].nz = normal.z;
+		m_model[i + 2].nx = normal.x; m_model[i + 2].ny = normal.y; m_model[i + 2].nz = normal.z;
+
+	}
+
+	// Then calculate vertex normals
+
+	
+	return;
 }
 
 float Terrain::CalculateDeterministicHeight(float x, float y, float t)
@@ -261,17 +282,18 @@ void Terrain::ApplyVerticalOffset(int xLoc, int zLoc, float radius, float height
 			worldX = x*m_gridSize - MAPSIZE*m_gridSize / 2.0;
 			worldZ = z*m_gridSize - MAPSIZE*m_gridSize / 2.0;
 			dist = sqrt(pow(xLoc-worldX,2) + pow(zLoc-worldZ,2));
-			if (dist < 1) dist = 1;
+			if (dist < 2) dist = 2;
 			if (dist < radius)
 			{
 				terrainMap[x][z] += height / dist;
 			}
 		}
 	}
+	SmoothTerrainMap(xLoc, zLoc, radius);
 	regenerateModelFromTerrainMap();
 }
 
-void Terrain::ResetVerticalOffset(int xLoc, int zLoc, float radius)
+void Terrain::SetVerticalOffset(int xLoc, int zLoc, float radius, float offset)
 {
 	float dist;
 	float worldX;
@@ -287,11 +309,33 @@ void Terrain::ResetVerticalOffset(int xLoc, int zLoc, float radius)
 			if (dist < 1) dist = 1;
 			if (dist < radius)
 			{
-				terrainMap[x][z] = 0;
+				terrainMap[x][z] = offset;
 			}
 		}
 	}
 	regenerateModelFromTerrainMap();
+}
+
+void Terrain::SmoothTerrainMap(int xLoc, int zLoc, float radius)
+{
+	float worldX, worldZ, dist;
+
+	for (int x = 0; x != MAPSIZE; ++x)
+	{
+		for (int z = 0; z != MAPSIZE; ++z)
+		{
+			if (x > 0 && x < MAPSIZE && z > 0 && z < MAPSIZE)
+			{
+				worldX = x*m_gridSize - MAPSIZE*m_gridSize / 2.0;
+				worldZ = z*m_gridSize - MAPSIZE*m_gridSize / 2.0;
+				dist = sqrt(pow(xLoc - worldX, 2) + pow(zLoc - worldZ, 2));
+				if (dist < radius)
+				{
+					terrainMap[x][z] = (terrainMap[x][z]*4 + terrainMap[x - 1][z - 1] + terrainMap[x + 1][z - 1] + terrainMap[x - 1][z + 1] + terrainMap[x + 1][z + 1]) / 8;
+				}
+			}
+		}
+	}
 }
 
 bool Terrain::LoadTerrainMap(char* filename)

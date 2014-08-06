@@ -8,6 +8,7 @@
 
 #include "raytriangle.h"
 
+
 using namespace std;
 
 class EntityModel
@@ -21,6 +22,18 @@ public:
 		D3DXVECTOR3 position;
 		D3DXVECTOR2 texture;
 		D3DXVECTOR3 normal;
+	};
+
+	struct UniqueVertex
+	{
+		float x, y, z;
+	};
+
+	struct UniqueFace
+	{
+		int vIndex1, vIndex2, vIndex3;
+		int tIndex1, tIndex2, tIndex3;
+		int nIndex1, nIndex2, nIndex3;
 	};
 
 public:
@@ -65,6 +78,7 @@ protected:
 
 	virtual bool LoadModel(char*);
 	void ReleaseModel();
+	bool BuildModel();
 
 protected:
 	bool m_isVisible;
@@ -80,4 +94,8 @@ protected:
 	ID3D11Device* m_device;
 
 	Model* m_model;
+
+	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
+	UniqueFace* m_modelDesc;
+	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
 };

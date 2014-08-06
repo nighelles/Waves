@@ -32,6 +32,9 @@
     <Filter Include="GameEngine\Entities\EntityModel">
       <UniqueIdentifier>{aa19d7be-f73e-4299-95fb-cb975414b30a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameEngine\Core\Game">
+      <UniqueIdentifier>{39bbb565-6aab-4051-9d92-ab5b5006dc1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp">
@@ -82,13 +85,7 @@
     <ClCompile Include="ProceduralTerrain.cpp">
       <Filter>GameEngine\Entities\Terrain</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>GameEngine\Core</Filter>
-    </ClCompile>
     <ClCompile Include="InputController.cpp">
-      <Filter>GameEngine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>GameEngine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
@@ -102,6 +99,12 @@
     </ClCompile>
     <ClCompile Include="raytriangle.cpp">
       <Filter>GameEngine\Entities\EntityModel</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>GameEngine\Core\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>GameEngine\Core\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,9 +159,6 @@
     <ClInclude Include="ProceduralTerrain.h">
       <Filter>GameEngine\Entities\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>GameEngine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="InputController.h">
       <Filter>GameEngine\Core</Filter>
     </ClInclude>
@@ -173,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="raytriangle.h">
       <Filter>GameEngine\Entities\EntityModel</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>GameEngine\Core\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,12 +8,6 @@ ObjFileUtility::ObjFileUtility()
 	int m_textureCount = 0;
 	int m_normalCount = 0;
 	int m_faceCount = 0;
-
-	vertices = 0;
-	texcoords = 0;
-	normals = 0;
-
-	faces = 0;
 }
 
 
@@ -21,38 +15,12 @@ ObjFileUtility::~ObjFileUtility()
 {
 }
 
-bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
+bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, EntityModel::UniqueVertex *texcoords, EntityModel::UniqueVertex *normals, EntityModel::UniqueFace *faces)
 {
 	ifstream fin;
 	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
 	char input, input2;
 	ofstream fout;
-
-
-	// Initialize the four data structures.
-	vertices = new Vertex[m_vertexCount];
-	if (!vertices)
-	{
-		return false;
-	}
-
-	texcoords = new Vertex[m_textureCount];
-	if (!texcoords)
-	{
-		return false;
-	}
-
-	normals = new Vertex[m_normalCount];
-	if (!normals)
-	{
-		return false;
-	}
-
-	faces = new Face[m_faceCount];
-	if (!faces)
-	{
-		return false;
-	}
 
 	vertexIndex = 0;
 	texcoordIndex = 0;
@@ -119,91 +87,30 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::Model *modelData)
 
 	fin.close();
 
-	for (int i = 0; i!=m_faceCount; ++i)
-	{
-		vIndex = faces[i].vIndex1 - 1;
-		tIndex = faces[i].tIndex1 - 1;
-		nIndex = faces[i].nIndex1 - 1;
-
-		modelData[3 * i].x = vertices[vIndex].x;
-		modelData[3 * i].y = vertices[vIndex].y;
-		modelData[3 * i].z = vertices[vIndex].z;
-
-		modelData[3 * i].tu = texcoords[tIndex].x;
-		modelData[3 * i].tv = texcoords[tIndex].y;
-
-		modelData[3 * i].nx = normals[nIndex].x;
-		modelData[3 * i].ny = normals[nIndex].y;
-		modelData[3 * i].nz = normals[nIndex].z;
-
-		vIndex = faces[i].vIndex2 - 1;
-		tIndex = faces[i].tIndex2 - 1;
-		nIndex = faces[i].nIndex2 - 1;
-
-		modelData[3*i + 1].x = vertices[vIndex].x;
-		modelData[3*i + 1].y = vertices[vIndex].y;
-		modelData[3*i + 1].z = vertices[vIndex].z;
-
-		modelData[3 * i + 1].tu = texcoords[tIndex].x;
-		modelData[3 * i + 1].tv = texcoords[tIndex].y;
-
-		modelData[3 * i + 1].nx = normals[nIndex].x;
-		modelData[3 * i + 1].ny = normals[nIndex].y;
-		modelData[3 * i + 1].nz = normals[nIndex].z;
-
-		vIndex = faces[i].vIndex3 - 1;
-		tIndex = faces[i].tIndex3 - 1;
-		nIndex = faces[i].nIndex3 - 1;
-
-		modelData[3*i + 2].x = vertices[vIndex].x;
-		modelData[3*i + 2].y = vertices[vIndex].y;
-		modelData[3*i + 2].z = vertices[vIndex].z;
-
-		modelData[3 * i + 2].tu = texcoords[tIndex].x;
-		modelData[3 * i + 2].tv = texcoords[tIndex].y;
-
-		modelData[3 * i + 2].nx = normals[nIndex].x;
-		modelData[3 * i + 2].ny = normals[nIndex].y;
-		modelData[3 * i + 2].nz = normals[nIndex].z;
-	}
-
 	return true;
 }
 
 void ObjFileUtility::Shutdown()
 {
-	if (vertices)
-	{
-		delete[] vertices;
-		vertices = 0;
-	}
-	if (texcoords)
-	{
-		delete[] texcoords;
-		texcoords = 0;
-	}
-	if (normals)
-	{
-		delete[] normals;
-		normals = 0;
-	}
-	if (faces)
-	{
-		delete[] faces;
-		faces = 0;
-	}
+
 	return;
 }
 
-int ObjFileUtility::loadNumberOfVertices(char* filename)
+bool ObjFileUtility::loadStats(char* filename, int& numVertices, int& numTexcoords, int& numNormals, int& numFaces)
 {
 	bool result;
 
 	result = AnalizeFile(filename);
 	if (!result) return 0;
 
-	return m_faceCount * 3;
+	numVertices = m_vertexCount;
+	numTexcoords = m_textureCount;
+	numNormals = m_normalCount;
+	numFaces = m_faceCount;
+
+	return true;
 }
+
 
 bool ObjFileUtility::AnalizeFile(char* filename)
 {

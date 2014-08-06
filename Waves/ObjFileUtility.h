@@ -23,17 +23,14 @@ public:
 	ObjFileUtility();
 	~ObjFileUtility();
 
-	int	 loadNumberOfVertices(char* filename);
+	bool loadStats(char* filename, int& numVertices, int& numTexcoords, int& numNormals, int& numFaces);
 
-	bool LoadObjFile(char*, EntityModel::Model*);
+	bool LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, EntityModel::UniqueVertex *texcoords, EntityModel::UniqueVertex *normals, EntityModel::UniqueFace *faces);
 	
 	void Shutdown();
 
 private:
 	bool AnalizeFile(char* filename);
-
-	Vertex *vertices, *texcoords, *normals;
-	Face *faces;
 
 	int m_vertexCount;
 	int m_textureCount;

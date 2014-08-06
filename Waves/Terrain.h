@@ -26,12 +26,13 @@ public:
 	virtual float CalculateDeterministicHeight(float x, float y, float t);
 
 	virtual void ApplyVerticalOffset(int xLoc, int zLoc, float radius, float height);
-	virtual void ResetVerticalOffset(int xLoc, int zLoc, float radius);
+	virtual void SetVerticalOffset(int xLoc, int zLoc, float radius, float height);
+	void SmoothTerrainMap(int xLoc, int zLoc, float radius);
 
 protected:
 	virtual void regenerateModelFromTerrainMap();
+	virtual void regenerateNormals();
 	void RenderBuffers(ID3D11DeviceContext*);
-
 	float terrainMap[MAPSIZE][MAPSIZE];
 
 	float m_gridSize;

@@ -126,8 +126,8 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_Light = new Light;
 	if (!m_Light) return false;
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light->SetFillColor (0.1f, 0.1f, 0.1f, 1.0f);
-	m_Light->SetDirection(0.0f,-1.f,0.0f);
+	m_Light->SetFillColor (0.3f, 0.3f, 0.3f, 1.0f);
+	m_Light->SetDirection(0.0f, -1.0f, 0.0f);
 
 	return true;
 }
@@ -223,7 +223,7 @@ bool GraphicsController::Render()
 			else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
 			{
 				result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
-			}
+			} 
 			if (!result) return false;
 		}
 	}
