@@ -5,7 +5,12 @@
 
 #include <fstream>
 
+#include "PhysicsDefs.h"
+
 #define MAPSIZE 100
+
+#define VERTEX(x,z) (x+z*MAPSIZE)
+#define INDEX(a) (a+1)
 
 class Terrain : public EntityModel
 {

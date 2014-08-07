@@ -112,6 +112,9 @@
     <ClCompile Include="Physics.cpp">
       <Filter>GameEngine\Core\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerEntity.cpp">
+      <Filter>GameEngine\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -185,6 +188,12 @@
     </ClInclude>
     <ClInclude Include="Physics.h">
       <Filter>GameEngine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsDefs.h">
+      <Filter>GameEngine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerEntity.h">
+      <Filter>GameEngine\Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

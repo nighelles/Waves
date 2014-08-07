@@ -11,6 +11,10 @@ Engine::Engine()
 	m_playerBoat = 0;
 	m_otherBoat = 0;
 
+#if GAME_BUILD
+	m_player = 0;
+#endif
+
 #if EDITOR_BUILD
 	m_editCursor = 0;
 #endif
@@ -127,6 +131,16 @@ bool Engine::InitializeGame()
 	// Change these to the new Register model structuring
 
 #if GAME_BUILD
+	// Initialize our player
+	m_player = new PlayerEntity;
+	result = m_player->Initialize();
+	if (!result) return false;
+	result = m_player->InitializeModel(m_Graphics, "player.obj",L"cursor.dds");
+	if (!result) return false;
+
+	m_player->SetLocation(0.0f,METERS(5.0f),0.0f);
+	m_player->Render(m_Graphics);
+
 	// Initialize a boat model
 	m_playerBoat = new PhysicsEntity;
 
@@ -145,19 +159,20 @@ bool Engine::InitializeGame()
 
 	// Put things in place
 	m_playerBoat->SetLocation(100.0f, 0, 0);
-	m_playerBoat->Update(m_Graphics);
+	m_playerBoat->Render(m_Graphics);
 
 	m_otherBoat->SetLocation(100.0f, 0, 0);
-	m_otherBoat->Update(m_Graphics);
+	m_otherBoat->Render(m_Graphics);
 
 	// Attach Camera to boat model
-	m_Graphics->GetPlayerCamera()->BindToEntity(m_playerBoat);
+	m_Graphics->GetPlayerCamera()->BindToEntity(m_player);
+
 	m_Graphics->GetPlayerCamera()->Update();
 	m_Graphics->GetPlayerCamera()->Render();
 #endif //#if GAME_BUILD
 
 #if EDITOR_BUILD
-	m_Graphics->GetPlayerCamera()->SetLocation(0.0f,100.0f,0.0f);
+	m_Graphics->GetPlayerCamera()->SetLocation(0.0f,METERS(100.0f),0.0f);
 	m_editCursor = new PhysicsEntity;
 	result = m_editCursor->Initialize();
 	if (!result) return false;
@@ -263,6 +278,12 @@ void Engine::Shutdown()
 		m_playerBoat->Shutdown();
 		delete m_playerBoat;
 		m_playerBoat = 0;
+	}
+	if (m_player)
+	{
+		m_player->Shutdown();
+		delete m_player;
+		m_player = 0;
 	}
 	if (m_otherBoat)
 	{
@@ -396,27 +417,58 @@ void Engine::PrepareToExit()
 bool Engine::Update()
 {
 	bool result;
-	int deltaT;
-	SYSTEMTIME sysTime;
+
+	int mouseX, mouseY;
+	int mouseDX, mouseDY;
 	
-	GetSystemTime(&sysTime);
-	m_oldTime = m_Time;
-	m_Time = sysTime.wSecond * 1000 + sysTime.wMilliseconds;
+	oldtime = newtime;
+	GetSystemTime(&newtime);
+	
+	float dt = newtime.wMilliseconds - oldtime.wMilliseconds;
+
+	if (dt < 0) dt += 1000;
+	dt /= 1000.0;
+
+	oldtime = newtime;
+
+	m_Time = newtime.wSecond * 1000 + newtime.wMilliseconds;
+
+
+	m_Input->GetMouseDelta(mouseDX, mouseDY);
 
 #if GAME_BUILD
 
+	D3DXVECTOR3 dir = D3DXVECTOR3(0, 0, 0);
+
 	if (m_Input->IsKeyPressed(DIK_W))
-		m_playerBoat->ApplyImpulse(0.0f, 0.0f, 1.0f);
+		dir.z += 1;
 	if (m_Input->IsKeyPressed(DIK_A))
-		m_playerBoat->ApplyRotation(0.f, -1.0f, 0.0f);
+		dir.x -= 1;
 	if (m_Input->IsKeyPressed(DIK_S))
-		m_playerBoat->ApplyImpulse(0.0f, 0.0f, -1.0f);
+		dir.z -= 1;
 	if (m_Input->IsKeyPressed(DIK_D))
-		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
+		dir.x += 1;
+	
+	D3DXVec3Normalize(&dir, &dir);
+	
+	if (m_Input->IsKeyDown(DIK_SPACE))
+		m_player->Jump();
+
+
+	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
+		m_player->Stop(dt);
+	else
+		m_player->Movement(dir.x, dir.y, dir.z, dt);
+	
+
+	m_player->ApplyRotation(0,mouseDX,0); // THIS SHOULD BE BASED ON DT ALSO
+	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY,mouseDX,0.0);
 
 #endif // #if GAME_BUILD
 
 #if EDITOR_BUILD
+	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
+
 	if (m_Input->IsKeyPressed(DIK_W))
 		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, 5.0f);
 	if (m_Input->IsKeyPressed(DIK_A))
@@ -445,24 +497,24 @@ bool Engine::Update()
 		
 		if (m_Input->IsKeyPressed(DIK_Q))
 		{
-			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, -10.0);
+			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, -5.0);
 			m_editedSomething = true;
 		}
 		if (m_Input->IsKeyPressed(DIK_E))
 		{
-			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 10.0);
+			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0);
 			m_editedSomething = true;
 		}
 		if (m_Input->IsKeyPressed(DIK_R))
 		{
-			m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 0.0f);
+			m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0f);
 			m_editedSomething = true;
 		}
 	}
 
 #endif
 
-	UpdateEntities();
+	UpdateEntities(dt);
 
 #if USE_NETWORKING
 
@@ -506,21 +558,31 @@ bool Engine::Update()
 	return true;
 }
 
-void Engine::UpdateEntities()
+void Engine::UpdateEntities(float dt)
 {
+	m_Graphics->GetPlayerCamera()->Update();
+
 #if GAME_BUILD
-	m_playerBoat->Update(m_Graphics);
-	m_otherBoat->Update(m_Graphics);
+	m_playerBoat->Tick(dt);
+	m_otherBoat->Tick(dt);
 
 	m_playerBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
 	m_otherBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
+
+	m_player->Tick(dt);
+
+	PHY_ApplyGravity(m_player, dt);
+	PHY_Ground(m_player, m_landTerrain);
+
+	m_playerBoat->Render(m_Graphics);
+	m_otherBoat->Render(m_Graphics);
+	m_player->Render(m_Graphics);
+
 #endif // #if GAME_BUILD
 
 #if EDITOR_BUILD
-	m_editCursor->Update(m_Graphics);
+	m_editCursor->Update(m_Graphics, dt);
 #endif
-
-	m_Graphics->GetPlayerCamera()->Update();
 
 	return;
 }
@@ -528,25 +590,10 @@ void Engine::UpdateEntities()
 bool Engine::Render()
 {
 	// Render the current frame
-	int mouseX, mouseY;
-	int mouseDX, mouseDY;
 	bool result;
-	
-	m_Input->GetMouseLocation(mouseX, mouseY);
-	m_Input->GetMouseDelta(mouseDX, mouseDY);
-	
 
-	// This will have to be changed once the player is just a physics object
-	// Camera should just use the physics object stuff I wrote.
+	result = m_Graphics->Frame(m_Time / 60000.0f);
 
-	if (m_gameState == GAME_PLAYING)
-	{
-		result = m_Graphics->Frame(mouseX, mouseY, mouseDX, mouseDY, m_Time / 60000.0f);
-	}
-	else if (m_gameState == GAME_MENU)
-	{
-		result = m_Graphics->Frame(0, 0, 0, 0, m_Time / 60000.0f);
-	}
 	if (!result) return false;
 
 	result = m_Graphics->Render();

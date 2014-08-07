@@ -18,9 +18,11 @@
 #include "ProceduralTerrain.h"
 #include "ProceduralTerrainShader.h"
 
+#include "PhysicsDefs.h"
+
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_DEPTH = METERS(1000);
 const float SCREEN_NEAR = 0.1f;
 
 class GraphicsController
@@ -32,7 +34,7 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame(int, int, int, int, float);
+	bool Frame(float);
 	bool Render();
 
 	RenderController* GetRenderController();

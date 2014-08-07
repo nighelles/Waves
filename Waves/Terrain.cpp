@@ -8,7 +8,7 @@ Terrain::Terrain() : EntityModel()
 	m_Texture = 0;
 	m_model = 0;
 
-	m_gridSize = 4.0f;
+	m_gridSize = METERS(4);
 
 	m_initialHeight = 5.0f;
 }
@@ -25,7 +25,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-	int i;
+	int i, vIndex, tIndex, nIndex;
 
 	m_device = device;
 
@@ -35,12 +35,37 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
 	indices = new unsigned long[m_indexCount];
 	if (!indices) return false;
 
-	for (i = 0; i != m_vertexCount; ++i)
+	for (i = 0; i != uniqueFaceCount * 3; ++i)
 	{
-		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
-		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
-		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 		indices[i] = i;
+	}
+
+	for (int i = 0; i != uniqueFaceCount; ++i)
+	{
+		vIndex = m_modelDesc[i].vIndex1 - 1;
+		tIndex = m_modelDesc[i].tIndex1 - 1;
+		nIndex = m_modelDesc[i].nIndex1 - 1;
+
+		vertices[3 * i].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+		vIndex = m_modelDesc[i].vIndex2 - 1;
+		tIndex = m_modelDesc[i].tIndex2 - 1;
+		nIndex = m_modelDesc[i].nIndex2 - 1;
+
+		vertices[3 * i + 1].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i + 1].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i + 1].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+		vIndex = m_modelDesc[i].vIndex3 - 1;
+		tIndex = m_modelDesc[i].tIndex3 - 1;
+		nIndex = m_modelDesc[i].nIndex3 - 1;
+
+		vertices[3 * i + 2].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+		vertices[3 * i + 2].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+		vertices[3 * i + 2].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
 	}
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -85,6 +110,7 @@ void Terrain::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	unsigned long* indices;
 	unsigned int stride;
 	unsigned int offset;
+	int vIndex, tIndex, nIndex;
 
 	stride = sizeof(Vertex);
 	offset = 0;
@@ -94,11 +120,32 @@ void Terrain::RenderBuffers(ID3D11DeviceContext* deviceContext)
 		m_modelUpdateNeeded = false;
 		vertices = new Vertex[m_vertexCount];
 
-		for (int i = 0; i != m_vertexCount; ++i)
+		for (int i = 0; i != uniqueFaceCount; ++i)
 		{
-			vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
-			vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
-			vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+			vIndex = m_modelDesc[i].vIndex1 - 1;
+			tIndex = m_modelDesc[i].tIndex1 - 1;
+			nIndex = m_modelDesc[i].nIndex1 - 1;
+
+			vertices[3 * i].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+			vertices[3 * i].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+			vertices[3 * i].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+			vIndex = m_modelDesc[i].vIndex2 - 1;
+			tIndex = m_modelDesc[i].tIndex2 - 1;
+			nIndex = m_modelDesc[i].nIndex2 - 1;
+
+			vertices[3 * i + 1].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+			vertices[3 * i + 1].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+			vertices[3 * i + 1].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
+			vIndex = m_modelDesc[i].vIndex3 - 1;
+			tIndex = m_modelDesc[i].tIndex3 - 1;
+			nIndex = m_modelDesc[i].nIndex3 - 1;
+
+			vertices[3 * i + 2].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
+			vertices[3 * i + 2].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
+			vertices[3 * i + 2].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+
 		}
 
 		D3D11_MAPPED_SUBRESOURCE resource;
@@ -143,7 +190,7 @@ bool Terrain::LoadModel()
 	{
 		for (int z = 0; z != MAPSIZE; ++z)
 		{
-			terrainMap[x][z] = 0.0;
+			terrainMap[x][z] = 5.0f;
 		}
 	}
 
@@ -163,49 +210,79 @@ void Terrain::regenerateModelFromTerrainMap()
 
 	int index = 0;
 
-	for (int x = 0; x != MAPSIZE - 1; ++x)
+	uniqueFaceCount = (MAPSIZE - 1)*(MAPSIZE - 1)*2;
+	uniqueVertexCount = (MAPSIZE)*(MAPSIZE);
+	uniqueNormalCount = uniqueVertexCount;
+	uniqueTextureCount = 4;
+
+	m_modelDesc = new UniqueFace[uniqueFaceCount];
+	uniqueVertices = new UniqueVertex[uniqueVertexCount];
+	uniqueNormals = new UniqueVertex[uniqueNormalCount];
+	uniqueTexcoords = new UniqueVertex[uniqueTextureCount];
+
+	uniqueTexcoords[0].x = 0;
+	uniqueTexcoords[0].y = 0;
+
+	uniqueTexcoords[1].x = 0;
+	uniqueTexcoords[1].y = 1;
+
+	uniqueTexcoords[2].x = 1;
+	uniqueTexcoords[2].y = 1;
+
+	uniqueTexcoords[3].x = 1;
+	uniqueTexcoords[3].y = 0;
+
+	for (int z = 0; z != MAPSIZE; ++z)
 	{
-		for (int z = 0; z != MAPSIZE - 1; ++z)
+		for (int x = 0; x != MAPSIZE; ++x)
 		{
-			m_model[index].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index].y = terrainMap[x][z] + m_initialHeight;
-			m_model[index].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index].tu = 0.0f;
-			m_model[index].tv = 0.0f;
+			uniqueVertices[VERTEX(x, z)].x = m_gridSize*x - m_gridSize*MAPSIZE / 2;
+			uniqueVertices[VERTEX(x, z)].y = terrainMap[x][z];
+			uniqueVertices[VERTEX(x, z)].z = m_gridSize*z - m_gridSize*MAPSIZE / 2;
 
-			m_model[index + 1].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 1].y = terrainMap[x + 1][z + 1] + m_initialHeight;
-			m_model[index + 1].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 1].tu = 1.0f;
-			m_model[index + 1].tv = 1.0f;
-
-			m_model[index + 2].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 2].y = terrainMap[x + 1][z] + m_initialHeight;
-			m_model[index + 2].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 2].tu = 1.0f;
-			m_model[index + 2].tv = 0.0f;
-
-			m_model[index + 3].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 3].y = terrainMap[x][z] + m_initialHeight;
-			m_model[index + 3].z = z * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 3].tu = 0.0f;
-			m_model[index + 3].tv = 0.0f;
-
-			m_model[index + 4].x = x * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 4].y = terrainMap[x][z + 1] + m_initialHeight;
-			m_model[index + 4].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 4].tu = 0.0f;
-			m_model[index + 4].tv = 1.0f;
-
-			m_model[index + 5].x = (x + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 5].y = terrainMap[x + 1][z + 1] + m_initialHeight;
-			m_model[index + 5].z = (z + 1) * m_gridSize - MAPSIZE*m_gridSize*0.5f;
-			m_model[index + 5].tu = 1.0f;
-			m_model[index + 5].tv = 1.0f;
-
-			index += 6;
+			uniqueNormals[VERTEX(x, z)].x = 0;
+			uniqueNormals[VERTEX(x, z)].y = 1;
+			uniqueNormals[VERTEX(x, z)].z = 0;
 		}
 	}
+
+	int curFace = 0;
+
+	for (int z = 0; z != MAPSIZE-1; ++z)
+	{
+		for (int x = 0; x != MAPSIZE-1; ++x)
+		{
+			m_modelDesc[curFace].vIndex1 = (x)+MAPSIZE*(z)+1;
+			m_modelDesc[curFace].vIndex2 = (x+1)+MAPSIZE*(z+1)+1;
+			m_modelDesc[curFace].vIndex3 = (x+1)+MAPSIZE*(z)+1;
+
+			m_modelDesc[curFace].nIndex1 = (x)+MAPSIZE*(z)+1;
+			m_modelDesc[curFace].nIndex2 = (x + 1) + MAPSIZE*(z + 1) + 1;
+			m_modelDesc[curFace].nIndex3 = (x + 1) + MAPSIZE*(z)+1;
+
+			m_modelDesc[curFace].tIndex1 = 0 + 1;
+			m_modelDesc[curFace].tIndex2 = 2 + 1;
+			m_modelDesc[curFace].tIndex3 = 3 + 1;
+
+			curFace += 1;
+
+			m_modelDesc[curFace].vIndex1 = (x)+MAPSIZE*(z)+1;
+			m_modelDesc[curFace].vIndex2 = (x) + MAPSIZE*(z + 1) + 1;
+			m_modelDesc[curFace].vIndex3 = (x + 1) + MAPSIZE*(z+1)+1;
+
+			m_modelDesc[curFace].nIndex1 = (x)+MAPSIZE*(z)+1;
+			m_modelDesc[curFace].nIndex2 = (x) + MAPSIZE*(z + 1) + 1;
+			m_modelDesc[curFace].nIndex3 = (x + 1) + MAPSIZE*(z+1)+1;
+
+			m_modelDesc[curFace].tIndex1 = 0 + 1;
+			m_modelDesc[curFace].tIndex2 = 1 + 1;
+			m_modelDesc[curFace].tIndex3 = 2 + 1;
+
+			curFace += 1;
+		}
+	}
+
+	BuildModel();
 	regenerateNormals();
 
 	return;
@@ -222,11 +299,19 @@ void Terrain::regenerateNormals()
 
 	int flip = 0;
 
-	for (int i = 0; i != m_vertexCount; i += 3)
+	for (int i = 0; i != uniqueFaceCount; i += 1)
 	{
-		vt1.x = m_model[i + 0].x; vt1.y = m_model[i + 0].y; vt1.z = m_model[i + 0].z;
-		vt2.x = m_model[i + 1].x; vt2.y = m_model[i + 1].y; vt2.z = m_model[i + 1].z;
-		vt3.x = m_model[i + 2].x; vt3.y = m_model[i + 2].y; vt3.z = m_model[i + 2].z;
+		vt1.x = uniqueVertices[m_modelDesc[i].vIndex1].x;
+		vt1.y = uniqueVertices[m_modelDesc[i].vIndex1].y;
+		vt1.z = uniqueVertices[m_modelDesc[i].vIndex1].z;
+
+		vt2.x = uniqueVertices[m_modelDesc[i].vIndex2].x;
+		vt2.y = uniqueVertices[m_modelDesc[i].vIndex2].y;
+		vt2.z = uniqueVertices[m_modelDesc[i].vIndex2].z;
+
+		vt3.x = uniqueVertices[m_modelDesc[i].vIndex3].x;
+		vt3.y = uniqueVertices[m_modelDesc[i].vIndex3].y;
+		vt3.z = uniqueVertices[m_modelDesc[i].vIndex3].z;
 
 		D3DXVec3Subtract(&edge1, &vt3, &vt1);
 		D3DXVec3Subtract(&edge2, &vt2, &vt1);
@@ -235,10 +320,32 @@ void Terrain::regenerateNormals()
 
 		D3DXVec3Normalize(&normal,&normal);
 
-		m_model[i + 0].nx = normal.x; m_model[i + 0].ny = normal.y; m_model[i + 0].nz = normal.z;
-		m_model[i + 1].nx = normal.x; m_model[i + 1].ny = normal.y; m_model[i + 1].nz = normal.z;
-		m_model[i + 2].nx = normal.x; m_model[i + 2].ny = normal.y; m_model[i + 2].nz = normal.z;
+		uniqueNormals[m_modelDesc[i].nIndex1].x += normal.x; 
+		uniqueNormals[m_modelDesc[i].nIndex1].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex1].z += normal.z;
 
+		uniqueNormals[m_modelDesc[i].nIndex2].x += normal.x;
+		uniqueNormals[m_modelDesc[i].nIndex2].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex2].z += normal.z;
+
+		uniqueNormals[m_modelDesc[i].nIndex3].x += normal.x;
+		uniqueNormals[m_modelDesc[i].nIndex3].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex3].z += normal.z;
+
+	}
+	for (int i = 0; i != uniqueFaceCount; i += 1)
+	{
+		uniqueNormals[m_modelDesc[i].nIndex1].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex1].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex1].z /= 6;
+
+		uniqueNormals[m_modelDesc[i].nIndex2].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex2].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex2].z /= 6;
+
+		uniqueNormals[m_modelDesc[i].nIndex3].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex3].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex3].z /= 6;
 	}
 
 	// Then calculate vertex normals
@@ -254,17 +361,17 @@ float Terrain::CalculateDeterministicHeight(float x, float y, float t)
 	float weightX;
 	float weightY;
 
-	indexX = x / m_gridSize;
-	indexY = y / m_gridSize;
+	indexX = (x + MAPSIZE*m_gridSize / 2) / m_gridSize;
+	indexY = (y + MAPSIZE*m_gridSize / 2) / m_gridSize;
 
-	weightX = (x - indexX);
-	weightY = (y - indexY);
+	weightX = (x - (indexX - MAPSIZE / 2) * m_gridSize)/m_gridSize;
+	weightY = (y - (indexY - MAPSIZE / 2) * m_gridSize)/m_gridSize;
 
 
 	avgZ = ((1-weightX)*(1-weightY)*terrainMap[indexX][indexY] + 
 			(1-weightX)*(weightY)*terrainMap[indexX][indexY+1] +
 			(weightX)*(weightY)*terrainMap[indexX + 1][indexY + 1] +
-			(weightX)*(1-weightY)*terrainMap[indexX+1][indexY]) / 4.0f;
+			(weightX)*(1-weightY)*terrainMap[indexX+1][indexY]);
 
 	return avgZ;
 }
@@ -282,14 +389,14 @@ void Terrain::ApplyVerticalOffset(int xLoc, int zLoc, float radius, float height
 			worldX = x*m_gridSize - MAPSIZE*m_gridSize / 2.0;
 			worldZ = z*m_gridSize - MAPSIZE*m_gridSize / 2.0;
 			dist = sqrt(pow(xLoc-worldX,2) + pow(zLoc-worldZ,2));
-			if (dist < 2) dist = 2;
+			if (dist < 1) dist = 1;
 			if (dist < radius)
 			{
-				terrainMap[x][z] += height / dist;
+				terrainMap[x][z] += METERS(height/sqrt(dist));
 			}
 		}
 	}
-	SmoothTerrainMap(xLoc, zLoc, radius);
+	//SmoothTerrainMap(xLoc, zLoc, radius);
 	regenerateModelFromTerrainMap();
 }
 
@@ -309,7 +416,7 @@ void Terrain::SetVerticalOffset(int xLoc, int zLoc, float radius, float offset)
 			if (dist < 1) dist = 1;
 			if (dist < radius)
 			{
-				terrainMap[x][z] = offset;
+				terrainMap[x][z] = METERS(offset);
 			}
 		}
 	}

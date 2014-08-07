@@ -96,6 +96,7 @@
     <ClCompile Include="ObjFileUtility.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PhysicsEntity.cpp" />
+    <ClCompile Include="PlayerEntity.cpp" />
     <ClCompile Include="ProceduralTerrain.cpp" />
     <ClCompile Include="ProceduralTerrainShader.cpp" />
     <ClCompile Include="raytriangle.cpp" />
@@ -121,7 +122,9 @@
     <ClInclude Include="NetworkSyncController.h" />
     <ClInclude Include="ObjFileUtility.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="PhysicsDefs.h" />
     <ClInclude Include="PhysicsEntity.h" />
+    <ClInclude Include="PlayerEntity.h" />
     <ClInclude Include="ProceduralTerrain.h" />
     <ClInclude Include="ProceduralTerrainShader.h" />
     <ClInclude Include="raytriangle.h" />

@@ -177,14 +177,12 @@ void GraphicsController::Shutdown()
 }
 
 
-bool GraphicsController::Frame(int mouseX, int mouseY, int mouseDX, int mouseDY, float time)
+bool GraphicsController::Frame(float time)
 {
 	bool result;
 	static float rotation = 0.0f;
 	
 	m_timeLoopCompletion = time;
-
-	m_PlayerCamera->ApplyRotation(mouseDY/2.0f,mouseDX/2.0f,0.0f);
 
 	return true;
 }

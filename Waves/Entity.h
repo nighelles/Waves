@@ -31,6 +31,8 @@ public:
 	virtual void BindToEntity(Entity* entity);
 	virtual void UnbindFromEntity();
 
+	bool Binded() const { return m_binded; }
+
 protected:
 
 	Entity* m_bindedEntity;

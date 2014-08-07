@@ -20,11 +20,13 @@
 #include "ProceduralTerrain.h"
 #include "Camera.h"
 
+#include "PlayerEntity.h"
+
 #include "Physics.h"
 
 #define USE_NETWORKING 0
-#define EDITOR_BUILD 1
-#define GAME_BUILD 0
+#define EDITOR_BUILD 0
+#define GAME_BUILD 1
 
 class Engine
 {
@@ -58,7 +60,7 @@ private:
 
 	void PrepareToExit();
 
-	void UpdateEntities();
+	void UpdateEntities(float dt);
 
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
@@ -74,6 +76,8 @@ private:
 	PhysicsEntity* m_playerBoat;
 	PhysicsEntity* m_otherBoat;
 
+	PlayerEntity* m_player;
+
 	ProceduralTerrain* m_waterTerrain;
 	Terrain* m_landTerrain;
 
@@ -81,7 +85,6 @@ private:
 	Bitmap* m_menuCursor;
 
 	int m_Time;
-	int m_oldTime;
 
 	NetworkServer* m_server;
 	NetworkClient* m_client;
@@ -96,6 +99,8 @@ private:
 	GameState m_gameState;
 
 	char m_terrainMapFilename[256];
+
+	SYSTEMTIME newtime, oldtime;
 
 #if EDITOR_BUILD
 

@@ -9,8 +9,9 @@ PhysicsEntity::PhysicsEntity() : Entity()
 	m_velocityY = 0.0f;
 	m_velocityZ = 0.0f;
 
-	m_velocityDamping = 0.1f;
-	m_maxVelocity = 2.0f;
+	m_velocityDamping = 0.0f;
+
+	m_grounded = false;
 }
 
 
@@ -29,10 +30,8 @@ bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFil
 	return true;
 }
 
-void PhysicsEntity::Update(GraphicsController* graphics)
+void PhysicsEntity::Tick(float dt)
 {
-	Entity::Update();
-
 	if (m_impulseX != 0.0f)
 	{
 		m_velocityX += m_impulseX;
@@ -49,16 +48,17 @@ void PhysicsEntity::Update(GraphicsController* graphics)
 		m_impulseZ = 0.0f;
 	}
 
-	if (abs(m_velocityX) > m_maxVelocity) m_velocityX = m_maxVelocity*(m_velocityX / abs(m_velocityX));
-	if (abs(m_velocityY) > m_maxVelocity) m_velocityY = m_maxVelocity*(m_velocityY / abs(m_velocityY));
-	if (abs(m_velocityZ) > m_maxVelocity) m_velocityZ = m_maxVelocity*(m_velocityZ / abs(m_velocityZ));
+	//m_velocityX -= m_velocityX*m_velocityDamping;
+	//m_velocityY -= m_velocityY*m_velocityDamping;
+	//m_velocityZ -= m_velocityZ*m_velocityDamping;
 
-	m_velocityX -= m_velocityX*m_velocityDamping;
-	m_velocityY -= m_velocityY*m_velocityDamping;
-	m_velocityZ -= m_velocityZ*m_velocityDamping;
+	ApplyTranslationRelative(m_velocityX*dt, m_velocityY*dt, m_velocityZ*dt);
 
-	ApplyTranslationRelative(m_velocityX, m_velocityY, m_velocityZ); 
+	Entity::Update(); // should override
+}
 
+void PhysicsEntity::Render(GraphicsController* graphics)
+{
 	graphics->GetEntityModel(m_modelID)->SetLocation(m_locationX, m_locationY, m_locationZ);
 	graphics->GetEntityModel(m_modelID)->SetRotation(m_rotationX, m_rotationY, m_rotationZ);
 }
@@ -142,9 +142,23 @@ void PhysicsEntity::OrientToTerrain(ProceduralTerrain* terrain, float time)
 	return;
 }
 
-void PhysicsEntity::ApplyImpulse(float x, float y, float z)
+void PhysicsEntity::ApplyImpulseDirect(float x, float y, float z)
 {
 	if (x) m_impulseX += x;
 	if (y) m_impulseY += y;
 	if (z) m_impulseZ += z;
+}
+
+void PhysicsEntity::ApplyImpulseAccel(float x, float y, float z, float dt)
+{
+	if (x) m_impulseX += x*dt;
+	if (y) m_impulseY += y*dt;
+	if (z) m_impulseZ += z*dt;
+}
+
+void PhysicsEntity::SetVelocity(float x, float y, float z)
+{
+	m_velocityX = x;
+	m_velocityY = y;
+	m_velocityZ = z;
 }
