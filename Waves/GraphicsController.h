@@ -49,6 +49,8 @@ public:
 	Camera* GetPlayerCamera();
 	ProceduralTerrain* GetTerrain();
 
+	Light* GetLight() const { return m_Light; }
+
 private:
 	RenderController* m_Render;
 	Camera* m_PlayerCamera;

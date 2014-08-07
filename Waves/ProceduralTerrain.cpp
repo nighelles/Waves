@@ -23,6 +23,6 @@ float ProceduralTerrain::CalculateDeterministicHeight(float x, float y, float t)
 
 void ProceduralTerrain::Update(float loopCompletion)
 {
-	
+
 }
 

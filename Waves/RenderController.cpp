@@ -163,10 +163,12 @@ bool RenderController::Initialize(int screenWidth, int screenHeight, bool vsync,
 	depthStencilDesc.StencilEnable = true;
 	depthStencilDesc.StencilReadMask = 0xFF;
 	depthStencilDesc.StencilWriteMask = 0xFF;
+	
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
 	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
@@ -227,10 +229,12 @@ bool RenderController::Initialize(int screenWidth, int screenHeight, bool vsync,
 	noDepthStencilDesc.StencilEnable = true;
 	noDepthStencilDesc.StencilReadMask = 0xFF;
 	noDepthStencilDesc.StencilWriteMask = 0xFF;
+
 	noDepthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	noDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	noDepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	noDepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
 	noDepthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	noDepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	noDepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;

@@ -29,10 +29,16 @@ public:
 	float m_velocityX, m_velocityY, m_velocityZ;
 
 	bool m_grounded;
+	bool m_underwater;
+
+	float Bouyancy() const { return m_bouyancy; }
+	void Bouyancy(float val) { m_bouyancy = val; }
 
 protected:
 	int m_modelID;
 
 	float m_velocityDamping;
+
+	float m_bouyancy;
 };
 

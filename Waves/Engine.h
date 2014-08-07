@@ -60,7 +60,7 @@ private:
 
 	void PrepareToExit();
 
-	void UpdateEntities(float dt);
+	void UpdateEntities(float dt, float loopCompletion);
 
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
@@ -84,7 +84,7 @@ private:
 	Bitmap* m_menuBitmap;
 	Bitmap* m_menuCursor;
 
-	int m_Time;
+	int m_timeloopCompletion;
 
 	NetworkServer* m_server;
 	NetworkClient* m_client;

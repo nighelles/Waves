@@ -431,7 +431,7 @@ bool Engine::Update()
 
 	oldtime = newtime;
 
-	m_Time = newtime.wSecond * 1000 + newtime.wMilliseconds;
+	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds)/60000.0;
 
 
 	m_Input->GetMouseDelta(mouseDX, mouseDY);
@@ -452,8 +452,9 @@ bool Engine::Update()
 	D3DXVec3Normalize(&dir, &dir);
 	
 	if (m_Input->IsKeyDown(DIK_SPACE))
-		m_player->Jump();
-
+	{
+		m_player->Jump(dt);
+	}
 
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
 		m_player->Stop(dt);
@@ -514,7 +515,7 @@ bool Engine::Update()
 
 #endif
 
-	UpdateEntities(dt);
+	UpdateEntities(dt, m_timeloopCompletion);
 
 #if USE_NETWORKING
 
@@ -558,7 +559,7 @@ bool Engine::Update()
 	return true;
 }
 
-void Engine::UpdateEntities(float dt)
+void Engine::UpdateEntities(float dt, float loopCompletion)
 {
 	m_Graphics->GetPlayerCamera()->Update();
 
@@ -566,13 +567,24 @@ void Engine::UpdateEntities(float dt)
 	m_playerBoat->Tick(dt);
 	m_otherBoat->Tick(dt);
 
-	m_playerBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
-	m_otherBoat->OrientToTerrain(m_waterTerrain, m_Time / 60000.0);
+	m_playerBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
+	m_otherBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
 
 	m_player->Tick(dt);
 
+	PHY_SetupTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+
+	// This is just if the entity is affected by water, probably should fix that
+	if (m_player->m_underwater) {
+		m_Graphics->GetLight()->SetDiffuseColor(0.2f, 0.2f, 1.0f, 1.0f);
+	}
+	else {
+		m_Graphics->GetLight()->SetDiffuseColor(1.0f,1.0f,1.0f, 1.0f);
+	}
+
 	PHY_ApplyGravity(m_player, dt);
-	PHY_Ground(m_player, m_landTerrain);
+	
+	PHY_EndTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
 
 	m_playerBoat->Render(m_Graphics);
 	m_otherBoat->Render(m_Graphics);
@@ -581,7 +593,7 @@ void Engine::UpdateEntities(float dt)
 #endif // #if GAME_BUILD
 
 #if EDITOR_BUILD
-	m_editCursor->Update(m_Graphics, dt);
+	m_editCursor->Render(m_Graphics);
 #endif
 
 	return;
@@ -592,7 +604,7 @@ bool Engine::Render()
 	// Render the current frame
 	bool result;
 
-	result = m_Graphics->Frame(m_Time / 60000.0f);
+	result = m_Graphics->Frame(m_timeloopCompletion);
 
 	if (!result) return false;
 

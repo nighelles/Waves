@@ -78,6 +78,4 @@ TODO: These entities should be loaded by The gameplay module, based on config fi
 behavior or setup without having to recompile the whole engine.
 
 TODO: The level editor should support adding entities, and should have player start points or whatever.
-TODO: Also, the level editor needs more tools, and better interface.
-    
-  
+TODO: Also, the level editor needs more tools, and better interface.1 + (z + 1) + (x + 1)*MAPSIZE;

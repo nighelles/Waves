@@ -12,6 +12,8 @@ PhysicsEntity::PhysicsEntity() : Entity()
 	m_velocityDamping = 0.0f;
 
 	m_grounded = false;
+
+	m_bouyancy = METERS(G_CONST);
 }
 
 
