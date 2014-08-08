@@ -14,11 +14,13 @@ bool NetworkController::Initialize()
 	int result;
 	WSADATA WsaData;
 	
-	addrinfo hints {0};
+	addrinfo hints;
 	addrinfo *server_info, *p;
 
 	result = WSAStartup(MAKEWORD(2, 2), &WsaData);
 	if (result != 0) return false;
+
+	memset(&hints, 0, sizeof(hints));
 
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;

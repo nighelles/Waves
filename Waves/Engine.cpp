@@ -586,11 +586,16 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-	NetworkedInput networkInput;
+	if (m_isServer)
+	{
+		m_networkSyncController->SyncPlayerInput(&playerInput);
 
-	m_networkSyncController->SyncPlayerInput(&playerInput);
-
-	MovePlayer(playerInput, m_otherPlayer, dt);
+		MovePlayer(playerInput, m_otherPlayer, dt);
+	}
+	else 
+	{
+		m_networkSyncController->SyncPlayerInput(&playerInput);
+	}
 
 #endif //#if USE_NETWORKING
 

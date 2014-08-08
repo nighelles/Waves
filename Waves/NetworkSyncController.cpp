@@ -1,5 +1,9 @@
 #include "NetworkSyncController.h"
 
+#include <stdio.h>
+#include <atldef.h>
+#include <atlstr.h>
+
 NetworkSyncController::NetworkSyncController()
 {
 	m_isServer = 0;
@@ -7,6 +11,8 @@ NetworkSyncController::NetworkSyncController()
 	m_networkController = 0;
 
 	m_numEntities = 0;
+
+	m_ack = 0;
 
 	return;
 }
@@ -92,23 +98,31 @@ bool NetworkSyncController::SyncEntityStates()
 
 		if (m_serverMessage.messageType == SERVERSENDSTATE)
 		{
-			if (m_serverMessage.ack > m_ack + 1) OutputDebugString(L"Lost some game state");
-			m_ack = m_serverMessage.ack;
+			ServerNetworkMessage* newState = (ServerNetworkMessage*)&m_serverMessage;
 
-			for (int i = 0; i != m_serverMessage.numEntityStates; ++i)
+			if (newState->ack != m_ack + 1)
 			{
-				entityIndex = m_serverMessage.entityStates[i].physicsEntityID;
-				x = m_serverMessage.entityStates[i].position.x;
-				y = m_serverMessage.entityStates[i].position.y;
-				z = m_serverMessage.entityStates[i].position.z;
-				yaw = m_serverMessage.entityStates[i].rotation.x;
-				pitch = m_serverMessage.entityStates[i].rotation.y;
-				roll = m_serverMessage.entityStates[i].rotation.z;
+				char msg[100];
+				sprintf_s(msg, 100, "we (client) lost state from ack # %d to #%d \n", m_ack, newState.ack);
+				OutputDebugString(ATL::CA2W(msg));
+			}
+			
+			m_ack = newState->ack;
+
+			for (int i = 0; i != newState->numEntityStates; ++i)
+			{
+				entityIndex = newState->entityStates[i].physicsEntityID;
+				x = newState->entityStates[i].position.x;
+				y = newState->entityStates[i].position.y;
+				z = newState->entityStates[i].position.z;
+				yaw = newState->entityStates[i].rotation.x;
+				pitch = newState->entityStates[i].rotation.y;
+				roll = newState->entityStates[i].rotation.z;
 
 				m_entities[entityIndex]->SetVelocity(
-					m_serverMessage.entityStates[i].velocity.x,
-					m_serverMessage.entityStates[i].velocity.y,
-					m_serverMessage.entityStates[i].velocity.z);
+					newState->entityStates[i].velocity.x,
+					newState->entityStates[i].velocity.y,
+					newState->entityStates[i].velocity.z);
 
 				m_entities[entityIndex]->SetLocation(x, y, z);
 				m_entities[entityIndex]->SetRotation(yaw, pitch, roll);
@@ -133,21 +147,26 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 
 		if (m_clientMessage.messageType = CLIENTSENDINPUT)
 		{
+			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
 			if (m_clientMessage.ack != m_ack - 1)
 			{
-				OutputDebugString(L"Client lost game state");
+				char msg[100];
+				sprintf_s(msg, 100, "Client at ack# %d, should be %d \n", m_clientMessage.ack, m_ack - 1);
+				OutputDebugString(ATL::CA2W(msg));
 			}
 
-			inp->keys[Network_W] = m_clientMessage.input.keys[Network_W];
-			inp->keys[Network_A] = m_clientMessage.input.keys[Network_A];
-			inp->keys[Network_S] = m_clientMessage.input.keys[Network_S];
-			inp->keys[Network_D] = m_clientMessage.input.keys[Network_D];
-			inp->keys[Network_SHIFT] = m_clientMessage.input.keys[Network_SHIFT];
-			inp->keys[Network_CONTROL] = m_clientMessage.input.keys[Network_CONTROL];
-			inp->keys[Network_SPACE] = m_clientMessage.input.keys[Network_SPACE];
+			bool w, a, s, d;
 
-			inp->mouseDX = m_clientMessage.input.mouseDX;
-			inp->mouseDY = m_clientMessage.input.mouseDY;
+			w = inp->keys[Network_W] = newClientInput->input.keys[Network_W];
+			a = inp->keys[Network_A] = newClientInput->input.keys[Network_A];
+			s = inp->keys[Network_S] = newClientInput->input.keys[Network_S];
+			d = inp->keys[Network_D] = newClientInput->input.keys[Network_D];
+			inp->keys[Network_SHIFT] = newClientInput->input.keys[Network_SHIFT];
+			inp->keys[Network_CONTROL] = newClientInput->input.keys[Network_CONTROL];
+			inp->keys[Network_SPACE] = newClientInput->input.keys[Network_SPACE];
+
+			inp->mouseDX = newClientInput->input.mouseDX;
+			inp->mouseDY = newClientInput->input.mouseDY;
 		}
 	}
 	else

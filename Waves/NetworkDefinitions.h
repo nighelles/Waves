@@ -23,6 +23,7 @@ typedef struct
 
 typedef struct
 {
+	UINT32 ack;
 	NetworkMessageType messageType;
 } NetworkMessage;
 
