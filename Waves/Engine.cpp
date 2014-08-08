@@ -32,6 +32,8 @@ Engine::Engine()
 	m_networkPlayer = { };
 
 	m_gameState = GAME_MENU;
+
+	m_playerConnected = false;
 }
 
 Engine::Engine(const Engine& other)
@@ -249,7 +251,7 @@ bool Engine::InitializeGame()
 		m_server = new NetworkServer;
 		m_server->Initialize();
 
-		m_server->WaitForClient();
+		while (!m_server->WaitForClient());
 		
 		m_networkSyncController->Initialize(m_isServer, m_server);
 	}
@@ -257,7 +259,7 @@ bool Engine::InitializeGame()
 		m_client = new NetworkClient;
 		m_client->Initialize();
 
-		m_client->ConnectToServer(m_serverAddress);
+		while (!m_client->ConnectToServer(m_serverAddress));
 
 		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
@@ -474,6 +476,9 @@ bool Engine::Update()
 
 	if (m_Input->IsKeyDown(DIK_SPACE))
 		playerInput.keys[Network_SPACE] = true;
+
+	playerInput.mouseDX = mouseDX;
+	playerInput.mouseDY = mouseDY;
 
 	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
 	MovePlayer(playerInput, m_player, dt);

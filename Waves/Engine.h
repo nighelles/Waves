@@ -91,6 +91,8 @@ private:
 	NetworkServer* m_server;
 	NetworkClient* m_client;
 
+	bool m_playerConnected;
+
 	NetworkSyncController* m_networkSyncController;
 
 	NetworkPlayer m_networkPlayer;
