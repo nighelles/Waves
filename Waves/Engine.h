@@ -84,7 +84,7 @@ private:
 	Bitmap* m_menuBitmap;
 	Bitmap* m_menuCursor;
 
-	int m_timeloopCompletion;
+	float m_timeloopCompletion;
 
 	NetworkServer* m_server;
 	NetworkClient* m_client;

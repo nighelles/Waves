@@ -448,8 +448,14 @@ bool Engine::Update()
 		dir.z -= 1;
 	if (m_Input->IsKeyPressed(DIK_D))
 		dir.x += 1;
-	
-	D3DXVec3Normalize(&dir, &dir);
+	if (m_Input->IsKeyPressed(DIK_SPACE))
+		dir.y += 1;
+	if (m_Input->IsKeyPressed(DIK_LCONTROL))
+		dir.y -= 1;
+	if (m_Input->IsKeyDown(DIK_LSHIFT))
+		m_player->Run(true);
+	if (m_Input->IsKeyUp(DIK_LSHIFT))
+		m_player->Run(false);
 	
 	if (m_Input->IsKeyDown(DIK_SPACE))
 	{
