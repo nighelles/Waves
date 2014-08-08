@@ -23,21 +23,20 @@ typedef struct
 
 typedef struct
 {
-	UINT32 ack;
 	NetworkMessageType messageType;
 } NetworkMessage;
 
 typedef struct
 {
-	UINT32 ack;
 	NetworkMessageType	messageType;
+	UINT32 ack;
 	int					numEntityStates;
 	ServerMessageBlock	entityStates[10];
 } ServerNetworkMessage;
 
 typedef struct
 {
-	UINT32 ack;
 	NetworkMessageType	messageType;
+	UINT32 ack;
 	NetworkedInput input;
 } ClientNetworkMessage;

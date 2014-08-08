@@ -46,7 +46,7 @@ bool NetworkServer::WaitForClient()
 		if (temp->messageType == JOINREQUEST)
 		{
 			m_clientAddr = from;
-			NetworkMessage acceptmsg{ 1, JOINACCEPT };
+			NetworkMessage acceptmsg{ JOINACCEPT };
 			SendDataToClient((char*)&acceptmsg, sizeof(acceptmsg));
 			foundClient = true;
 		}
