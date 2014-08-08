@@ -103,7 +103,7 @@ bool NetworkSyncController::SyncEntityStates()
 			if (newState->ack != m_ack + 1)
 			{
 				char msg[100];
-				sprintf_s(msg, 100, "we (client) lost state from ack # %d to #%d \n", m_ack, newState.ack);
+				sprintf_s(msg, 100, "we (client) lost state from ack # %d to #%d \n", m_ack, newState->ack);
 				OutputDebugString(ATL::CA2W(msg));
 			}
 			

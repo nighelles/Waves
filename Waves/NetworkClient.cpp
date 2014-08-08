@@ -21,7 +21,7 @@ bool NetworkClient::ConnectToServer(char* address)
 	if (getaddrinfo(address, GAME_NETWORK_PORT, &hints, &m_serverInfo) != 0)
 		return false;
 
-	NetworkMessage joinmsg{ JOINREQUEST };
+	NetworkMessage joinmsg{ 0, JOINREQUEST };
 	SendDataToServer((char*)&joinmsg, sizeof(joinmsg));
 
 	unsigned char packet_data[256];
