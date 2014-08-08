@@ -475,8 +475,8 @@ bool Engine::Update()
 	if (m_Input->IsKeyDown(DIK_SPACE))
 		playerInput.keys[Network_SPACE] = true;
 
+	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
 	MovePlayer(playerInput, m_player, dt);
-	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY,mouseDX,0.0);
 
 #endif // #if GAME_BUILD
 
