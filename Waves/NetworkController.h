@@ -23,7 +23,7 @@ public:
 	void CloseSocket();
 
 protected:
-	int m_socketHandle;
+	SOCKET m_socketHandle;
 
 };
 

@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include <d3dx10math.h>
 
-enum NetworkMessageType { JOINREQUEST = 556656, JOINACCEPT, CLIENTSENDINPUT, SERVERSENDSTATE };
+enum NetworkMessageType { JOINREQUEST = 0xAAAA, JOINACCEPT = 0xAAAB, CLIENTSENDINPUT, SERVERSENDSTATE };
 
 enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CONTROL, Network_SPACE };
 

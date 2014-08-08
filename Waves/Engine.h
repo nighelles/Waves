@@ -31,7 +31,7 @@
 class Engine
 {
 public:
-	enum GameState { GAME_MENU, GAME_LOADING, GAME_PLAYING, GAME_PAUSED, GAME_EDITOR };
+	enum GameState { GAME_MENU, GAME_LOADING,GAME_WAIT_NETWORK, GAME_PLAYING, GAME_PAUSED, GAME_EDITOR };
 
 	typedef struct  
 	{
@@ -47,6 +47,8 @@ public:
 	bool Initialize();
 	bool LoadConfiguration();
 	bool InitializeGame();
+	bool InitializeNetworking();
+	bool ConnectNetworking();
 
 	void Shutdown();
 	void Run();
@@ -84,6 +86,7 @@ private:
 	Terrain* m_landTerrain;
 
 	Bitmap* m_menuBitmap;
+	Bitmap* m_networkLoadingBitmap;
 	Bitmap* m_menuCursor;
 
 	float m_timeloopCompletion;

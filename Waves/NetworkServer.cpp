@@ -1,8 +1,12 @@
 #include "NetworkServer.h"
 
+#include <stdio.h>
+#include <atldef.h>
+#include <atlstr.h>
 
-NetworkServer::NetworkServer()
+NetworkServer::NetworkServer() : NetworkController()
 {
+
 }
 
 
@@ -20,7 +24,20 @@ bool NetworkServer::WaitForClient()
 
 	bool foundClient = false;
 	
-	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+	int sock = m_socketHandle;
+
+	memset(packet_data, 0, sizeof(packet_data));
+
+	int bytes = recvfrom(sock, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+
+	if (bytes == SOCKET_ERROR)
+	{
+		OutputDebugString(L"Socket Error\n");
+		char msg[100];
+		sprintf_s(msg,100, "Error code: %d\n", WSAGetLastError());
+		OutputDebugString(ATL::CA2W(msg));
+	}
+
 
 	if (bytes > 0)
 	{

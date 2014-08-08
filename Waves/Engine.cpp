@@ -24,6 +24,7 @@ Engine::Engine()
 	m_landTerrain = 0;
 
 	m_menuBitmap = 0;
+	m_networkLoadingBitmap = 0;
 
 	m_server = 0;
 	m_client = 0;
@@ -121,8 +122,19 @@ bool Engine::Initialize()
 	if (!result) return false;
 
 	m_menuBitmap->SetVisible(true);
-
 	m_Graphics->RegisterBitmap(m_menuBitmap);
+
+	// setup loading screen for network
+
+	m_networkLoadingBitmap = new Bitmap;
+	if (!m_networkLoadingBitmap) return false;
+
+	result = m_networkLoadingBitmap->Initialize(m_Graphics->GetRenderController()->GetDevice(), screenWidth, screenHeight, L"networkloading.dds", screenWidth, screenHeight);
+	if (!result) return false;
+
+	m_networkLoadingBitmap->SetVisible(false);
+
+	m_Graphics->RegisterBitmap(m_networkLoadingBitmap);
 
 	return true;
 }
@@ -241,25 +253,41 @@ bool Engine::InitializeGame()
 
 	m_menuBitmap->SetVisible(false);
 
-	// NETWORKING INITIALIZATION
+	return true;
+}
 
 #if USE_NETWORKING
+bool Engine::InitializeNetworking()
+{
+	m_networkLoadingBitmap->SetVisible(true);
+
 	m_networkSyncController = new NetworkSyncController;
-	
+
 	if (m_isServer)
 	{
 		m_server = new NetworkServer;
 		m_server->Initialize();
-
-		while (!m_server->WaitForClient());
-		
-		m_networkSyncController->Initialize(m_isServer, m_server);
 	}
 	else {
 		m_client = new NetworkClient;
 		m_client->Initialize();
+	}
 
-		while (!m_client->ConnectToServer(m_serverAddress));
+	return true;
+}
+
+bool Engine::ConnectNetworking()
+{
+	if (m_isServer)
+	{
+		if (!m_server->WaitForClient()) 
+			return false;
+
+		m_networkSyncController->Initialize(m_isServer, m_server);
+	}
+	else {
+		if (!m_client->ConnectToServer(m_serverAddress)) 
+			return false;
 
 		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
@@ -267,10 +295,12 @@ bool Engine::InitializeGame()
 	m_networkSyncController->RegisterEntity(m_player);
 	m_networkSyncController->RegisterEntity(m_otherPlayer);
 
-#endif // #if USE_NETWORKING
-
+	// done loading
+	m_networkLoadingBitmap->SetVisible(false);
 	return true;
 }
+
+#endif //#if USE_NETWORKING
 
 void Engine::Shutdown()
 {
@@ -336,6 +366,12 @@ void Engine::Shutdown()
 		delete m_menuBitmap;
 		m_menuBitmap = 0;
 	}
+	if (m_networkLoadingBitmap)
+	{
+		m_networkLoadingBitmap->Shutdown();
+		delete m_networkLoadingBitmap;
+		m_networkLoadingBitmap = 0;
+	}
 	if (m_client)
 	{
 		m_client->Shutdown();
@@ -397,11 +433,24 @@ void Engine::Run()
 						break;
 					}
 					m_gameState = GAME_PLAYING;
+#if USE_NETWORKING
+					m_gameState = GAME_WAIT_NETWORK;
+					InitializeNetworking();
+#endif
 				}
 
 				result = Render();
 				if (!result) done = true;
 			}
+#if USE_NETWORKING
+			else if (m_gameState == GAME_WAIT_NETWORK)
+			{
+				if (ConnectNetworking()) m_gameState = GAME_PLAYING;
+
+				result = Render();
+				if (!result) done = true;
+			}
+#endif
 			else if (m_gameState == GAME_PLAYING)
 			{
 				// Main game logic
