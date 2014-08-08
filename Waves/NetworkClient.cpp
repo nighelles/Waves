@@ -32,13 +32,17 @@ bool NetworkClient::ConnectToServer(char* address)
 
 	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
 
-	if (((NetworkMessage*)&packet_data)->messageType == JOINACCEPT)
+	if (bytes > 0)
 	{
-		foundServer = true;
+		NetworkMessage *temp = (NetworkMessage*)&packet_data;
+
+		if (temp->messageType == JOINACCEPT)
+		{
+			foundServer = true;
+		}
+
+		// We already have a socket from the super's initialization, just store the address
 	}
-
-	// We already have a socket from the super's initialization, just store the address
-
 	return foundServer;
 }
 

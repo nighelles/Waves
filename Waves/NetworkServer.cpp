@@ -22,14 +22,18 @@ bool NetworkServer::WaitForClient()
 	
 	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
 
-	if (((NetworkMessage*)&packet_data)->messageType == JOINREQUEST)
+	if (bytes > 0)
 	{
-		m_clientAddr = from;
-		NetworkMessage acceptmsg{ JOINACCEPT };
-		SendDataToClient((char*)&acceptmsg, sizeof(acceptmsg));
-		foundClient = true;
+
+		NetworkMessage* temp = (NetworkMessage*)&packet_data;
+		if (temp->messageType == JOINREQUEST)
+		{
+			m_clientAddr = from;
+			NetworkMessage acceptmsg{ JOINACCEPT };
+			SendDataToClient((char*)&acceptmsg, sizeof(acceptmsg));
+			foundClient = true;
+		}
 	}
-	
 	// ADD timeout
 	return foundClient;
 }
