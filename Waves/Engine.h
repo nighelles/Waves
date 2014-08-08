@@ -64,6 +64,7 @@ private:
 
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
+	void MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt);
 
 private:
 	LPCWSTR m_applicationName;
@@ -77,6 +78,7 @@ private:
 	PhysicsEntity* m_otherBoat;
 
 	PlayerEntity* m_player;
+	PlayerEntity* m_otherPlayer;
 
 	ProceduralTerrain* m_waterTerrain;
 	Terrain* m_landTerrain;
@@ -109,6 +111,7 @@ private:
 	bool m_editedSomething;
 
 #endif // #if EDITOR_BUILD
+
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

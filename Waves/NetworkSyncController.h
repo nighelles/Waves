@@ -4,10 +4,11 @@
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
-#include "Entity.h"
+#include "PhysicsEntity.h"
 
 class NetworkSyncController
 {
+
 public:
 	NetworkSyncController();
 	~NetworkSyncController();
@@ -15,20 +16,20 @@ public:
 	bool Initialize(bool isServer, NetworkController* networkController);
 	void Shutdown();
 
-	int RegisterEntity(Entity* entity);
+	int RegisterEntity(PhysicsEntity* entity);
 
 	bool SyncEntityStates();
-	bool SyncPlayerInput(bool& forward, bool& backward, 
-						 bool& left, bool& right,
-						 int& mouseDX, int& mouseDY);
+	bool SyncPlayerInput(NetworkedInput* inp);
 
 private:
 	bool m_isServer;
 
 	NetworkController* m_networkController;
 
+	UINT32 m_ack;
+
 	int m_numEntities;
-	Entity* m_entities[10];
+	PhysicsEntity* m_entities[10];
 
 	ClientNetworkMessage m_clientMessage;
 	ServerNetworkMessage m_serverMessage;

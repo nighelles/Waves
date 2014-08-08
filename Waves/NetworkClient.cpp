@@ -27,25 +27,19 @@ bool NetworkClient::ConnectToServer(char* address)
 	unsigned char packet_data[256];
 	unsigned int max_packet_size = sizeof(packet_data);
 
-	sockaddr_in from;
+	sockaddr_in from; bool foundServer;
 	int fromLength = sizeof(from);
 
-	bool foundServer = false;
-	while (!foundServer)
+	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+
+	if (((NetworkMessage*)&packet_data)->messageType == JOINACCEPT)
 	{
-
-		int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
-		if (bytes <= 0) continue;
-
-		if (((NetworkMessage*)&packet_data)->messageType == JOINACCEPT)
-		{
-			foundServer = true;
-		}
+		foundServer = true;
 	}
 
 	// We already have a socket from the super's initialization, just store the address
 
-	return true;
+	return foundServer;
 }
 
 bool NetworkClient::GetDataFromServer(ServerNetworkMessage* serverMessage)

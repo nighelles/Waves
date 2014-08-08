@@ -1,16 +1,24 @@
 #pragma once
 
+#include <d3d11.h>
+#include <d3dx10math.h>
+
 enum NetworkMessageType { JOINREQUEST = 556656, JOINACCEPT, CLIENTSENDINPUT, SERVERSENDSTATE };
+
+enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CONTROL, Network_SPACE };
+
+typedef struct
+{
+	bool keys[7];
+	float mouseDX, mouseDY;
+} NetworkedInput;
 
 typedef struct
 {
 	int physicsEntityID;
-	float x;
-	float y;
-	float z;
-	float yaw;
-	float pitch;
-	float roll;
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 velocity;
+	D3DXVECTOR3 rotation;
 } ServerMessageBlock;
 
 typedef struct
@@ -20,6 +28,7 @@ typedef struct
 
 typedef struct
 {
+	UINT32 ack;
 	NetworkMessageType	messageType;
 	int					numEntityStates;
 	ServerMessageBlock	entityStates[10];
@@ -27,11 +36,7 @@ typedef struct
 
 typedef struct
 {
+	UINT32 ack;
 	NetworkMessageType	messageType;
-	bool	forward;
-	bool	backward;
-	bool	left;
-	bool	right;
-	int	mouseDX;
-	int	mouseDY;
+	NetworkedInput input;
 } ClientNetworkMessage;

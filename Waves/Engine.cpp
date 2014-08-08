@@ -13,6 +13,7 @@ Engine::Engine()
 
 #if GAME_BUILD
 	m_player = 0;
+	m_otherPlayer = 0;
 #endif
 
 #if EDITOR_BUILD
@@ -141,6 +142,17 @@ bool Engine::InitializeGame()
 	m_player->SetLocation(0.0f,METERS(5.0f),0.0f);
 	m_player->Render(m_Graphics);
 
+	// other network player
+
+	m_otherPlayer = new PlayerEntity;
+	result = m_otherPlayer->Initialize();
+	if (!result) return false;
+	result = m_otherPlayer->InitializeModel(m_Graphics, "player.obj", L"cursor.dds");
+	if (!result) return false;
+
+	m_otherPlayer->SetLocation(0.0f, METERS(5.0f), 0.0f);
+	m_otherPlayer->Render(m_Graphics);
+
 	// Initialize a boat model
 	m_playerBoat = new PhysicsEntity;
 
@@ -250,9 +262,8 @@ bool Engine::InitializeGame()
 		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
 
-	m_networkSyncController->RegisterEntity(m_playerBoat);
-	m_networkSyncController->RegisterEntity(m_otherBoat);
-	m_networkSyncController->RegisterEntity(m_island);
+	m_networkSyncController->RegisterEntity(m_player);
+	m_networkSyncController->RegisterEntity(m_otherPlayer);
 
 #endif // #if USE_NETWORKING
 
@@ -284,6 +295,12 @@ void Engine::Shutdown()
 		m_player->Shutdown();
 		delete m_player;
 		m_player = 0;
+	}
+	if (m_otherPlayer)
+	{
+		m_otherPlayer->Shutdown();
+		delete m_otherPlayer;
+		m_otherPlayer = 0;
 	}
 	if (m_otherBoat)
 	{
@@ -420,10 +437,10 @@ bool Engine::Update()
 
 	int mouseX, mouseY;
 	int mouseDX, mouseDY;
-	
+
 	oldtime = newtime;
 	GetSystemTime(&newtime);
-	
+
 	float dt = newtime.wMilliseconds - oldtime.wMilliseconds;
 
 	if (dt < 0) dt += 1000;
@@ -431,44 +448,34 @@ bool Engine::Update()
 
 	oldtime = newtime;
 
-	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds)/60000.0;
+	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
 
 	m_Input->GetMouseDelta(mouseDX, mouseDY);
 
 #if GAME_BUILD
 
-	D3DXVECTOR3 dir = D3DXVECTOR3(0, 0, 0);
+	NetworkedInput playerInput{ };
 
 	if (m_Input->IsKeyPressed(DIK_W))
-		dir.z += 1;
+		playerInput.keys[Network_W] = true;
 	if (m_Input->IsKeyPressed(DIK_A))
-		dir.x -= 1;
+		playerInput.keys[Network_A] = true;
 	if (m_Input->IsKeyPressed(DIK_S))
-		dir.z -= 1;
+		playerInput.keys[Network_S] = true;
 	if (m_Input->IsKeyPressed(DIK_D))
-		dir.x += 1;
+		playerInput.keys[Network_D] = true;
 	if (m_Input->IsKeyPressed(DIK_SPACE))
-		dir.y += 1;
+		playerInput.keys[Network_SPACE] = true;
 	if (m_Input->IsKeyPressed(DIK_LCONTROL))
-		dir.y -= 1;
-	if (m_Input->IsKeyDown(DIK_LSHIFT))
-		m_player->Run(true);
-	if (m_Input->IsKeyUp(DIK_LSHIFT))
-		m_player->Run(false);
-	
+		playerInput.keys[Network_CONTROL] = true;
+	if (m_Input->IsKeyPressed(DIK_LSHIFT))
+		playerInput.keys[Network_SHIFT] = true;
+
 	if (m_Input->IsKeyDown(DIK_SPACE))
-	{
-		m_player->Jump(dt);
-	}
+		playerInput.keys[Network_SPACE] = true;
 
-	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
-		m_player->Stop(dt);
-	else
-		m_player->Movement(dir.x, dir.y, dir.z, dt);
-	
-
-	m_player->ApplyRotation(0,mouseDX,0); // THIS SHOULD BE BASED ON DT ALSO
+	MovePlayer(playerInput, m_player, dt);
 	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY,mouseDX,0.0);
 
 #endif // #if GAME_BUILD
@@ -525,44 +532,51 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-	bool forward,backward,left,right;
-	int mouseDX,mouseDY;
+	NetworkedInput networkInput;
 
-	if(!m_isServer)
-	{
-		forward = m_Input->IsKeyPressed(DIK_W);
-		backward = m_Input->IsKeyPressed(DIK_S);
-		left = m_Input->IsKeyPressed(DIK_A);
-		right = m_Input->IsKeyPressed(DIK_D);
-		m_Input->GetMouseDelta(mouseDX, mouseDY);
-	}
+	m_networkSyncController->SyncPlayerInput(&playerInput);
 
-	m_networkSyncController->SyncPlayerInput(forward, backward, left, right, mouseDX, mouseDY);
-
-	if (m_isServer)
-	{
-		m_networkPlayer.forward = forward;
-		m_networkPlayer.backward = backward;
-		m_networkPlayer.left = left;
-		m_networkPlayer.right = right;
-		m_networkPlayer.mouseDX = mouseDX;
-		m_networkPlayer.mouseDY = mouseDY;
-	}
-
-
-	if (m_networkPlayer.forward)
-		m_otherBoat->ApplyImpulse(0.0f, 0.0f, 1.0f);
-	if (m_networkPlayer.left)
-		m_playerBoat->ApplyRotation(0.f, -1.0f, 0.0f);
-	if (m_networkPlayer.backward)
-		m_playerBoat->ApplyImpulse(0.0f, 0.0f, -1.0f);
-	if (m_networkPlayer.right)
-		m_playerBoat->ApplyRotation(0.f, 1.0f, 0.0f);
+	MovePlayer(playerInput, m_otherPlayer, dt);
 
 #endif //#if USE_NETWORKING
 
 
 	return true;
+}
+
+void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
+{
+	D3DXVECTOR3 dir = D3DXVECTOR3(0, 0, 0);
+
+	if (inp.keys[Network_W])
+		dir.z += 1;
+	if (inp.keys[Network_A])
+		dir.x -= 1;
+	if (inp.keys[Network_S])
+		dir.z -= 1;
+	if (inp.keys[Network_D])
+		dir.x += 1;
+	if (inp.keys[Network_SPACE])
+		dir.y += 1;
+	if (inp.keys[Network_CONTROL])
+		dir.y -= 1;
+	if (inp.keys[Network_SHIFT])
+		player->Run(true);
+	else
+		player->Run(false);
+
+	if (inp.keys[Network_SPACE])
+	{
+		player->Jump(dt);
+	}
+
+	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
+		player->Stop(dt);
+	else
+		player->Movement(dir.x, dir.y, dir.z, dt);
+
+
+	player->ApplyRotation(0, inp.mouseDX, 0); // THIS SHOULD BE BASED ON DT ALSO
 }
 
 void Engine::UpdateEntities(float dt, float loopCompletion)
