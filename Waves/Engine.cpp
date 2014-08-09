@@ -292,9 +292,15 @@ bool Engine::ConnectNetworking()
 		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
 
-	m_networkSyncController->RegisterEntity(m_player);
-	m_networkSyncController->RegisterEntity(m_otherPlayer);
-
+	if (m_server) {
+		m_networkSyncController->RegisterEntity(m_player);
+		m_networkSyncController->RegisterEntity(m_otherPlayer);
+	}
+	else 
+	{
+		m_networkSyncController->RegisterEntity(m_otherPlayer);
+		m_networkSyncController->RegisterEntity(m_player);
+	}
 	// done loading
 	m_networkLoadingBitmap->SetVisible(false);
 	return true;
