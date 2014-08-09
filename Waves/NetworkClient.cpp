@@ -1,5 +1,7 @@
 #include "NetworkClient.h"
-
+#include <stdio.h>
+#include <atldef.h>
+#include <atlstr.h>
 
 NetworkClient::NetworkClient() : NetworkController()
 {
@@ -27,7 +29,8 @@ bool NetworkClient::ConnectToServer(char* address)
 	unsigned char packet_data[256];
 	unsigned int max_packet_size = sizeof(packet_data);
 
-	sockaddr_in from; bool foundServer;
+	sockaddr_in from; 
+	bool foundServer = false;
 	int fromLength = sizeof(from);
 
 	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
@@ -51,20 +54,30 @@ bool NetworkClient::GetDataFromServer(ServerNetworkMessage* serverMessage)
 	unsigned char packet_data[256];
 	unsigned int max_packet_size = sizeof(packet_data);
 
+	memset(packet_data, 0, sizeof(packet_data));
+
 	sockaddr_in from;
 	int fromLength = sizeof(from);
 
 	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+	
+	if (bytes == SOCKET_ERROR)
+	{
+		OutputDebugString(L"Socket Error\n");
+		char msg[100];
+		sprintf_s(msg, 100, "Error code: %d\n", WSAGetLastError());
+		OutputDebugString(ATL::CA2W(msg));
+	}
+	else {
+		OutputDebugString(L"Socket Error\n");
+		char msg[256];
+		sprintf_s(msg, 256, "%s\n", (char*)packet_data);
+		OutputDebugString(ATL::CA2W(msg));
+	}
 	if (bytes <= 0) return false;
 
-	if (((NetworkMessage*)&packet_data)->messageType == SERVERSENDSTATE)
-	{
-		serverMessage = (ServerNetworkMessage*)&packet_data;
-	}
-	else
-	{
-		return false;
-	}
+	serverMessage = (ServerNetworkMessage*)&packet_data;
+
 
 	// ADD timeout
 	return true;

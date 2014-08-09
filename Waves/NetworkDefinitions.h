@@ -31,7 +31,7 @@ typedef struct
 	NetworkMessageType	messageType;
 	UINT32 ack;
 	int					numEntityStates;
-	ServerMessageBlock	entityStates[10];
+	ServerMessageBlock	entityStates[3];
 } ServerNetworkMessage;
 
 typedef struct
