@@ -301,6 +301,9 @@ bool Engine::ConnectNetworking()
 		m_networkSyncController->RegisterEntity(m_otherPlayer);
 		m_networkSyncController->RegisterEntity(m_player);
 	}
+
+	m_networkSyncController->RegisterEntity(m_playerBoat);
+
 	// done loading
 	m_networkLoadingBitmap->SetVisible(false);
 	return true;
@@ -674,8 +677,15 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	m_playerBoat->Render(m_Graphics);
 	m_otherBoat->Render(m_Graphics);
 	m_player->Render(m_Graphics);
-
 #endif // #if GAME_BUILD
+
+#if USE_NETWORKING
+	m_otherPlayer->Tick(dt);
+	PHY_SetupTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+	PHY_ApplyGravity(m_otherPlayer, dt);
+	PHY_EndTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+	m_otherPlayer->Render(m_Graphics);
+#endif
 
 #if EDITOR_BUILD
 	m_editCursor->Render(m_Graphics);

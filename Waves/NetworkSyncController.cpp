@@ -120,6 +120,7 @@ bool NetworkSyncController::SyncEntityStates()
 				x = newState->entityStates[i].position.x;
 				y = newState->entityStates[i].position.y;
 				z = newState->entityStates[i].position.z;
+				
 				yaw = newState->entityStates[i].rotation.x;
 				pitch = newState->entityStates[i].rotation.y;
 				roll = newState->entityStates[i].rotation.z;
