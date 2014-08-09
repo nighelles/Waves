@@ -4,7 +4,7 @@
 #include <atldef.h>
 #include <atlstr.h>
 
-#define MAX_WAIT 10
+#define MAX_WAIT 1000
 
 NetworkSyncController::NetworkSyncController()
 {
@@ -100,6 +100,7 @@ bool NetworkSyncController::SyncEntityStates()
 			m_ack += 1;
 
 			m_waiting = true;
+			m_waitCount = 0;
 		}
 	}
 	else 
@@ -171,12 +172,12 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
 			if (m_clientMessage.ack != m_ack - 1)
 			{
-				char msg[100];
-				sprintf_s(msg, 100, "Client at ack# %d, should be %d \n", m_clientMessage.ack, m_ack - 1);
-				OutputDebugString(ATL::CA2W(msg));
 				m_waitCount += 1;
 				if (m_waitCount == MAX_WAIT)
 				{
+					char msg[100];
+					sprintf_s(msg, 100, "FORCE: Client at ack# %d, should be %d \n", m_clientMessage.ack, m_ack - 1);
+					OutputDebugString(ATL::CA2W(msg));
 					m_waitCount = 0;
 					m_waiting = false;
 				}

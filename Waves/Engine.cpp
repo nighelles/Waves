@@ -510,7 +510,6 @@ bool Engine::Update()
 
 	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
-
 	m_Input->GetMouseDelta(mouseDX, mouseDY);
 
 #if GAME_BUILD
