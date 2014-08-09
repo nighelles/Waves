@@ -296,14 +296,14 @@ bool Engine::ConnectNetworking()
 		m_networkSyncController->RegisterEntity(m_player); //server
 		m_networkSyncController->RegisterEntity(m_otherPlayer); // not server
 		m_player->SetLocation(METERS(-100), 0, METERS(-100));
-		m_otherPlayer->SetLocation(METERS(180), 0, METERS(180));
+		m_otherPlayer->SetLocation(METERS(100), 0, METERS(100));
 	}
 	else 
 	{
 		m_networkSyncController->RegisterEntity(m_otherPlayer); // server
 		m_networkSyncController->RegisterEntity(m_player); // notserver
 		m_otherPlayer->SetLocation(METERS(-100), 0, METERS(-100));
-		m_player->SetLocation(METERS(180), 0, METERS(180));
+		m_player->SetLocation(METERS(100), 0, METERS(100));
 	}
 
 	m_networkSyncController->RegisterEntity(m_playerBoat);
