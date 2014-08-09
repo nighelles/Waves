@@ -4,6 +4,8 @@
 #include <atldef.h>
 #include <atlstr.h>
 
+#define MAX_WAIT 10
+
 NetworkSyncController::NetworkSyncController()
 {
 	m_isServer = 0;
@@ -13,6 +15,9 @@ NetworkSyncController::NetworkSyncController()
 	m_numEntities = 0;
 
 	m_ack = 0;
+
+	m_waitCount = 0;
+	m_waiting = false;
 
 	return;
 }
@@ -72,25 +77,30 @@ bool NetworkSyncController::SyncEntityStates()
 
 	if (m_isServer)
 	{
-		m_serverMessage.ack = m_ack;
-		m_serverMessage.messageType = SERVERSENDSTATE;
-		m_serverMessage.numEntityStates = m_numEntities;
-
-		for (int i = 0; i != m_numEntities; ++i)
+		if (!m_waiting)
 		{
-			m_entities[i]->GetLocation(x, y, z);
-			m_entities[i]->GetRotation(yaw, pitch, roll);
+			m_serverMessage.ack = m_ack;
+			m_serverMessage.messageType = SERVERSENDSTATE;
+			m_serverMessage.numEntityStates = m_numEntities;
 
-			m_serverMessage.entityStates[i].position = D3DXVECTOR3(x, y, z);
-			m_serverMessage.entityStates[i].velocity = m_entities[i]->GetVelocity();
-			m_serverMessage.entityStates[i].rotation = D3DXVECTOR3(yaw, pitch, roll);
+			for (int i = 0; i != m_numEntities; ++i)
+			{
+				m_entities[i]->GetLocation(x, y, z);
+				m_entities[i]->GetRotation(yaw, pitch, roll);
+
+				m_serverMessage.entityStates[i].position = D3DXVECTOR3(x, y, z);
+				m_serverMessage.entityStates[i].velocity = m_entities[i]->GetVelocity();
+				m_serverMessage.entityStates[i].rotation = D3DXVECTOR3(yaw, pitch, roll);
 
 
-			m_serverMessage.entityStates[i].physicsEntityID = i;
+				m_serverMessage.entityStates[i].physicsEntityID = i;
+			}
+
+			result = ((NetworkServer*)m_networkController)->SendDataToClient((char*)&m_serverMessage, sizeof(m_serverMessage));
+			m_ack += 1;
+
+			m_waiting = true;
 		}
-
-		result = ((NetworkServer*)m_networkController)->SendDataToClient((char*)&m_serverMessage, sizeof(m_serverMessage));
-		m_ack += 1;
 	}
 	else 
 	{
@@ -164,6 +174,16 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 				char msg[100];
 				sprintf_s(msg, 100, "Client at ack# %d, should be %d \n", m_clientMessage.ack, m_ack - 1);
 				OutputDebugString(ATL::CA2W(msg));
+				m_waitCount += 1;
+				if (m_waitCount == MAX_WAIT)
+				{
+					m_waitCount = 0;
+					m_waiting = false;
+				}
+			}
+			else {
+				m_waiting = false;
+				m_waitCount = 0;
 			}
 
 			bool w, a, s, d;

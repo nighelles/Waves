@@ -28,8 +28,11 @@ private:
 
 	UINT32 m_ack;
 
+	int m_waitCount;
+	bool m_waiting;
+
 	int m_numEntities;
-	PhysicsEntity* m_entities[10];
+	PhysicsEntity* m_entities[3];
 
 	ClientNetworkMessage m_clientMessage;
 	ServerNetworkMessage m_serverMessage;
