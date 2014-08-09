@@ -10,7 +10,7 @@ public:
 
 	bool WaitForClient();
 	bool SendDataToClient(char* data, int datasize);
-	bool GetDataFromClient(ClientNetworkMessage* clientMessage);
+	bool GetDataFromClient(char* data, int datasize);
 
 private:
 	sockaddr_in m_clientAddr;

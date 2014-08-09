@@ -94,7 +94,12 @@ bool NetworkSyncController::SyncEntityStates()
 	}
 	else 
 	{
-		((NetworkClient*)m_networkController)->GetDataFromServer(&m_serverMessage);
+		char serverData[256];
+		int dataSize = sizeof(serverData);
+
+		((NetworkClient*)m_networkController)->GetDataFromServer(serverData, dataSize);
+
+		m_serverMessage = *((ServerNetworkMessage*)serverData);
 
 		if (m_serverMessage.messageType == SERVERSENDSTATE)
 		{
@@ -143,7 +148,12 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 
 	if (m_isServer)
 	{
-		((NetworkServer*)m_networkController)->GetDataFromClient(&m_clientMessage);
+		char clientData[256];
+		int dataSize = sizeof(clientData);
+
+		((NetworkClient*)m_networkController)->GetDataFromServer(clientData, dataSize);
+
+		m_clientMessage = *((ClientNetworkMessage*)clientData);
 
 		if (m_clientMessage.messageType = CLIENTSENDINPUT)
 		{

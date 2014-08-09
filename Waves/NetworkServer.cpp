@@ -55,25 +55,13 @@ bool NetworkServer::WaitForClient()
 	return foundClient;
 }
 
-bool NetworkServer::GetDataFromClient(ClientNetworkMessage* clientMessage)
+bool NetworkServer::GetDataFromClient(char* data, int datasize)
 {
-	unsigned char packet_data[256];
-	unsigned int max_packet_size = sizeof(packet_data);
-
 	sockaddr_in from;
 	int fromLength = sizeof(from);
 
-	int bytes = recvfrom(m_socketHandle, (char*)packet_data, max_packet_size, 0, (sockaddr*)&from, &fromLength);
+	int bytes = recvfrom(m_socketHandle, (char*)data, datasize, 0, (sockaddr*)&from, &fromLength);
 	if (bytes <= 0) return false;
-
-	if (((NetworkMessage*)&packet_data)->messageType == CLIENTSENDINPUT)
-	{
-		clientMessage = (ClientNetworkMessage*)&packet_data;
-	}
-	else 
-	{
-		return false;
-	}
 	
 	// ADD timeout
 	return true;
