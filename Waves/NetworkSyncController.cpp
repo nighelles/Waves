@@ -131,7 +131,7 @@ bool NetworkSyncController::SyncEntityStates()
 					newState->entityStates[i].velocity.z);
 
 				m_entities[entityIndex]->SetLocation(x, y, z);
-				m_entities[entityIndex]->SetRotation(yaw, pitch, roll);
+				m_entities[entityIndex]->SetRotation(0, pitch, 0);
 			}
 		}
 	}
