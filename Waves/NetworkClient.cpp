@@ -68,12 +68,7 @@ bool NetworkClient::GetDataFromServer(ServerNetworkMessage* serverMessage)
 		sprintf_s(msg, 100, "Error code: %d\n", WSAGetLastError());
 		OutputDebugString(ATL::CA2W(msg));
 	}
-	else {
-		OutputDebugString(L"Socket Error\n");
-		char msg[256];
-		sprintf_s(msg, 256, "%s\n", (char*)packet_data);
-		OutputDebugString(ATL::CA2W(msg));
-	}
+	
 	if (bytes <= 0) return false;
 
 	serverMessage = (ServerNetworkMessage*)&packet_data;
