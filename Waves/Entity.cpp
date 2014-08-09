@@ -60,7 +60,7 @@ void Entity::GetCameraLocation(float& x, float& y, float& z)
 	D3DXMatrixRotationYawPitchRoll(&rotationMatrix, yaw, pitch, roll);
 
 	cameraLocation.x = 0.0f;
-	cameraLocation.y = 1.2f; // Default is a hover camera
+	cameraLocation.y = 0.9f; // Default is a hover camera
 	cameraLocation.z = 0.0f;
 
 	D3DXVec3TransformCoord(&cameraLocation, &cameraLocation, &rotationMatrix);
