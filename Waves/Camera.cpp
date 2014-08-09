@@ -121,4 +121,9 @@ D3DXVECTOR3 Camera::GetDirection()
 	return lookAt;
 }
 
+D3DXVECTOR3 Camera::GetRotation()
+{
+	return D3DXVECTOR3(m_rotationX, m_rotationY, m_rotationZ);
+}
+
 

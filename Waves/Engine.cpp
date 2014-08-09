@@ -541,7 +541,13 @@ bool Engine::Update()
 	playerInput.mouseDX = mouseDX;
 	playerInput.mouseDY = mouseDY;
 
-	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
+	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
+
+	D3DXVECTOR3 rot = m_Graphics->GetPlayerCamera()->GetRotation();
+	float px, py, pz;
+	m_player->GetRotation(px, py, py);
+	m_Graphics->GetPlayerCamera()->SetRotation(rot.x, py, rot.z);
+
 	MovePlayer(playerInput, m_player, dt);
 
 #endif // #if GAME_BUILD
