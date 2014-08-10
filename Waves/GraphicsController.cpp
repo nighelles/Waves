@@ -227,7 +227,7 @@ bool GraphicsController::Render()
 	}
 
 	m_Render->DisableZBuffer();
-
+	m_PlayerCamera->GetHUDViewMatrix(viewMatrix);
 	for (i = 0; i != m_numBitmaps; ++i)
 	{
 		if (m_bitmaps[i]->GetVisible())

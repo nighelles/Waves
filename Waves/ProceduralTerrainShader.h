@@ -53,6 +53,7 @@ protected:
 	ID3D11Buffer* m_infoBuffer;
 
 	ID3D11SamplerState* m_sampleState;
+	ID3D11BlendState* m_blendState;
 
 	ID3D11Buffer* m_lightBuffer;
 };

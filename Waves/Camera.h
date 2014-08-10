@@ -22,8 +22,10 @@ public:
 
 	void Render();
 	void GetViewMatrix(D3DXMATRIX&);
+	void GetHUDViewMatrix(D3DXMATRIX&);
 
 private:
 	D3DXMATRIX m_viewMatrix;
+	D3DXMATRIX m_hudViewMatrix;
 };
 

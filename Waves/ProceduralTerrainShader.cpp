@@ -8,6 +8,7 @@ ProceduralTerrainShader::ProceduralTerrainShader()
 	m_matrixBuffer = 0;
 
 	m_sampleState = 0;
+	m_blendState = 0;
 
 	m_lightBuffer = 0;
 }
@@ -26,7 +27,7 @@ bool ProceduralTerrainShader::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
 
-	result = InitializeShader(device, hwnd, L"proceduralTerrainVertexShader.vs", L"texture.ps");
+	result = InitializeShader(device, hwnd, L"proceduralTerrainVertexShader.vs", L"Specular.ps");
 	if (!result) return false;
 
 	return true;
@@ -67,6 +68,8 @@ bool ProceduralTerrainShader::InitializeShader(ID3D11Device* device, HWND hwnd, 
 	D3D11_BUFFER_DESC infoBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
+
+	D3D11_BLEND_DESC blendDesc;
 
 	errorMessage = 0;
 	vertexShaderBuffer = 0;
@@ -168,6 +171,20 @@ bool ProceduralTerrainShader::InitializeShader(ID3D11Device* device, HWND hwnd, 
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	result = device->CreateBlendState(&blendDesc, &m_blendState);
+	if (FAILED(result)) return false;
+
 	result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
 	if (FAILED(result)) return false;
 
@@ -196,6 +213,11 @@ bool ProceduralTerrainShader::InitializeShader(ID3D11Device* device, HWND hwnd, 
 
 void ProceduralTerrainShader::ShutdownShader()
 {
+	if (m_blendState)
+	{
+		m_blendState->Release();
+		m_blendState = 0;
+	}
 	if (m_lightBuffer)
 	{
 		m_lightBuffer->Release();
@@ -325,6 +347,9 @@ bool ProceduralTerrainShader::SetShaderParameters(ID3D11DeviceContext* deviceCon
 void ProceduralTerrainShader::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	deviceContext->IASetInputLayout(m_layout);
+
+	deviceContext->OMSetBlendState(m_blendState, 0, 0xffffffff);
+
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);

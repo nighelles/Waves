@@ -6,8 +6,7 @@ cbuffer LightBuffer
 	float4 diffuseColor;
 	float4 fillColor;
 	float3 lightDirection;
-	float  specularPower;
-	float4 specularColor;
+	float  waste;
 }
 
 struct PixelInputType
@@ -26,6 +25,9 @@ float4 TexturePixelShader(PixelInputType input) : SV_TARGET
 	float4 color;
 	float3 reflection;
 	float4 specular;
+
+	float specularPower = 1;
+	float4 specularColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	color = fillColor;
 	textureColor = shaderTexture.Sample(SampleType, input.tex);

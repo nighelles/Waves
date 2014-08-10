@@ -3,6 +3,24 @@
 
 Camera::Camera() : Entity()
 {
+	D3DXVECTOR3 up, position, lookAt;
+	float yaw, pitch, roll;
+	D3DXMATRIX rotationMatrix;
+
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+	position.x = 0;
+	position.y = 0;
+	position.z = -1;
+
+	lookAt.x = 0.0f;
+	lookAt.y = 0.0f;
+	lookAt.z = 1.0f;
+
+	lookAt = position + lookAt;
+
+	D3DXMatrixLookAtLH(&m_hudViewMatrix, &position, &lookAt, &up);
 }
 
 Camera::Camera(const Camera& other)
@@ -75,6 +93,12 @@ void Camera::Render()
 void Camera::GetViewMatrix(D3DXMATRIX& viewMatrix)
 {
 	viewMatrix = m_viewMatrix;
+	return;
+}
+
+void Camera::GetHUDViewMatrix(D3DXMATRIX& viewMatrix)
+{
+	viewMatrix = m_hudViewMatrix;
 	return;
 }
 

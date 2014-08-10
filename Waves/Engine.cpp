@@ -26,6 +26,8 @@ Engine::Engine()
 	m_menuBitmap = 0;
 	m_networkLoadingBitmap = 0;
 
+	m_crosshair = 0;
+
 	m_server = 0;
 	m_client = 0;
 
@@ -124,6 +126,15 @@ bool Engine::Initialize()
 	m_menuBitmap->SetVisible(true);
 	m_Graphics->RegisterBitmap(m_menuBitmap);
 
+	// crosshair for game
+
+	m_crosshair = new Bitmap;
+	if (!m_crosshair) return false;
+	result = m_crosshair->Initialize(m_Graphics->GetRenderController()->GetDevice(), screenWidth, screenHeight, L"crosshair.dds", 32, 32);
+	if (!result) return false;
+	m_crosshair->SetVisible(true);
+	m_Graphics->RegisterBitmap(m_crosshair);
+
 	// setup loading screen for network
 
 	m_networkLoadingBitmap = new Bitmap;
@@ -205,20 +216,6 @@ bool Engine::InitializeGame()
 	result = m_editCursor->InitializeModel(m_Graphics, "EditorCursor.obj", L"cursor.dds");
 #endif //#if EDITOR_BUILD
 
-	// Deal with creating water
-	m_waterTerrain = new ProceduralTerrain();
-	if (!m_waterTerrain) return false;
-
-	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"water_tiling.dds");
-	if (!result)
-	{
-		OutputDebugString(L"Could not Initialize Water Terrain");
-		return false;
-	}
-	m_waterTerrain->m_shaderType = EntityModel::WATER_SHADER;
-
-	m_Graphics->RegisterEntityModel(m_waterTerrain);
-
 	m_landTerrain = new Terrain();
 	if (!m_landTerrain) return false;
 
@@ -233,6 +230,20 @@ bool Engine::InitializeGame()
 	m_Graphics->RegisterEntityModel(m_landTerrain);
 
 	result = m_landTerrain->LoadTerrainMap(m_terrainMapFilename);
+
+	// Deal with creating water
+	m_waterTerrain = new ProceduralTerrain();
+	if (!m_waterTerrain) return false;
+
+	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"water_trans.dds");
+	if (!result)
+	{
+		OutputDebugString(L"Could not Initialize Water Terrain");
+		return false;
+	}
+	m_waterTerrain->m_shaderType = EntityModel::WATER_SHADER;
+
+	m_Graphics->RegisterEntityModel(m_waterTerrain);
 
 #if GAME_BUILD
 	if (!result)
@@ -378,6 +389,12 @@ void Engine::Shutdown()
 		m_menuBitmap->Shutdown();
 		delete m_menuBitmap;
 		m_menuBitmap = 0;
+	}
+	if (m_crosshair)
+	{
+		m_crosshair->Shutdown();
+		delete m_crosshair;
+		m_crosshair = 0;
 	}
 	if (m_networkLoadingBitmap)
 	{
