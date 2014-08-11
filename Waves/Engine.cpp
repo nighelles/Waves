@@ -122,7 +122,7 @@ bool Engine::Initialize()
 
 	result = m_menuBitmap->Initialize(m_Graphics->GetRenderController()->GetDevice(), screenWidth, screenHeight, L"menu.dds", screenWidth, screenHeight);
 	if (!result) return false;
-
+	m_menuBitmap->UpdateBuffers(m_Graphics->GetRenderController()->GetDeviceContext(), 0, 0);
 	m_menuBitmap->SetVisible(true);
 	m_Graphics->RegisterBitmap(m_menuBitmap);
 
@@ -132,6 +132,7 @@ bool Engine::Initialize()
 	if (!m_crosshair) return false;
 	result = m_crosshair->Initialize(m_Graphics->GetRenderController()->GetDevice(), screenWidth, screenHeight, L"crosshair.dds", 32, 32);
 	if (!result) return false;
+	m_crosshair->UpdateBuffers(m_Graphics->GetRenderController()->GetDeviceContext(), screenWidth / 2-16, screenHeight / 2-16);
 	m_crosshair->SetVisible(true);
 	m_Graphics->RegisterBitmap(m_crosshair);
 
@@ -316,6 +317,9 @@ bool Engine::ConnectNetworking()
 		m_otherPlayer->SetLocation(METERS(-100), 0, METERS(-100));
 		m_player->SetLocation(METERS(100), 0, METERS(100));
 	}
+
+	// set later after we debug position
+	//m_Graphics->GetEntityModel(m_player->ModelID())->IsVisible(false);
 
 	m_networkSyncController->RegisterEntity(m_playerBoat);
 
@@ -516,8 +520,9 @@ bool Engine::Update()
 {
 	bool result;
 
+	int mouseIDX, mouseIDY;
 	int mouseX, mouseY;
-	int mouseDX, mouseDY;
+	float mouseDX, mouseDY;
 
 	oldtime = newtime;
 	GetSystemTime(&newtime);
@@ -531,7 +536,10 @@ bool Engine::Update()
 
 	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
-	m_Input->GetMouseDelta(mouseDX, mouseDY);
+	m_Input->GetMouseDelta(mouseIDX, mouseIDY);
+
+	mouseDX = mouseIDX * dt * 10;
+	mouseDY = mouseIDY * dt * 10;
 
 #if GAME_BUILD
 
@@ -675,7 +683,6 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 
 void Engine::UpdateEntities(float dt, float loopCompletion)
 {
-	m_Graphics->GetPlayerCamera()->Update();
 
 #if GAME_BUILD
 	m_playerBoat->Tick(dt);
@@ -717,6 +724,7 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	m_editCursor->Render(m_Graphics);
 #endif
 
+	m_Graphics->GetPlayerCamera()->Update();
 	return;
 }
 

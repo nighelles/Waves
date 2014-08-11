@@ -34,9 +34,11 @@ public:
 	float Bouyancy() const { return m_bouyancy; }
 	void Bouyancy(float val) { m_bouyancy = val; }
 
+	int ModelID() const { return m_modelID; }
+	void ModelID(int val) { m_modelID = val; }
+
 protected:
 	int m_modelID;
-
 	float m_velocityDamping;
 
 	float m_bouyancy;

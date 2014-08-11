@@ -236,7 +236,7 @@ bool GraphicsController::Render()
 			m_Render->GetOrthoMatrix(orthoMatrix);
 			//m_Render->GetOrthoMatrix(viewMatrix);
 
-			m_bitmaps[i]->Render(m_Render->GetDeviceContext(), 0, 0);
+			m_bitmaps[i]->Render(m_Render->GetDeviceContext());
 			result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_bitmaps[i]->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_bitmaps[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
 		}
 	}

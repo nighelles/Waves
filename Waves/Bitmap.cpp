@@ -46,12 +46,10 @@ void Bitmap::Shutdown()
 	return;
 }
 
-bool Bitmap::Render(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+bool Bitmap::Render(ID3D11DeviceContext* deviceContext)
 {
 	bool result;
 
-	result = UpdateBuffers(deviceContext, positionX, positionY);
-	if (!result) return false;
 	RenderBuffers(deviceContext);
 
 	return true;
@@ -162,9 +160,9 @@ bool Bitmap::UpdateBuffers(ID3D11DeviceContext* deviceContext, int positionX, in
 	m_previousPosX = positionX;
 	m_previousPosY = positionY;
 	
-	left = (float)((m_screenWidth / 2) * -1) + (float)positionX;
+	left = (float)((m_screenWidth / 2.0) * -1) + (float)positionX;
 	right = left + (float)m_bitmapWidth;
-	top = (float)(m_screenHeight / 2) - (float)positionY;
+	top = (float)(m_screenHeight / 2.0) - (float)positionY;
 	bottom = top - (float)m_bitmapHeight;
 	
 	vertices = new Vertex[m_vertexCount];
