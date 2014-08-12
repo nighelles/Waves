@@ -8,11 +8,13 @@ GraphicsController::GraphicsController()
 	
 	m_DefaultShader = 0;
 	m_WaterShader = 0;
+	m_SkyboxShader = 0;
 
 	m_Light = 0;
 	m_clearColor = 0.0f;
 	
 	m_numEntities = 0;
+	m_skybox = 0;
 }
 
 
@@ -129,6 +131,24 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_Light->SetFillColor (0.3f, 0.3f, 0.3f, 1.0f);
 	m_Light->SetDirection(0.0f, -1.0f, 0.0f);
 
+	// skybox
+
+	m_SkyboxShader = new SkyboxShader;
+	if (!m_SkyboxShader) return false;
+	result = m_SkyboxShader->Initialize(m_Render->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Initialize Skybox Shader", L"Error", MB_OK);
+		return false;
+	}
+
+	m_skybox = new EntityModel;
+	result = m_skybox->Initialize(m_Render->GetDevice(), "skybox.obj", L"skybox.dds");
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }
 
@@ -151,6 +171,18 @@ void GraphicsController::Shutdown()
 		m_WaterShader->Shutdown();
 		delete m_WaterShader;
 		m_WaterShader = 0;
+	}
+	if (m_SkyboxShader)
+	{
+		m_SkyboxShader->Shutdown();
+		delete m_SkyboxShader;
+		m_SkyboxShader = 0;
+	}
+	if (m_skybox)
+	{
+		m_skybox->Shutdown();
+		delete m_skybox;
+		m_skybox = 0;
 	}
 	// We don't own these, so just set them to zero
 	for (int i = 0; i != m_numEntities; ++i)
@@ -216,6 +248,7 @@ bool GraphicsController::Render()
 			m_modelEntities[i]->Render(m_Render->GetDeviceContext());
 			if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
 			{
+				//result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture());
 				result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
 			}
 			else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
@@ -225,6 +258,17 @@ bool GraphicsController::Render()
 			if (!result) return false;
 		}
 	}
+
+	float x, y, z;
+	m_PlayerCamera->GetLocation(x, y, z);
+	D3DXMatrixTranslation(&worldMatrix, x, y, z);
+	D3DXMATRIX scale;
+	D3DXMatrixScaling(&scale, 5.0f, 5.0f, 5.0f);
+
+	worldMatrix = scale*worldMatrix;
+
+	m_skybox->Render(m_Render->GetDeviceContext());
+	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture());
 
 	m_Render->DisableZBuffer();
 	m_PlayerCamera->GetHUDViewMatrix(viewMatrix);

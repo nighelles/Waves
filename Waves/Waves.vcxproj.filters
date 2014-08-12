@@ -115,6 +115,9 @@
     <ClCompile Include="PlayerEntity.cpp">
       <Filter>GameEngine\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="SkyboxShader.cpp">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -195,6 +198,9 @@
     <ClInclude Include="PlayerEntity.h">
       <Filter>GameEngine\Entities</Filter>
     </ClInclude>
+    <ClInclude Include="SkyboxShader.h">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="texture.vs">
@@ -207,6 +213,12 @@
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
     <None Include="proceduralTerrainVertexShader.vs">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
+    </None>
+    <None Include="skybox.vs">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
+    </None>
+    <None Include="skybox.ps">
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
   </ItemGroup>

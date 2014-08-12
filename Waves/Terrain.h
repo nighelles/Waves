@@ -29,6 +29,7 @@ public:
 	virtual void Update();
 
 	virtual float CalculateDeterministicHeight(float x, float y, float t);
+	virtual float GetNormalForLocation(float x, float y);
 
 	virtual void ApplyVerticalOffset(int xLoc, int zLoc, float radius, float height);
 	virtual void SetVerticalOffset(int xLoc, int zLoc, float radius, float height);

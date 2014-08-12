@@ -376,6 +376,28 @@ float Terrain::CalculateDeterministicHeight(float x, float y, float t)
 	return avgZ;
 }
 
+float Terrain::GetNormalForLocation(float x, float y)
+{
+	int indexX, indexY;
+	float avgZ;
+	float weightX;
+	float weightY;
+
+	indexX = (x + MAPSIZE*m_gridSize / 2) / m_gridSize;
+	indexY = (y + MAPSIZE*m_gridSize / 2) / m_gridSize;
+
+	weightX = (x - (indexX - MAPSIZE / 2) * m_gridSize) / m_gridSize;
+	weightY = (y - (indexY - MAPSIZE / 2) * m_gridSize) / m_gridSize;
+
+
+	avgZ = ((1 - weightX)*(1 - weightY)*terrainMap[indexX][indexY] +
+		(1 - weightX)*(weightY)*terrainMap[indexX][indexY + 1] +
+		(weightX)*(weightY)*terrainMap[indexX + 1][indexY + 1] +
+		(weightX)*(1 - weightY)*terrainMap[indexX + 1][indexY]);
+
+	return avgZ;
+}
+
 void Terrain::ApplyVerticalOffset(int xLoc, int zLoc, float radius, float height)
 {
 	float dist;

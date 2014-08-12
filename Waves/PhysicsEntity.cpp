@@ -34,27 +34,7 @@ bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFil
 
 void PhysicsEntity::Tick(float dt)
 {
-	if (m_impulseX != 0.0f)
-	{
-		m_velocityX += m_impulseX;
-		m_impulseX = 0.0f;
-	}
-	if (m_impulseY != 0.0f)
-	{
-		m_velocityY += m_impulseY;
-		m_impulseY = 0.0f;
-	}
-	if (m_impulseZ != 0.0f)
-	{
-		m_velocityZ += m_impulseZ;
-		m_impulseZ = 0.0f;
-	}
-
-	//m_velocityX -= m_velocityX*m_velocityDamping;
-	//m_velocityY -= m_velocityY*m_velocityDamping;
-	//m_velocityZ -= m_velocityZ*m_velocityDamping;
-
-	ApplyTranslation(m_velocityX*dt, m_velocityY*dt, m_velocityZ*dt);
+	// moved to EndTick in Physics.cpp
 
 	Entity::Update(); // should override
 }

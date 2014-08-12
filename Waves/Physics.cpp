@@ -24,22 +24,55 @@ void PHY_SetupTick(
 void PHY_EndTick(
 	PhysicsEntity* en,
 	Terrain* land,
-	ProceduralTerrain* water, float loopCompletion)
+	ProceduralTerrain* water, float loopCompletion, float dt)
 {
+	// move the thing
+
+	if (en->m_impulseX != 0.0f)
+	{
+		en->m_velocityX += en->m_impulseX;
+		en->m_impulseX = 0.0f;
+	}
+	if (en->m_impulseY != 0.0f)
+	{
+		en->m_velocityY += en->m_impulseY;
+		en->m_impulseY = 0.0f;
+	}
+	if (en->m_impulseZ != 0.0f)
+	{
+		en->m_velocityZ += en->m_impulseZ;
+		en->m_impulseZ = 0.0f;
+	}
+
+	// Check for intersections
+
 	float x, y, z;
 	en->GetLocation(x, y, z);
 
-	D3DXVECTOR3 preCollisionVelocity = en->GetVelocity();
+	D3DXVECTOR3 preCollisionVelocity = en->GetVelocity()*dt;
+	D3DXVECTOR3 entityPosition = D3DXVECTOR3(x, y, z);
+	D3DXVECTOR3 collisionPoint, collisionNormal;
 
-	if (en->m_grounded)
+	D3DXVECTOR3 requestedPositionDist = entityPosition + preCollisionVelocity;
+
+	float landHeight = land->CalculateDeterministicHeight(x, y, 0);
+
+	float collisionDist = PHY_GetRayIntersection(land, &entityPosition, &preCollisionVelocity, &collisionPoint, &collisionNormal);
+
+	if (collisionDist > 0 && collisionDist <= D3DXVec3Length(&preCollisionVelocity))
 	{
-		float height = land->CalculateDeterministicHeight(x, z, 0);
-		en->SetLocation(NULL, height, NULL);
-		preCollisionVelocity.y = preCollisionVelocity.y / 10.0;
-		if (abs(preCollisionVelocity.y) < 0.1) preCollisionVelocity.y = 0;
-		en->SetVelocity(preCollisionVelocity.x, -preCollisionVelocity.y, preCollisionVelocity.z);
-		en->m_grounded = true;
+		D3DXVECTOR3 newVelocity;
+		D3DXVECTOR3 stoppedVelocity;
+
+		stoppedVelocity = D3DXVec3Dot(&preCollisionVelocity, &collisionNormal)*collisionNormal*D3DXVec3Length(&preCollisionVelocity)*1.01;
+
+		newVelocity = preCollisionVelocity + stoppedVelocity;
+
+		en->SetVelocity(newVelocity.x, newVelocity.y, newVelocity.z);
 	}
+	
+	en->ApplyTranslation(en->m_velocityX*dt, en->m_velocityY*dt, en->m_velocityZ*dt);
+
 }
 
 void PHY_ApplyGravity(PhysicsEntity* en, float dt)
@@ -74,12 +107,12 @@ void PHY_Ground(PhysicsEntity* en, Terrain* ground)
 	return;
 }
 
-bool PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3* point)
+float PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3* point)
 {
 	return PHY_GetRayIntersection(model, orig, indir, point, NULL);
 }
 
-bool PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3* point, D3DXVECTOR3* normal)
+float PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* indir, D3DXVECTOR3* point, D3DXVECTOR3* normal)
 {
 	// I'm going to comment this, the t returned is DISTANCE TO THE POINT OF INTERSECTION
 	// u,v is coordinates within triangle
@@ -114,14 +147,21 @@ bool PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* 
 
 			if (normal)
 			{
-				normal->x = model->uniqueNormals[model->m_modelDesc[i].nIndex1].x;
-				normal->y = model->uniqueNormals[model->m_modelDesc[i].nIndex1].y;
-				normal->z = model->uniqueNormals[model->m_modelDesc[i].nIndex1].z;
+				normal->x += model->uniqueNormals[model->m_modelDesc[i].nIndex1].x;
+				normal->y += model->uniqueNormals[model->m_modelDesc[i].nIndex1].y;
+				normal->z += model->uniqueNormals[model->m_modelDesc[i].nIndex1].z;
+				normal->x += model->uniqueNormals[model->m_modelDesc[i].nIndex2].x;
+				normal->y += model->uniqueNormals[model->m_modelDesc[i].nIndex2].y;
+				normal->z += model->uniqueNormals[model->m_modelDesc[i].nIndex2].z;
+				normal->x += model->uniqueNormals[model->m_modelDesc[i].nIndex3].x;
+				normal->y += model->uniqueNormals[model->m_modelDesc[i].nIndex3].y;
+				normal->z += model->uniqueNormals[model->m_modelDesc[i].nIndex3].z;
+				D3DXVec3Normalize(normal,normal);
 			}
-			return true;
+			return t;
 		}
 	}
 
-	return false;
+	return -1;
 }
 

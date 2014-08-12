@@ -17,6 +17,7 @@
 
 #include "ProceduralTerrain.h"
 #include "ProceduralTerrainShader.h"
+#include "SkyboxShader.h"
 
 #include "PhysicsDefs.h"
 
@@ -57,12 +58,15 @@ private:
 
 	TextureShader* m_DefaultShader;
 	ProceduralTerrainShader* m_WaterShader;
-	
+	SkyboxShader* m_SkyboxShader;
+
 	Light* m_Light;
 
 	EntityModel* m_playerEntity;
 
 	EntityModel* m_modelEntities[10];
+
+	EntityModel* m_skybox;
 	int m_numEntities;
 
 	Bitmap* m_bitmaps[10];

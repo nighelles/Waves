@@ -713,7 +713,7 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 
 	PHY_ApplyGravity(m_player, dt);
 	
-	PHY_EndTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+	PHY_EndTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion,dt);
 
 	m_playerBoat->Render(m_Graphics);
 	m_otherBoat->Render(m_Graphics);
@@ -724,7 +724,7 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	m_otherPlayer->Tick(dt);
 	PHY_SetupTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
 	PHY_ApplyGravity(m_otherPlayer, dt);
-	PHY_EndTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+	PHY_EndTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion, dt);
 	m_otherPlayer->Render(m_Graphics);
 #endif
 
