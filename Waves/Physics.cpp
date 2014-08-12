@@ -124,3 +124,4 @@ bool PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3* 
 
 	return false;
 }
+

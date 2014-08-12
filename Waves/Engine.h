@@ -119,6 +119,8 @@ private:
 
 #endif // #if EDITOR_BUILD
 
+	int m_screenHeight, m_screenWidth;
+
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

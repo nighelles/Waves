@@ -17,11 +17,21 @@ PlayerEntity::~PlayerEntity()
 void PlayerEntity::Movement(float x, float y, float z, float dt)
 {
 	D3DXVECTOR3 walkVec;
+	D3DXMATRIX rot;
+
+	float yaw, pitch, roll;
+	yaw = m_rotationY * 0.0174532925f;
+	pitch = m_rotationX * 0.0174532925f;
+	roll = m_rotationZ * 0.0174532925f;
+
+	D3DXMatrixRotationYawPitchRoll(&rot, yaw, 0, 0);
 
 	if (m_underwater)
 		walkVec = D3DXVECTOR3(x, y, z);
 	else
 		walkVec = D3DXVECTOR3(x, 0, z);
+
+	D3DXVec3TransformCoord(&walkVec, &walkVec, &rot);
 
 	D3DXVec3Normalize(&walkVec, &walkVec);
 

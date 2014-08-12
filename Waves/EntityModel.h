@@ -86,6 +86,7 @@ protected:
 
 protected:
 	bool m_isVisible;
+	bool m_inWorld;
 
 	float m_locationX, m_locationY, m_locationZ;
 	float m_rotationX, m_rotationY, m_rotationZ;

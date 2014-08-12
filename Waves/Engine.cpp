@@ -114,6 +114,9 @@ bool Engine::Initialize()
 	result = m_Graphics->Initialize(screenWidth, screenHeight, m_hwnd);
 	if (!result) return false;
 
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
 	// Start with menu
 	m_gameState = GAME_MENU;
 
@@ -132,7 +135,6 @@ bool Engine::Initialize()
 	if (!m_crosshair) return false;
 	result = m_crosshair->Initialize(m_Graphics->GetRenderController()->GetDevice(), screenWidth, screenHeight, L"crosshair.dds", 32, 32);
 	if (!result) return false;
-	m_crosshair->UpdateBuffers(m_Graphics->GetRenderController()->GetDeviceContext(), screenWidth / 2-16, screenHeight / 2-16);
 	m_crosshair->SetVisible(true);
 	m_Graphics->RegisterBitmap(m_crosshair);
 
@@ -226,6 +228,7 @@ bool Engine::InitializeGame()
 		OutputDebugString(L"Could not Initialize Sand Terrain");
 		return false;
 	}
+
 	m_landTerrain->m_shaderType = EntityModel::TEXTURE_SHADER;
 
 	m_Graphics->RegisterEntityModel(m_landTerrain);
@@ -264,6 +267,8 @@ bool Engine::InitializeGame()
 	// GAME_STATE
 
 	m_menuBitmap->SetVisible(false);
+
+	m_crosshair->UpdateBuffers(m_Graphics->GetRenderController()->GetDeviceContext(), m_screenWidth / 2 - 16, m_screenHeight / 2 - 16);
 
 	return true;
 }
@@ -434,6 +439,7 @@ void Engine::Run()
 	MSG msg;
 	bool done, result;
 	bool mouse1,mouse2;
+	int mouseX, mouseY;
 
 	ZeroMemory(&msg, sizeof(MSG));
 
@@ -459,6 +465,8 @@ void Engine::Run()
 			m_Input->IsMouseClicked(mouse1, mouse2);
 			if (m_gameState == GAME_MENU)
 			{
+				m_Input->GetMouseLocation(mouseX, mouseY);
+				m_crosshair->UpdateBuffers(m_Graphics->GetRenderController()->GetDeviceContext(), mouseX, mouseY);
 				if (mouse1)
 				{
 					if (!InitializeGame())

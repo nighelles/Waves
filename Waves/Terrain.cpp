@@ -283,6 +283,7 @@ void Terrain::regenerateModelFromTerrainMap()
 	}
 
 	BuildModel();
+
 	regenerateNormals();
 
 	return;
@@ -295,23 +296,21 @@ void Terrain::regenerateNormals()
 	D3DXVECTOR3 edge1, edge2;
 	D3DXVECTOR3 normal;
 
-	D3DXVECTOR3 normalMap[MAPSIZE*2][MAPSIZE];
-
 	int flip = 0;
 
-	for (int i = 0; i != uniqueFaceCount; i += 1)
+	for (int i = 0; i != uniqueFaceCount; ++i)
 	{
-		vt1.x = uniqueVertices[m_modelDesc[i].vIndex1].x;
-		vt1.y = uniqueVertices[m_modelDesc[i].vIndex1].y;
-		vt1.z = uniqueVertices[m_modelDesc[i].vIndex1].z;
+		vt1.x = uniqueVertices[m_modelDesc[i].vIndex1-1].x;
+		vt1.y = uniqueVertices[m_modelDesc[i].vIndex1-1].y;
+		vt1.z = uniqueVertices[m_modelDesc[i].vIndex1 - 1].z;
 
-		vt2.x = uniqueVertices[m_modelDesc[i].vIndex2].x;
-		vt2.y = uniqueVertices[m_modelDesc[i].vIndex2].y;
-		vt2.z = uniqueVertices[m_modelDesc[i].vIndex2].z;
+		vt2.x = uniqueVertices[m_modelDesc[i].vIndex2 - 1].x;
+		vt2.y = uniqueVertices[m_modelDesc[i].vIndex2 - 1].y;
+		vt2.z = uniqueVertices[m_modelDesc[i].vIndex2 - 1].z;
 
-		vt3.x = uniqueVertices[m_modelDesc[i].vIndex3].x;
-		vt3.y = uniqueVertices[m_modelDesc[i].vIndex3].y;
-		vt3.z = uniqueVertices[m_modelDesc[i].vIndex3].z;
+		vt3.x = uniqueVertices[m_modelDesc[i].vIndex3 - 1].x;
+		vt3.y = uniqueVertices[m_modelDesc[i].vIndex3 - 1].y;
+		vt3.z = uniqueVertices[m_modelDesc[i].vIndex3 - 1].z;
 
 		D3DXVec3Subtract(&edge1, &vt3, &vt1);
 		D3DXVec3Subtract(&edge2, &vt2, &vt1);
@@ -320,32 +319,33 @@ void Terrain::regenerateNormals()
 
 		D3DXVec3Normalize(&normal,&normal);
 
-		uniqueNormals[m_modelDesc[i].nIndex1].x += normal.x; 
-		uniqueNormals[m_modelDesc[i].nIndex1].y += normal.y;
-		uniqueNormals[m_modelDesc[i].nIndex1].z += normal.z;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].x += normal.x;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].z += normal.z;
 
-		uniqueNormals[m_modelDesc[i].nIndex2].x += normal.x;
-		uniqueNormals[m_modelDesc[i].nIndex2].y += normal.y;
-		uniqueNormals[m_modelDesc[i].nIndex2].z += normal.z;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].x += normal.x;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].z += normal.z;
 
-		uniqueNormals[m_modelDesc[i].nIndex3].x += normal.x;
-		uniqueNormals[m_modelDesc[i].nIndex3].y += normal.y;
-		uniqueNormals[m_modelDesc[i].nIndex3].z += normal.z;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].x += normal.x;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].y += normal.y;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].z += normal.z;
 
 	}
+
 	for (int i = 0; i != uniqueFaceCount; i += 1)
 	{
-		uniqueNormals[m_modelDesc[i].nIndex1].x /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex1].y /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex1].z /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex1 - 1].z /= 6;
 
-		uniqueNormals[m_modelDesc[i].nIndex2].x /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex2].y /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex2].z /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex2 - 1].z /= 6;
 
-		uniqueNormals[m_modelDesc[i].nIndex3].x /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex3].y /= 6;
-		uniqueNormals[m_modelDesc[i].nIndex3].z /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].x /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].y /= 6;
+		uniqueNormals[m_modelDesc[i].nIndex3 - 1].z /= 6;
 	}
 
 	// Then calculate vertex normals

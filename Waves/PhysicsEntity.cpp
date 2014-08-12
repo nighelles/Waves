@@ -54,7 +54,7 @@ void PhysicsEntity::Tick(float dt)
 	//m_velocityY -= m_velocityY*m_velocityDamping;
 	//m_velocityZ -= m_velocityZ*m_velocityDamping;
 
-	ApplyTranslationRelative(m_velocityX*dt, m_velocityY*dt, m_velocityZ*dt);
+	ApplyTranslation(m_velocityX*dt, m_velocityY*dt, m_velocityZ*dt);
 
 	Entity::Update(); // should override
 }
