@@ -141,7 +141,7 @@
   <ItemGroup>
     <None Include="proceduralTerrainVertexShader.vs" />
     <None Include="skybox.ps" />
-    <None Include="skybox.vs" />
+    <None Include="skybox.fx" />
     <None Include="Specular.ps" />
     <None Include="texture.ps" />
     <None Include="texture.vs" />

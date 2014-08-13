@@ -215,10 +215,10 @@
     <None Include="proceduralTerrainVertexShader.vs">
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
-    <None Include="skybox.vs">
+    <None Include="skybox.ps">
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
-    <None Include="skybox.ps">
+    <None Include="skybox.fx">
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
   </ItemGroup>

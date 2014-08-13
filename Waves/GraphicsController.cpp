@@ -143,7 +143,7 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	}
 
 	m_skybox = new EntityModel;
-	result = m_skybox->Initialize(m_Render->GetDevice(), "skybox.obj", L"skybox.dds");
+	result = m_skybox->Initialize(m_Render->GetDevice(), "skybox.obj", L"Sunset.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);
@@ -262,10 +262,7 @@ bool GraphicsController::Render()
 	float x, y, z;
 	m_PlayerCamera->GetLocation(x, y, z);
 	D3DXMatrixTranslation(&worldMatrix, x, y, z);
-	D3DXMATRIX scale;
-	D3DXMatrixScaling(&scale, 5.0f, 5.0f, 5.0f);
-
-	worldMatrix = scale*worldMatrix;
+	
 
 	m_skybox->Render(m_Render->GetDeviceContext());
 	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture());

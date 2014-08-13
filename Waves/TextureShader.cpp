@@ -301,6 +301,7 @@ bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DX
 	dataPtr2->padding = 0.0f;
 	deviceContext->Unmap(m_lightBuffer, 0);
 	bufferNumber = 0;
+
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
 	return true;

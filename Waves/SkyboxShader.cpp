@@ -25,7 +25,7 @@ bool SkyboxShader::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
 
-	result = InitializeShader(device, hwnd, L"skybox.vs", L"skybox.ps");
+	result = InitializeShader(device, hwnd, L"skybox.fx", L"skybox.fx");
 	if (!result) return false;
 
 	return true;
@@ -68,7 +68,7 @@ bool SkyboxShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFi
 	vertexShaderBuffer = 0;
 	pixelShaderBuffer = 0;
 
-	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "SkyboxVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &vertexShaderBuffer, &errorMessage, NULL);
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "VS", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &vertexShaderBuffer, &errorMessage, NULL);
 	if (FAILED(result))
 	{
 		if (errorMessage)
@@ -83,7 +83,7 @@ bool SkyboxShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFi
 		return false;
 	}
 
-	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "SkyboxPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &pixelShaderBuffer, &errorMessage, NULL);
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "PS", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &pixelShaderBuffer, &errorMessage, NULL);
 	if (FAILED(result))
 	{
 		if (errorMessage)
