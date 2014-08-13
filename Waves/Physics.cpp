@@ -46,32 +46,18 @@ void PHY_EndTick(
 
 	// Check for intersections
 
+	en->ApplyTranslation(en->m_velocityX*dt, en->m_velocityY*dt, en->m_velocityZ*dt);
+
 	float x, y, z;
 	en->GetLocation(x, y, z);
-
-	D3DXVECTOR3 preCollisionVelocity = en->GetVelocity()*dt;
-	D3DXVECTOR3 entityPosition = D3DXVECTOR3(x, y, z);
-	D3DXVECTOR3 collisionPoint, collisionNormal;
-
-	D3DXVECTOR3 requestedPositionDist = entityPosition + preCollisionVelocity;
-
-	float landHeight = land->CalculateDeterministicHeight(x, y, 0);
-
-	float collisionDist = PHY_GetRayIntersection(land, &entityPosition, &preCollisionVelocity, &collisionPoint, &collisionNormal);
-
-	if (collisionDist > 0 && collisionDist <= D3DXVec3Length(&preCollisionVelocity))
+	float height = land->CalculateDeterministicHeight(x, z, 0);
+	if (y < height)
 	{
-		D3DXVECTOR3 newVelocity;
-		D3DXVECTOR3 stoppedVelocity;
-
-		stoppedVelocity = D3DXVec3Dot(&preCollisionVelocity, &collisionNormal)*collisionNormal*D3DXVec3Length(&preCollisionVelocity)*1.01;
-
-		newVelocity = preCollisionVelocity + stoppedVelocity;
-
-		en->SetVelocity(newVelocity.x, newVelocity.y, newVelocity.z);
+		D3DXVECTOR3 vel = en->GetVelocity();
+		en->SetVelocity(vel.x, 0, vel.z);
+		en->SetLocation(x, height, z);
+		en->m_grounded = true;
 	}
-	
-	en->ApplyTranslation(en->m_velocityX*dt, en->m_velocityY*dt, en->m_velocityZ*dt);
 
 }
 
@@ -137,13 +123,17 @@ float PHY_GetRayIntersection(EntityModel* model, D3DXVECTOR3* orig, D3DXVECTOR3*
 		v2.y = model->uniqueVertices[model->m_modelDesc[i].vIndex3].y;
 		v2.z = model->uniqueVertices[model->m_modelDesc[i].vIndex3].z;
 
-		intersected = intersect_triangle(orig, &dir, &v0, &v1, &v2, t, u, v);
+		D3DXVECTOR3 intPoint;
+
+		intersected = intersect_triangle(orig, &dir, &v0, &v1, &v2, t, u, v, &intPoint);
 
 		if (intersected)
 		{
 			// This only returns whatever the 1st vertex is, so it's sketchy, interpolation would be good.
 
-			point->x = v0.x; point->y = v0.y; point->z = v0.z;
+			point->x = intPoint.x;
+			point->y = intPoint.y;
+			point->z = intPoint.z;
 
 			if (normal)
 			{

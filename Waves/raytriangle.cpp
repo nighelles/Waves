@@ -1,6 +1,6 @@
 #include "raytriangle.h"
 
-bool intersect_triangle(D3DXVECTOR3* orig, D3DXVECTOR3* dir, D3DXVECTOR3* vert0, D3DXVECTOR3* vert1, D3DXVECTOR3* vert2, double& t, double& u, double& v)
+bool intersect_triangle(D3DXVECTOR3* orig, D3DXVECTOR3* dir, D3DXVECTOR3* vert0, D3DXVECTOR3* vert1, D3DXVECTOR3* vert2, double& t, double& u, double& v, D3DXVECTOR3* intPoint)
 {
 	D3DXVECTOR3 edge1, edge2, tvec, pvec, qvec;
 	double det, inv_det;
@@ -31,6 +31,14 @@ bool intersect_triangle(D3DXVECTOR3* orig, D3DXVECTOR3* dir, D3DXVECTOR3* vert0,
 	t *= inv_det;
 	u *= inv_det;
 	v *= inv_det;
+
+	intPoint->x = vert0->x;
+	intPoint->y = vert0->y;
+	intPoint->z = vert0->z;
+
+	intPoint->x += edge1.x*u + edge2.x*v;
+	intPoint->y += edge1.y*u + edge2.y*v;
+	intPoint->z += edge1.z*u + edge2.z*v;
 
 	return true;
 }

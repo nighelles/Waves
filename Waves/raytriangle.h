@@ -13,5 +13,5 @@ bool intersect_triangle(D3DXVECTOR3* orig, D3DXVECTOR3* dir,
 	D3DXVECTOR3* vert0,
 	D3DXVECTOR3* vert1,
 	D3DXVECTOR3* vert2,
-	double& t, double& u, double& v);
+	double& t, double& u, double& v, D3DXVECTOR3* intPoint);
 

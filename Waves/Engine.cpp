@@ -167,7 +167,7 @@ bool Engine::InitializeGame()
 	result = m_player->InitializeModel(m_Graphics, "player.obj",L"cursor.dds");
 	if (!result) return false;
 
-	m_player->SetLocation(0.0f,METERS(5.0f),0.0f);
+	m_player->SetLocation(METERS(100.0f),METERS(10.0f),METERS(100.0f));
 	m_player->Render(m_Graphics);
 
 	// other network player
