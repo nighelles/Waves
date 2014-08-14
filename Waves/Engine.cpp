@@ -159,12 +159,28 @@ bool Engine::InitializeGame()
 
 	// Change these to the new Register model structuring
 
+	// TESTING
+
+	test = new EntityModel;
+
+	test->loadBinaryFile("glock.bmf");
+	test->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"metal.dds");
+	test->SetLocation(100, 5, 100);
+
+	test->CurrentFrame(4);
+
+	m_Graphics->RegisterEntityModel(test);
+
+	// END TESTING
+
 #if GAME_BUILD
 	// Initialize our player
+
 	m_player = new PlayerEntity;
-	result = m_player->Initialize();
+
+	result = m_player->InitializeModel(m_Graphics, "player.obj", L"cursor.dds");
 	if (!result) return false;
-	result = m_player->InitializeModel(m_Graphics, "player.obj",L"cursor.dds");
+	result = m_player->Initialize();
 	if (!result) return false;
 
 	m_player->SetLocation(METERS(100.0f),METERS(10.0f),METERS(100.0f));
@@ -173,9 +189,10 @@ bool Engine::InitializeGame()
 	// other network player
 
 	m_otherPlayer = new PlayerEntity;
-	result = m_otherPlayer->Initialize();
-	if (!result) return false;
+	
 	result = m_otherPlayer->InitializeModel(m_Graphics, "player.obj", L"cursor.dds");
+	if (!result) return false;
+	result = m_otherPlayer->Initialize();
 	if (!result) return false;
 
 	m_otherPlayer->SetLocation(0.0f, METERS(5.0f), 0.0f);
@@ -184,17 +201,17 @@ bool Engine::InitializeGame()
 	// Initialize a boat model
 	m_playerBoat = new PhysicsEntity;
 
+	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+	if (!result) return false;
 	result = m_playerBoat->Initialize();
 	if (!result) return false;
 
-	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-	if (!result) return false;
 
 	// Initialize other person's boat
 	m_otherBoat = new PhysicsEntity;
-	result = m_otherBoat->Initialize();
-	if (!result) return false;
 	result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+	if (!result) return false;
+	result = m_otherBoat->Initialize();
 	if (!result) return false;
 
 	// Put things in place
@@ -535,21 +552,22 @@ bool Engine::Update()
 	oldtime = newtime;
 	GetSystemTime(&newtime);
 
-	float dt = newtime.wMilliseconds - oldtime.wMilliseconds;
+	m_dt = newtime.wMilliseconds - oldtime.wMilliseconds;
 
-	if (dt < 0) dt += 1000;
-	dt /= 1000.0;
-
-	oldtime = newtime;
+	if (m_dt < 0) m_dt += 1000;
+	m_dt /= 1000.0;
 
 	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
 	m_Input->GetMouseDelta(mouseIDX, mouseIDY);
 
-	mouseDX = mouseIDX * dt * 10;
-	mouseDY = mouseIDY * dt * 10;
+	mouseDX = mouseIDX * m_dt * 10;
+	mouseDY = mouseIDY * m_dt * 10;
 
 #if GAME_BUILD
+
+	if (m_Input->IsKeyPressed(DIK_T))
+		test->Animating(true);
 
 	NetworkedInput playerInput{ };
 
@@ -581,7 +599,7 @@ bool Engine::Update()
 	m_player->GetRotation(px, py, py);
 	m_Graphics->GetPlayerCamera()->SetRotation(rot.x, py, rot.z);
 
-	MovePlayer(playerInput, m_player, dt);
+	MovePlayer(playerInput, m_player, m_dt);
 
 #endif // #if GAME_BUILD
 
@@ -633,7 +651,7 @@ bool Engine::Update()
 
 #endif
 
-	UpdateEntities(dt, m_timeloopCompletion);
+	UpdateEntities(m_dt, m_timeloopCompletion);
 
 #if USE_NETWORKING
 
@@ -641,7 +659,7 @@ bool Engine::Update()
 	{
 		m_networkSyncController->SyncPlayerInput(&playerInput);
 
-		MovePlayer(playerInput, m_otherPlayer, dt);
+		MovePlayer(playerInput, m_otherPlayer, m_dt);
 	}
 	else 
 	{
@@ -745,7 +763,7 @@ bool Engine::Render()
 
 	if (!result) return false;
 
-	result = m_Graphics->Render();
+	result = m_Graphics->Render(m_dt);
 	if (!result) return false;
 
 	return true;

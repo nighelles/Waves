@@ -36,7 +36,7 @@ public:
 	bool Initialize(int, int, HWND);
 	void Shutdown();
 	bool Frame(float);
-	bool Render();
+	bool Render(float dt);
 
 	RenderController* GetRenderController();
 

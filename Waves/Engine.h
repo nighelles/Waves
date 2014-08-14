@@ -28,6 +28,14 @@
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
 
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment( lib, "ws2_32.lib")
+
 class Engine
 {
 public:
@@ -69,6 +77,10 @@ private:
 	void MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt);
 
 private:
+
+	// TESTING
+	EntityModel *test;
+	//
 	LPCWSTR m_applicationName;
 	HINSTANCE m_hinstance;
 	HWND m_hwnd;
@@ -92,6 +104,8 @@ private:
 	Bitmap* m_crosshair;
 
 	float m_timeloopCompletion;
+
+	float m_dt;
 
 	NetworkServer* m_server;
 	NetworkClient* m_client;

@@ -7,8 +7,6 @@
 
 #define GAME_NETWORK_PORT "4444"
 
-#pragma comment( lib, "ws2_32.lib")
-
 class NetworkController
 {
 public:

@@ -6,6 +6,11 @@
 
 #include "Texture.h"
 
+#include <stdio.h>
+#include <iostream>
+
+#define FRAMES_PER_SECOND 24.0f
+
 using namespace std;
 
 class EntityModel
@@ -29,8 +34,8 @@ public:
 	struct UniqueFace
 	{
 		int vIndex1, vIndex2, vIndex3;
-		int tIndex1, tIndex2, tIndex3;
 		int nIndex1, nIndex2, nIndex3;
+		int tIndex1, tIndex2, tIndex3;
 	};
 
 public:
@@ -46,9 +51,9 @@ public:
 	EntityModel(const EntityModel&);
 	~EntityModel();
 
-	virtual bool Initialize(ID3D11Device*, char*, WCHAR*);
+	virtual bool Initialize(ID3D11Device*, WCHAR*);
 	virtual void Shutdown();
-	void Render(ID3D11DeviceContext*);
+	void Render(ID3D11DeviceContext*, float dt);
 
 	int GetIndexCount();
 	void SetLocation(float x, float y, float z);
@@ -63,10 +68,25 @@ public:
 	bool IsVisible() const { return m_isVisible; }
 	void IsVisible(bool val) { m_isVisible = val; }
 
+	// Function to load a model file
+
+	bool loadBinaryFile(char* filename);
+	bool writeBinaryFile(char* filename);
+
+	virtual bool LoadModel(char*);
+
+	// Animation functions
+
+	bool Animating() const { return m_animating; }
+	void Animating(bool val) { m_animating = val; }
+	int CurrentFrame() const { return m_currentFrame; }
+	void CurrentFrame(int val) { m_currentFrame = val; }
+
 	// These need to be public for utility functions in physics to work
 	// Probably didn't need to be a class.
 
 	Model* m_model;
+
 	int m_vertexCount, m_indexCount;
 	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
 	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
@@ -80,11 +100,18 @@ protected:
 	bool LoadTexture(ID3D11Device*, WCHAR*);
 	void ReleaseTexture();
 
-	virtual bool LoadModel(char*);
 	void ReleaseModel();
 	bool BuildModel();
 
 protected:
+	int m_currentFrame;
+	int m_numFrames;
+
+	bool m_animating;
+
+	float m_currentTime;
+	float m_maxTime;
+
 	bool m_isVisible;
 	bool m_inWorld;
 

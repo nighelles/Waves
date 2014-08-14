@@ -55,7 +55,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -88,6 +88,7 @@
     <ClCompile Include="GraphicsController.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LoadBinary.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityModel.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EntityModel.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LoadBinary.h" />
     <ClInclude Include="NetworkClient.h" />
     <ClInclude Include="NetworkController.h" />
     <ClInclude Include="NetworkDefinitions.h" />

@@ -19,6 +19,14 @@ EntityModel::EntityModel()
 
 	m_shaderType = TEXTURE_SHADER;
 
+	m_numFrames = 1;
+	m_currentFrame = 0;
+
+	m_animating = false;
+
+	m_currentTime = 0;
+	m_maxTime = 1;
+
 	m_isVisible = true;
 }
 
@@ -30,14 +38,11 @@ EntityModel::~EntityModel()
 {
 }
 
-bool EntityModel::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
+bool EntityModel::Initialize(ID3D11Device* device, WCHAR* textureFilename)
 {
 	bool result;
 
 	m_device = device;
-
-	result = LoadModel(modelFilename);
-	if (!result) return false;
 
 	result = InitializeBuffers(device);
 	if (!result) return false;
@@ -59,8 +64,26 @@ void EntityModel::Shutdown()
 	return;
 }
 
-void EntityModel::Render(ID3D11DeviceContext* deviceContext)
+void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 {
+	if (m_animating)
+	{
+		m_currentTime += dt;
+
+		if (m_currentTime > m_maxTime)
+		{
+			m_currentTime = 0;
+			m_animating = false;
+			m_currentFrame = 0;
+		}
+		else {
+			m_currentFrame = (m_currentTime / m_maxTime)*m_numFrames;
+			m_currentTime += dt;
+			if (m_currentFrame > m_numFrames) m_currentFrame = m_numFrames;
+		}
+		InitializeBuffers(m_device);
+	}
+
 	RenderBuffers(deviceContext);
 
 	return;
@@ -96,31 +119,35 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 		indices[i] = i;
 	}
 
+	UniqueVertex *usedVertices = &(uniqueVertices[m_currentFrame*uniqueVertexCount]);
+	UniqueVertex *usedNormals = &(uniqueNormals[m_currentFrame*uniqueNormalCount]);
+	UniqueVertex *usedTexcoords = &(uniqueTexcoords[m_currentFrame*uniqueTextureCount]);
+
 	for (int i = 0; i != uniqueFaceCount; ++i)
 	{
 		vIndex = m_modelDesc[i].vIndex1 - 1;
 		tIndex = m_modelDesc[i].tIndex1 - 1;
 		nIndex = m_modelDesc[i].nIndex1 - 1;
 
-		vertices[3 * i].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
-		vertices[3 * i].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
-		vertices[3 * i].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+		vertices[3 * i].position = D3DXVECTOR3(usedVertices[vIndex].x, usedVertices[vIndex].y, usedVertices[vIndex].z);
+		vertices[3 * i].texture = D3DXVECTOR2(usedTexcoords[tIndex].x, usedTexcoords[tIndex].y);
+		vertices[3 * i].normal = D3DXVECTOR3(usedNormals[nIndex].x, usedNormals[nIndex].y, usedNormals[nIndex].z);
 
 		vIndex = m_modelDesc[i].vIndex2 - 1;
 		tIndex = m_modelDesc[i].tIndex2 - 1;
 		nIndex = m_modelDesc[i].nIndex2 - 1;
 
-		vertices[3 * i+1].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
-		vertices[3 * i+1].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
-		vertices[3 * i+1].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+		vertices[3 * i + 1].position = D3DXVECTOR3(usedVertices[vIndex].x, usedVertices[vIndex].y, usedVertices[vIndex].z);
+		vertices[3 * i + 1].texture = D3DXVECTOR2(usedTexcoords[tIndex].x, usedTexcoords[tIndex].y);
+		vertices[3 * i + 1].normal = D3DXVECTOR3(usedNormals[nIndex].x, usedNormals[nIndex].y, usedNormals[nIndex].z);
 
 		vIndex = m_modelDesc[i].vIndex3 - 1;
 		tIndex = m_modelDesc[i].tIndex3 - 1;
 		nIndex = m_modelDesc[i].nIndex3 - 1;
 
-		vertices[3 * i+2].position = D3DXVECTOR3(uniqueVertices[vIndex].x, uniqueVertices[vIndex].y, uniqueVertices[vIndex].z);
-		vertices[3 * i+2].texture = D3DXVECTOR2(uniqueTexcoords[tIndex].x, uniqueTexcoords[tIndex].y);
-		vertices[3 * i+2].normal = D3DXVECTOR3(uniqueNormals[nIndex].x, uniqueNormals[nIndex].y, uniqueNormals[nIndex].z);
+		vertices[3 * i + 2].position = D3DXVECTOR3(usedVertices[vIndex].x, usedVertices[vIndex].y, usedVertices[vIndex].z);
+		vertices[3 * i + 2].texture = D3DXVECTOR2(usedTexcoords[tIndex].x, usedTexcoords[tIndex].y);
+		vertices[3 * i + 2].normal = D3DXVECTOR3(usedNormals[nIndex].x, usedNormals[nIndex].y, usedNormals[nIndex].z);
 
 	}
 
@@ -262,53 +289,58 @@ bool EntityModel::LoadModel(char* filename)
 
 bool EntityModel::BuildModel()
 {
-	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
+	int vIndex, tIndex, nIndex;
+
+	UniqueVertex *usedVertices = &(uniqueVertices[m_currentFrame*uniqueVertexCount]);
+	UniqueVertex *usedNormals = &(uniqueNormals[m_currentFrame*uniqueNormalCount]);
+	UniqueVertex *usedTexcoords = &(uniqueTexcoords[m_currentFrame*uniqueTextureCount]);
+
 	for (int i = 0; i != uniqueFaceCount; ++i)
 	{
 		vIndex = m_modelDesc[i].vIndex1 - 1;
 		tIndex = m_modelDesc[i].tIndex1 - 1;
 		nIndex = m_modelDesc[i].nIndex1 - 1;
 
-		m_model[3 * i].x = uniqueVertices[vIndex].x;
-		m_model[3 * i].y = uniqueVertices[vIndex].y;
-		m_model[3 * i].z = uniqueVertices[vIndex].z;
+		m_model[3 * i].x = usedVertices[vIndex].x;
+		m_model[3 * i].y = usedVertices[vIndex].y;
+		m_model[3 * i].z = usedVertices[vIndex].z;
 
-		m_model[3 * i].tu = uniqueTexcoords[tIndex].x;
-		m_model[3 * i].tv = uniqueTexcoords[tIndex].y;
+		m_model[3 * i].tu = usedTexcoords[tIndex].x;
+		m_model[3 * i].tv = usedTexcoords[tIndex].y;
 
-		m_model[3 * i].nx = uniqueNormals[nIndex].x;
-		m_model[3 * i].ny = uniqueNormals[nIndex].y;
-		m_model[3 * i].nz = uniqueNormals[nIndex].z;
+		m_model[3 * i].nx = usedNormals[nIndex].x;
+		m_model[3 * i].ny = usedNormals[nIndex].y;
+		m_model[3 * i].nz = usedNormals[nIndex].z;
 
 		vIndex = m_modelDesc[i].vIndex2 - 1;
 		tIndex = m_modelDesc[i].tIndex2 - 1;
 		nIndex = m_modelDesc[i].nIndex2 - 1;
 
-		m_model[3 * i + 1].x = uniqueVertices[vIndex].x;
-		m_model[3 * i + 1].y = uniqueVertices[vIndex].y;
-		m_model[3 * i + 1].z = uniqueVertices[vIndex].z;
+		m_model[3 * i + 1].x = usedVertices[vIndex].x;
+		m_model[3 * i + 1].y = usedVertices[vIndex].y;
+		m_model[3 * i + 1].z = usedVertices[vIndex].z;
 
-		m_model[3 * i + 1].tu = uniqueTexcoords[tIndex].x;
-		m_model[3 * i + 1].tv = uniqueTexcoords[tIndex].y;
+		m_model[3 * i + 1].tu = usedTexcoords[tIndex].x;
+		m_model[3 * i + 1].tv = usedTexcoords[tIndex].y;
 
-		m_model[3 * i + 1].nx = uniqueNormals[nIndex].x;
-		m_model[3 * i + 1].ny = uniqueNormals[nIndex].y;
-		m_model[3 * i + 1].nz = uniqueNormals[nIndex].z;
+		m_model[3 * i + 1].nx = usedNormals[nIndex].x;
+		m_model[3 * i + 1].ny = usedNormals[nIndex].y;
+		m_model[3 * i + 1].nz = usedNormals[nIndex].z;
 
 		vIndex = m_modelDesc[i].vIndex3 - 1;
 		tIndex = m_modelDesc[i].tIndex3 - 1;
 		nIndex = m_modelDesc[i].nIndex3 - 1;
 
-		m_model[3 * i + 2].x = uniqueVertices[vIndex].x;
-		m_model[3 * i + 2].y = uniqueVertices[vIndex].y;
-		m_model[3 * i + 2].z = uniqueVertices[vIndex].z;
+		m_model[3 * i + 2].x = usedVertices[vIndex].x;
+		m_model[3 * i + 2].y = usedVertices[vIndex].y;
+		m_model[3 * i + 2].z = usedVertices[vIndex].z;
 
-		m_model[3 * i + 2].tu = uniqueTexcoords[tIndex].x;
-		m_model[3 * i + 2].tv = uniqueTexcoords[tIndex].y;
+		m_model[3 * i + 2].tu = usedTexcoords[tIndex].x;
+		m_model[3 * i + 2].tv = usedTexcoords[tIndex].y;
 
-		m_model[3 * i + 2].nx = uniqueNormals[nIndex].x;
-		m_model[3 * i + 2].ny = uniqueNormals[nIndex].y;
-		m_model[3 * i + 2].nz = uniqueNormals[nIndex].z;
+		m_model[3 * i + 2].nx = usedNormals[nIndex].x;
+		m_model[3 * i + 2].ny = usedNormals[nIndex].y;
+		m_model[3 * i + 2].nz = usedNormals[nIndex].z;
 	}
 
 	return true;
@@ -338,4 +370,93 @@ void EntityModel::ApplyEntityMatrix(D3DXMATRIX& entityMatrix)
 	entityMatrix = translation;
 	D3DXMatrixMultiply(&entityMatrix, &rotation, &entityMatrix);
 	return;
+}
+
+long getFileSize(FILE *file)
+{
+		long lCurPos, lEndPos;
+		lCurPos = ftell(file);
+		fseek(file, 0, 2);
+		lEndPos = ftell(file);
+		fseek(file, lCurPos, 0);
+		return lEndPos;
+}
+
+typedef unsigned char BYTE;
+
+bool EntityModel::loadBinaryFile(char* filename)
+{
+	bool result;
+
+	BYTE *fileBuf;
+	FILE *file = NULL;
+
+	if ((file = fopen(filename, "rb")) == NULL) return false;
+
+	long fileSize = getFileSize(file);
+
+	fileBuf = new BYTE[fileSize];
+	fread(fileBuf, fileSize, 1, file);
+
+	// LOAD MODEL INFORMATION
+	m_numFrames = ((int*)fileBuf)[0];
+	uniqueFaceCount = ((int*)fileBuf)[1];
+	uniqueVertexCount = ((int*)fileBuf)[2];
+	uniqueNormalCount = ((int*)fileBuf)[3];
+	uniqueTextureCount = ((int*)fileBuf)[4];
+	
+	// LOAD UNIQUE FACES
+	int faceDataOffset = sizeof(int) * 5;
+	m_modelDesc = new UniqueFace[uniqueFaceCount];
+
+	memcpy((BYTE*)m_modelDesc, (fileBuf + faceDataOffset), sizeof(int) * 9 * uniqueFaceCount);
+
+	// Load frames
+	int frameOffset = faceDataOffset + sizeof(int) * 9 * uniqueFaceCount;
+	int currentOffset = frameOffset;
+
+	uniqueVertices = new UniqueVertex[m_numFrames*uniqueVertexCount];
+	uniqueNormals = new UniqueVertex[m_numFrames*uniqueNormalCount];
+	uniqueTexcoords = new UniqueVertex[m_numFrames*uniqueTextureCount];
+
+	memcpy((BYTE*)uniqueVertices, (fileBuf + currentOffset), sizeof(float) * 3 * m_numFrames*uniqueVertexCount);
+	currentOffset += sizeof(float) * 3 * m_numFrames*uniqueVertexCount;
+	memcpy((BYTE*)uniqueNormals, (fileBuf + currentOffset), sizeof(float) * 3 * m_numFrames*uniqueNormalCount);
+	currentOffset += sizeof(float) * 3 * m_numFrames*uniqueNormalCount;
+	memcpy((BYTE*)uniqueTexcoords, (fileBuf + currentOffset), sizeof(float) * 3 * m_numFrames*uniqueTextureCount);
+	
+	delete[] fileBuf;
+	fclose(file);
+
+	m_vertexCount = uniqueFaceCount * 3;
+	m_indexCount = m_vertexCount;
+
+	m_model = new Model[m_vertexCount];
+
+	result = BuildModel();
+	if (!result) return false;
+
+	m_maxTime = (m_numFrames / FRAMES_PER_SECOND); // 24 FPS
+
+	return true;
+}
+
+bool EntityModel::writeBinaryFile(char* filename)
+{
+	FILE *file = NULL;
+	if ((file = fopen(filename, "wb")) == NULL) return false;
+
+	fwrite(&m_numFrames, sizeof(int), 1, file);
+	fwrite(&uniqueFaceCount, sizeof(int), 1, file);
+	fwrite(&uniqueVertexCount, sizeof(int), 1, file);
+	fwrite(&uniqueNormalCount, sizeof(int), 1, file);
+	fwrite(&uniqueTextureCount, sizeof(int), 1, file);
+	fwrite(m_modelDesc, sizeof(int), uniqueFaceCount * 9, file);
+	fwrite(uniqueVertices, sizeof(float), uniqueVertexCount * 3 * m_numFrames, file);
+	fwrite(uniqueNormals, sizeof(float), uniqueNormalCount * 3 * m_numFrames, file);
+	fwrite(uniqueTexcoords, sizeof(float), uniqueTextureCount * 3 * m_numFrames, file);
+
+	fclose(file);
+
+	return true;
 }

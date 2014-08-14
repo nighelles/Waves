@@ -39,7 +39,12 @@ int GraphicsController::InitializeEntityModel(char* modelFilename, WCHAR* textur
 	m_modelEntities[m_numEntities] = new EntityModel;
 	if (!m_modelEntities[m_numEntities]) return -1;
 
-	result = m_modelEntities[m_numEntities]->Initialize(m_Render->GetDevice(), modelFilename, textureFilename);
+	result = m_modelEntities[m_numEntities]->LoadModel(modelFilename);
+	if (!result)
+	{
+		return -1;
+	}
+	result = m_modelEntities[m_numEntities]->Initialize(m_Render->GetDevice(), textureFilename);
 	if (!result)
 	{
 		MessageBox(m_hwnd, L"Could not Initialize Model", L"Error", MB_OK);
@@ -143,7 +148,15 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	}
 
 	m_skybox = new EntityModel;
-	result = m_skybox->Initialize(m_Render->GetDevice(), "skybox.obj", L"Sunset.dds");
+	
+	result = m_skybox->LoadModel("skybox.obj");
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Load Skybox Model", L"Error", MB_OK);
+		return false;
+	}
+	
+	result = m_skybox->Initialize(m_Render->GetDevice(), L"Sunset.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);
@@ -225,7 +238,7 @@ Camera* GraphicsController::GetPlayerCamera()
 }
 
 // Time here is between 0 and 1
-bool GraphicsController::Render()
+bool GraphicsController::Render(float dt)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix;
 	bool result;
@@ -245,7 +258,7 @@ bool GraphicsController::Render()
 			m_Render->GetWorldMatrix(worldMatrix);
 
 			m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
-			m_modelEntities[i]->Render(m_Render->GetDeviceContext());
+			m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
 			if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
 			{
 				//result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture());
@@ -264,7 +277,7 @@ bool GraphicsController::Render()
 	D3DXMatrixTranslation(&worldMatrix, x, y, z);
 	
 
-	m_skybox->Render(m_Render->GetDeviceContext());
+	m_skybox->Render(m_Render->GetDeviceContext(), dt);
 	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture());
 
 	m_Render->DisableZBuffer();

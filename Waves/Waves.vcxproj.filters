@@ -38,6 +38,9 @@
     <Filter Include="GameEngine\Core\Physics">
       <UniqueIdentifier>{666f5a25-e343-411e-a5f6-346bd4d27861}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameEngine\Entities\EntityModel\Load Utilities">
+      <UniqueIdentifier>{c70a9b08-2efa-4fa8-b7dd-81b18cf52031}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp">
@@ -79,9 +82,6 @@
     <ClCompile Include="PhysicsEntity.cpp">
       <Filter>GameEngine\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="ObjFileUtility.cpp">
-      <Filter>GameEngine\Entities</Filter>
-    </ClCompile>
     <ClCompile Include="NetworkSyncController.cpp">
       <Filter>GameEngine\Networking</Filter>
     </ClCompile>
@@ -117,6 +117,12 @@
     </ClCompile>
     <ClCompile Include="SkyboxShader.cpp">
       <Filter>GameEngine\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjFileUtility.cpp">
+      <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadBinary.cpp">
+      <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -162,9 +168,6 @@
     <ClInclude Include="PhysicsEntity.h">
       <Filter>GameEngine\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="ObjFileUtility.h">
-      <Filter>GameEngine\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="NetworkSyncController.h">
       <Filter>GameEngine\Networking</Filter>
     </ClInclude>
@@ -200,6 +203,12 @@
     </ClInclude>
     <ClInclude Include="SkyboxShader.h">
       <Filter>GameEngine\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFileUtility.h">
+      <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadBinary.h">
+      <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

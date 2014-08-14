@@ -15,12 +15,14 @@ ObjFileUtility::~ObjFileUtility()
 {
 }
 
-bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, EntityModel::UniqueVertex *texcoords, EntityModel::UniqueVertex *normals, EntityModel::UniqueFace *faces)
+bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, 
+								EntityModel::UniqueVertex *texcoords, 
+								EntityModel::UniqueVertex *normals, 
+								EntityModel::UniqueFace *faces)
 {
 	ifstream fin;
-	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
+	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
 	char input, input2;
-	ofstream fout;
 
 	vertexIndex = 0;
 	texcoordIndex = 0;
