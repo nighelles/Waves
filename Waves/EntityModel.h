@@ -82,11 +82,6 @@ public:
 	int CurrentFrame() const { return m_currentFrame; }
 	void CurrentFrame(int val) { m_currentFrame = val; }
 
-	// These need to be public for utility functions in physics to work
-	// Probably didn't need to be a class.
-
-	Model* m_model;
-
 	int m_vertexCount, m_indexCount;
 	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
 	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
@@ -101,7 +96,6 @@ protected:
 	void ReleaseTexture();
 
 	void ReleaseModel();
-	bool BuildModel();
 
 protected:
 	int m_currentFrame;

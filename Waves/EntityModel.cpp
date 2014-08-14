@@ -7,7 +7,6 @@ EntityModel::EntityModel()
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
-	m_model = 0;
 
 	m_locationX = 0.0f;
 	m_locationY = 0.0f;
@@ -247,10 +246,25 @@ void EntityModel::ReleaseTexture()
 
 void EntityModel::ReleaseModel()
 {
-	if (m_model)
+	if (m_modelDesc)
 	{
-		delete[] m_model;
-		m_model = 0;
+		delete[] m_modelDesc;
+		m_modelDesc = 0;
+	}
+	if (uniqueVertices)
+	{
+		delete[] uniqueVertices;
+		uniqueVertices = 0;
+	}
+	if (uniqueNormals)
+	{
+		delete[] uniqueNormals;
+		uniqueNormals = 0;
+	}
+	if (uniqueTexcoords)
+	{
+		delete[] uniqueTexcoords;
+		uniqueTexcoords = 0;
 	}
 
 	return;
@@ -276,75 +290,12 @@ bool EntityModel::LoadModel(char* filename)
 
 	if (m_vertexCount < 1) return false;
 
-	m_model = new Model[m_vertexCount];
-
-	result = BuildModel();
-	if (!result) return false;
-
 	objLoader->Shutdown();
 	delete objLoader;
 
 	return true;
 }
 
-bool EntityModel::BuildModel()
-{
-	int vIndex, tIndex, nIndex;
-
-	UniqueVertex *usedVertices = &(uniqueVertices[m_currentFrame*uniqueVertexCount]);
-	UniqueVertex *usedNormals = &(uniqueNormals[m_currentFrame*uniqueNormalCount]);
-	UniqueVertex *usedTexcoords = &(uniqueTexcoords[m_currentFrame*uniqueTextureCount]);
-
-	for (int i = 0; i != uniqueFaceCount; ++i)
-	{
-		vIndex = m_modelDesc[i].vIndex1 - 1;
-		tIndex = m_modelDesc[i].tIndex1 - 1;
-		nIndex = m_modelDesc[i].nIndex1 - 1;
-
-		m_model[3 * i].x = usedVertices[vIndex].x;
-		m_model[3 * i].y = usedVertices[vIndex].y;
-		m_model[3 * i].z = usedVertices[vIndex].z;
-
-		m_model[3 * i].tu = usedTexcoords[tIndex].x;
-		m_model[3 * i].tv = usedTexcoords[tIndex].y;
-
-		m_model[3 * i].nx = usedNormals[nIndex].x;
-		m_model[3 * i].ny = usedNormals[nIndex].y;
-		m_model[3 * i].nz = usedNormals[nIndex].z;
-
-		vIndex = m_modelDesc[i].vIndex2 - 1;
-		tIndex = m_modelDesc[i].tIndex2 - 1;
-		nIndex = m_modelDesc[i].nIndex2 - 1;
-
-		m_model[3 * i + 1].x = usedVertices[vIndex].x;
-		m_model[3 * i + 1].y = usedVertices[vIndex].y;
-		m_model[3 * i + 1].z = usedVertices[vIndex].z;
-
-		m_model[3 * i + 1].tu = usedTexcoords[tIndex].x;
-		m_model[3 * i + 1].tv = usedTexcoords[tIndex].y;
-
-		m_model[3 * i + 1].nx = usedNormals[nIndex].x;
-		m_model[3 * i + 1].ny = usedNormals[nIndex].y;
-		m_model[3 * i + 1].nz = usedNormals[nIndex].z;
-
-		vIndex = m_modelDesc[i].vIndex3 - 1;
-		tIndex = m_modelDesc[i].tIndex3 - 1;
-		nIndex = m_modelDesc[i].nIndex3 - 1;
-
-		m_model[3 * i + 2].x = usedVertices[vIndex].x;
-		m_model[3 * i + 2].y = usedVertices[vIndex].y;
-		m_model[3 * i + 2].z = usedVertices[vIndex].z;
-
-		m_model[3 * i + 2].tu = usedTexcoords[tIndex].x;
-		m_model[3 * i + 2].tv = usedTexcoords[tIndex].y;
-
-		m_model[3 * i + 2].nx = usedNormals[nIndex].x;
-		m_model[3 * i + 2].ny = usedNormals[nIndex].y;
-		m_model[3 * i + 2].nz = usedNormals[nIndex].z;
-	}
-
-	return true;
-}
 
 void EntityModel::SetLocation(float x, float y, float z)
 {
@@ -430,11 +381,6 @@ bool EntityModel::loadBinaryFile(char* filename)
 
 	m_vertexCount = uniqueFaceCount * 3;
 	m_indexCount = m_vertexCount;
-
-	m_model = new Model[m_vertexCount];
-
-	result = BuildModel();
-	if (!result) return false;
 
 	m_maxTime = (m_numFrames / FRAMES_PER_SECOND); // 24 FPS
 

@@ -6,7 +6,6 @@ Terrain::Terrain() : EntityModel()
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
-	m_model = 0;
 
 	m_gridSize = METERS(4);
 
@@ -184,8 +183,6 @@ bool Terrain::LoadModel()
 	m_vertexCount = MAPSIZE*MAPSIZE*6;
 	m_indexCount = m_vertexCount;
 
-	m_model = new Model[m_indexCount];
-
 	for (int x = 0; x != MAPSIZE; ++x) // generate initial map heights
 	{
 		for (int z = 0; z != MAPSIZE; ++z)
@@ -281,8 +278,6 @@ void Terrain::regenerateModelFromTerrainMap()
 			curFace += 1;
 		}
 	}
-
-	BuildModel();
 
 	regenerateNormals();
 
