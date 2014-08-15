@@ -65,7 +65,7 @@ void EntityModel::Shutdown()
 
 void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 {
-	if (m_animating)
+	if (m_animating && m_numFrames > 1)
 	{
 		m_currentTime += dt;
 

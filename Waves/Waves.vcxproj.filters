@@ -231,6 +231,9 @@
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
     <None Include="resources\entities\glock.ent" />
+    <None Include="resources\entities\tree.ent">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Cube.txt">
