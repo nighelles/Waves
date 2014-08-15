@@ -1,0 +1,8 @@
+map: levels\maps\niles3.txt
+groundtexture: resources\textures\sand_tiling.dds
+groundtexture: resources\textures\redsand.dds
+skyboxtexture: resources\textures\redsky.dds
+playerstart: 0 100 20 100 0 0 0
+playerstart: 1 100 100 100 0 0 0
+entity: resources\entities\glock.ent 100 5 100 0 0 0 0 0 0
+entity: resources\entities\glock.ent 110 5 100 0 0 0 0 0 0

@@ -14,6 +14,8 @@ PhysicsEntity::PhysicsEntity() : Entity()
 	m_grounded = false;
 
 	m_bouyancy = METERS(G_CONST);
+
+	m_entityModel = 0;
 }
 
 
@@ -25,7 +27,24 @@ bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFil
 {
 	bool result;
 
-	m_modelID = graphics->InitializeEntityModel(modelFilename, textureFilename);
+	m_entityModel = new EntityModel;
+	
+	result = m_entityModel->loadBinaryFile(modelFilename);
+	if (!result)
+	{
+		OutputDebugString(L"Could not load binary file");
+		return false;
+	}
+	
+	result = m_entityModel->Initialize(graphics->GetRenderController()->GetDevice(), textureFilename);
+	if (!result)
+	{
+		OutputDebugString(L"Could not initialize entity model.");
+		return false;
+	}
+
+	m_modelID = graphics->RegisterEntityModel(m_entityModel);
+	
 	if (m_modelID == -1)
 		return false;
 
@@ -143,4 +162,16 @@ void PhysicsEntity::SetVelocity(float x, float y, float z)
 	m_velocityX = x;
 	m_velocityY = y;
 	m_velocityZ = z;
+}
+
+void PhysicsEntity::Shutdown()
+{
+	Entity::Shutdown();
+
+	if (m_entityModel)
+	{
+		m_entityModel->Shutdown();
+		delete m_entityModel;
+		m_entityModel = 0;
+	}
 }

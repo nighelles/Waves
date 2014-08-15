@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="proceduralTerrainVertexShader.vs" />
+    <None Include="resources\entities\glock.ent" />
     <None Include="skybox.ps" />
     <None Include="skybox.fx" />
     <None Include="Specular.ps" />
@@ -149,8 +150,10 @@
     <None Include="texture.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Attributions.txt" />
     <Text Include="config.txt" />
     <Text Include="Cube.txt" />
+    <Text Include="levels\level0.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -230,12 +230,19 @@
     <None Include="skybox.fx">
       <Filter>GameEngine\Graphics\Shaders</Filter>
     </None>
+    <None Include="resources\entities\glock.ent" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Cube.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="config.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="levels\level0.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Attributions.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

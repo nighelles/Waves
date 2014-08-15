@@ -28,6 +28,12 @@
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
 
+#define NUMBEROFTEAMS 2
+#define MAXSPAWNPOINTS 10
+#define MAXENTITIES 10
+
+#define MAXPLAYERS 5
+
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dx11.lib")
@@ -46,6 +52,12 @@ public:
 		bool forward, backward, left, right;
 		int mouseDX, mouseDY;
 	} NetworkPlayer;
+
+	typedef struct  
+	{
+		float x, y, z;
+		float rx, ry, rz;
+	} PlayerSpawnPoint;
 
 public:
 	Engine();
@@ -72,8 +84,21 @@ private:
 
 	void UpdateEntities(float dt, float loopCompletion);
 
+	bool CreateEntityFromFile(
+		char* filename, float x, float y, float z,
+		float rx, float ry, float rz,
+		float vx, float vy, float vz
+		);
+
+	bool SpawnPlayer(PlayerEntity* player, PlayerSpawnPoint spawnpoint);
+
+
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
+
+	PlayerEntity* Player() { return m_players[m_playerNumber]; };
+
+	// Networking
 	void MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt);
 
 private:
@@ -91,8 +116,10 @@ private:
 	PhysicsEntity* m_playerBoat;
 	PhysicsEntity* m_otherBoat;
 
-	PlayerEntity* m_player;
-	PlayerEntity* m_otherPlayer;
+	PlayerEntity* m_players[MAXPLAYERS];
+	PhysicsEntity* m_entities[MAXENTITIES];
+
+	int m_entityIndex;
 
 	ProceduralTerrain* m_waterTerrain;
 	Terrain* m_landTerrain;
@@ -120,10 +147,22 @@ private:
 	char m_serverAddress[16];
 
 	GameState m_gameState;
-
-	char m_terrainMapFilename[256];
-
+	
 	SYSTEMTIME newtime, oldtime;
+
+	// Loading variables
+
+	char m_levelFilename[256];
+	char m_terrainMapFilename[256];
+	char m_landTextureFilename[256];
+	char m_skyboxTextureFilename[256];
+
+	PlayerSpawnPoint m_spawnPoints[NUMBEROFTEAMS][MAXSPAWNPOINTS];
+	int m_spawnPointIndex[NUMBEROFTEAMS];
+
+	int m_playerTeam;
+	int m_playerNumber;
+
 
 #if EDITOR_BUILD
 

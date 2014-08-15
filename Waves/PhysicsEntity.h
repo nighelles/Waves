@@ -10,6 +10,8 @@ public:
 	PhysicsEntity();
 	~PhysicsEntity();
 
+	void Shutdown();
+
 	bool InitializeModel(GraphicsController* graphics, char* modelFilename, WCHAR* textureFilename);
 	
 	void Tick(float dt);
@@ -37,7 +39,13 @@ public:
 	int ModelID() const { return m_modelID; }
 	void ModelID(int val) { m_modelID = val; }
 
+	// accessors
+	EntityModel* GetEntityModel() const { return m_entityModel; }
+	void SetEntityModel(EntityModel* val) { m_entityModel = val; }
+
 protected:
+	EntityModel* m_entityModel;
+
 	int m_modelID;
 	float m_velocityDamping;
 

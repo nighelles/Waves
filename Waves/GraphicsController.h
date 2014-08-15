@@ -47,10 +47,15 @@ public:
 
 	int RegisterBitmap(Bitmap* bitmap);
 
+	bool InitializeSkybox(char* skyboxFilename);
+
 	Camera* GetPlayerCamera();
 	ProceduralTerrain* GetTerrain();
 
 	Light* GetLight() const { return m_Light; }
+
+
+	// Accessors
 
 private:
 	RenderController* m_Render;

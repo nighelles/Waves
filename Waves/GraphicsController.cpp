@@ -1,5 +1,7 @@
 #include "GraphicsController.h"
 
+#include <atldef.h>
+#include <atlstr.h>
 
 GraphicsController::GraphicsController()
 {
@@ -136,32 +138,6 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 	m_Light->SetFillColor (0.3f, 0.3f, 0.3f, 1.0f);
 	m_Light->SetDirection(0.0f, -1.0f, 0.0f);
 
-	// skybox
-
-	m_SkyboxShader = new SkyboxShader;
-	if (!m_SkyboxShader) return false;
-	result = m_SkyboxShader->Initialize(m_Render->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not Initialize Skybox Shader", L"Error", MB_OK);
-		return false;
-	}
-
-	m_skybox = new EntityModel;
-	
-	result = m_skybox->LoadModel("skybox.obj");
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not Load Skybox Model", L"Error", MB_OK);
-		return false;
-	}
-	
-	result = m_skybox->Initialize(m_Render->GetDevice(), L"Sunset.dds");
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);
-		return false;
-	}
 	return true;
 }
 
@@ -299,5 +275,38 @@ bool GraphicsController::Render(float dt)
 
 	m_Render->PresentBackBuffer();
 
+	return true;
+}
+
+bool GraphicsController::InitializeSkybox(char* skyboxFilename)
+{
+	bool result;
+	
+	// skybox
+
+	m_SkyboxShader = new SkyboxShader;
+	if (!m_SkyboxShader) return false;
+	result = m_SkyboxShader->Initialize(m_Render->GetDevice(), m_hwnd);
+	if (!result)
+	{
+		MessageBox(m_hwnd, L"Could not Initialize Skybox Shader", L"Error", MB_OK);
+		return false;
+	}
+
+	m_skybox = new EntityModel;
+
+	result = m_skybox->LoadModel("skybox.obj");
+	if (!result)
+	{
+		MessageBox(m_hwnd, L"Could not Load Skybox Model", L"Error", MB_OK);
+		return false;
+	}
+
+	result = m_skybox->Initialize(m_Render->GetDevice(), L"resources\\textures\\redsky.dds");
+	if (!result)
+	{
+		MessageBox(m_hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }

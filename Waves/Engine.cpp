@@ -12,8 +12,15 @@ Engine::Engine()
 	m_otherBoat = 0;
 
 #if GAME_BUILD
-	m_player = 0;
-	m_otherPlayer = 0;
+	for (int playerNum = 0; playerNum != MAXPLAYERS; ++playerNum)
+	{
+		m_players[playerNum] = 0;
+	}
+	for (int entityNum = 0; entityNum != MAXENTITIES; ++entityNum)
+	{
+		m_entities[entityNum] = 0;
+	}
+	m_entityIndex = 0;
 #endif
 
 #if EDITOR_BUILD
@@ -37,6 +44,12 @@ Engine::Engine()
 	m_gameState = GAME_MENU;
 
 	m_playerConnected = false;
+
+	// LOADING VARIABLES
+	for (int i = 0; i != NUMBEROFTEAMS; ++i)
+	{
+		m_spawnPointIndex[i] = 0;
+	}
 }
 
 Engine::Engine(const Engine& other)
@@ -50,20 +63,84 @@ Engine::~Engine()
 bool Engine::LoadConfiguration()
 {
 	ifstream fin;
-	char input;
+	char command[256];
 
 	fin.open("config.txt");
-	if (fin.fail()) return false;
+	if (fin.fail())
+	{
+		OutputDebugString(L"Could not open config.txt");
+		return false;
+	}
 
-	fin.get(input);
-	while (input != ':') fin.get(input);
-	fin >> m_isServer;
-	fin.get(input);
-	while (input != ':') fin.get(input);
-	fin >> m_serverAddress;
-	fin.get(input);
-	while (input != ':') fin.get(input);
-	fin >> m_terrainMapFilename;
+	fin >> command;
+	while (!fin.eof())
+	{
+		if (strcmp(command, "isServer:")==0) fin >> m_isServer;
+		else if (strcmp(command, "serverIP:")==0) fin >> m_serverAddress;
+		else if (strcmp(command, "level:") == 0) fin >> m_levelFilename;
+		else 
+		{
+			OutputDebugString(L"Syntax Error in config.txt");
+			return false;
+		}
+		fin >> command; 
+	}
+	// This file contains the configuration for a level
+
+	fin.close();
+
+	fin.open(m_levelFilename);
+	if (fin.fail())
+	{
+		OutputDebugString(L"Could not open level file");
+		return false;
+	}
+
+	fin >> command;
+	while (!fin.eof())
+	{
+		if (strcmp(command, "map:") == 0)
+		{
+			fin >> m_terrainMapFilename;
+		}
+		else if (strcmp(command, "groundtexture:") == 0)
+		{
+			fin >> m_landTextureFilename;
+		}
+		else if (strcmp(command, "skyboxtexture:") == 0)
+		{
+			fin >> m_skyboxTextureFilename;
+		}
+		else if (strcmp(command, "playerstart:")==0)
+		{
+			int teamNum;
+			float x, y, z, rx, ry, rz;
+			fin >> teamNum >> x >> y >> z >> rx >> ry >> rz;
+			
+			m_spawnPoints[teamNum][m_spawnPointIndex[teamNum]]
+				= { x, y, z, rx, ry, rz};
+			
+		} 
+		else if (strcmp(command, "entity:") == 0)
+		{
+			char filename[256];
+			float x, y, z;
+			float rx, ry, rz;
+			float vx, vy, vz;
+			fin >> filename >> x >> y >> z;
+			fin >> rx >> ry >> rz;
+			fin >> vx >> vy >> vz;
+
+			CreateEntityFromFile(filename, x, y, z, rx, ry, rz, vx, vy, vz);
+		}
+		else 
+		{
+			OutputDebugString(L"Error in level file");
+			return false;
+		}
+		fin >> command;
+	}
+
 
 	if (m_isServer) 
 		OutputDebugString(L"Server\n");
@@ -77,10 +154,72 @@ bool Engine::LoadConfiguration()
 	return true;
 }
 
+bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, float rx, float ry, float rz, float vx, float vy, float vz)
+{
+	fstream fin;
+	char command[256];
+	char modelFilename[256];
+	char textureFilename[256];
+
+	bool result;
+
+	fin.open(filename);
+	if (fin.fail())
+	{
+		OutputDebugString(L"Could not open entity file.");
+		return false;
+	}
+
+	fin >> command;
+	while (!fin.eof())
+	{
+		if (strcmp(command, "model:") == 0) fin >> modelFilename;
+		else if (strcmp(command, "texture:") == 0) fin >> textureFilename;
+		else
+		{
+			OutputDebugString(L"Syntax Error loading entity.\n");
+			return false;
+		}
+		fin >> command;
+	}
+
+	fin.close();
+
+	m_entities[m_entityIndex] = new PhysicsEntity;
+
+	result = m_entities[m_entityIndex]->InitializeModel(
+		m_Graphics,
+		modelFilename,
+		ATL::CA2W(textureFilename));
+
+	if (!result)
+	{
+		OutputDebugString(L"Could not load entity. \n");
+		return false;
+	}
+	result = m_entities[m_entityIndex]->Initialize();
+	if (!result) return false;
+
+	m_entities[m_entityIndex]->SetLocation(x, y, z);
+	m_entities[m_entityIndex]->SetRotation(rx, ry, rz);
+	m_entities[m_entityIndex]->SetVelocity(vx, vy, vz);
+
+	m_entityIndex += 1;
+
+	return true;
+}
+
+bool Engine::SpawnPlayer(PlayerEntity* player, PlayerSpawnPoint spawnpoint)
+{
+	player->SetLocation(spawnpoint.x, spawnpoint.y, spawnpoint.z);
+	player->SetRotation(spawnpoint.rx, spawnpoint.ry, spawnpoint.rz);
+	player->SetVelocity(0, 0, 0);
+
+	return true;
+}
+
 bool Engine::Initialize()
 {
-	LoadConfiguration();
-
 	// GAMESTATE
 	m_gameState = GAME_LOADING;
 
@@ -113,6 +252,16 @@ bool Engine::Initialize()
 
 	result = m_Graphics->Initialize(screenWidth, screenHeight, m_hwnd);
 	if (!result) return false;
+
+	// LOAD CONFIGURATION FROM FILE AFTER COMPONANTS OF THE ENGINE EXIST
+	LoadConfiguration();
+
+	result = m_Graphics->InitializeSkybox(m_skyboxTextureFilename);
+	if (!result)
+	{
+		OutputDebugString(L"Could not initialize skybox.\n");
+		return false;
+	}
 
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
@@ -157,72 +306,69 @@ bool Engine::InitializeGame()
 {
 	bool result;
 
-	// Change these to the new Register model structuring
-
-	// TESTING
-
-	test = new EntityModel;
-
-	test->loadBinaryFile("glock.bmf");
-	test->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"metal.dds");
-	test->SetLocation(100, 5, 100);
-
-	test->CurrentFrame(4);
-
-	m_Graphics->RegisterEntityModel(test);
-
-	// END TESTING
-
 #if GAME_BUILD
 	// Initialize our player
 
-	m_player = new PlayerEntity;
+	m_playerNumber = 0;
+	m_playerTeam = 0;
 
-	result = m_player->InitializeModel(m_Graphics, "player.obj", L"cursor.dds");
+	m_players[m_playerNumber] = new PlayerEntity;
+
+	result = Player()->InitializeModel(
+		m_Graphics, 
+		"player.bmf", 
+		L"cursor.dds");
+
+	SpawnPlayer(Player(), m_spawnPoints[m_playerTeam][0]);
+
 	if (!result) return false;
-	result = m_player->Initialize();
+	result = Player()->Initialize();
 	if (!result) return false;
 
-	m_player->SetLocation(METERS(100.0f),METERS(10.0f),METERS(100.0f));
-	m_player->Render(m_Graphics);
+	Player()->Render(m_Graphics);
+
 
 	// other network player
 
-	m_otherPlayer = new PlayerEntity;
-	
-	result = m_otherPlayer->InitializeModel(m_Graphics, "player.obj", L"cursor.dds");
-	if (!result) return false;
-	result = m_otherPlayer->Initialize();
-	if (!result) return false;
+// 	m_otherPlayer = new PlayerEntity;
+// 	
+// 	result = m_player->InitializeModel(
+// 		m_Graphics,
+// 		"player.bmf",
+// 		L"cursor.dds");
+// 
+// 	if (!result) return false;
+// 	result = m_otherPlayer->Initialize();
+// 	if (!result) return false;
+// 
+// 	m_otherPlayer->SetLocation(0.0f, METERS(5.0f), 0.0f);
+// 	m_otherPlayer->Render(m_Graphics);
 
-	m_otherPlayer->SetLocation(0.0f, METERS(5.0f), 0.0f);
-	m_otherPlayer->Render(m_Graphics);
-
-	// Initialize a boat model
-	m_playerBoat = new PhysicsEntity;
-
-	result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-	if (!result) return false;
-	result = m_playerBoat->Initialize();
-	if (!result) return false;
-
-
-	// Initialize other person's boat
-	m_otherBoat = new PhysicsEntity;
-	result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-	if (!result) return false;
-	result = m_otherBoat->Initialize();
-	if (!result) return false;
-
-	// Put things in place
-	m_playerBoat->SetLocation(100.0f, 0, 0);
-	m_playerBoat->Render(m_Graphics);
-
-	m_otherBoat->SetLocation(100.0f, 0, 0);
-	m_otherBoat->Render(m_Graphics);
+// 	Initialize a boat model
+// 		m_playerBoat = new PhysicsEntity;
+// 	
+// 		result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+// 		if (!result) return false;
+// 		result = m_playerBoat->Initialize();
+// 		if (!result) return false;
+// 	
+// 	
+// 		// Initialize other person's boat
+// 		m_otherBoat = new PhysicsEntity;
+// 		result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
+// 		if (!result) return false;
+// 		result = m_otherBoat->Initialize();
+// 		if (!result) return false;
+// 	
+// 		// Put things in place
+// 		m_playerBoat->SetLocation(100.0f, 0, 0);
+// 		m_playerBoat->Render(m_Graphics);
+// 	
+// 		m_otherBoat->SetLocation(100.0f, 0, 0);
+// 		m_otherBoat->Render(m_Graphics);
 
 	// Attach Camera to boat model
-	m_Graphics->GetPlayerCamera()->BindToEntity(m_player);
+	m_Graphics->GetPlayerCamera()->BindToEntity(Player());
 
 	m_Graphics->GetPlayerCamera()->Update();
 	m_Graphics->GetPlayerCamera()->Render();
@@ -239,7 +385,7 @@ bool Engine::InitializeGame()
 	m_landTerrain = new Terrain();
 	if (!m_landTerrain) return false;
 
-	result = m_landTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"sand_tiling.dds");
+	result = m_landTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), ATL::CA2W(m_landTextureFilename));
 	if (!result)
 	{
 		OutputDebugString(L"Could not Initialize Sand Terrain");
@@ -372,18 +518,26 @@ void Engine::Shutdown()
 		delete m_playerBoat;
 		m_playerBoat = 0;
 	}
-	if (m_player)
+
+	for (int playerNum = 0; playerNum != MAXPLAYERS; ++playerNum)
 	{
-		m_player->Shutdown();
-		delete m_player;
-		m_player = 0;
+		if (m_players[playerNum])
+		{
+			m_players[playerNum]->Shutdown();
+			delete m_players[playerNum];
+			m_players[playerNum] = 0;
+		}
 	}
-	if (m_otherPlayer)
+	for (int entityNum = 0; entityNum != MAXENTITIES; ++entityNum)
 	{
-		m_otherPlayer->Shutdown();
-		delete m_otherPlayer;
-		m_otherPlayer = 0;
+		if (m_entities[entityNum])
+		{
+			m_entities[entityNum]->Shutdown();
+			delete m_entities[entityNum];
+			m_entities[entityNum] = 0;
+		}
 	}
+
 	if (m_otherBoat)
 	{
 		m_otherBoat->Shutdown();
@@ -567,8 +721,15 @@ bool Engine::Update()
 #if GAME_BUILD
 
 	if (m_Input->IsKeyPressed(DIK_T))
-		test->Animating(true);
-
+	{
+		for (int i = 0; i != MAXENTITIES; ++i)
+		{
+			if (m_entities[i])
+			{
+				m_entities[i]->GetEntityModel()->Animating(true);
+			}
+		}
+	}
 	NetworkedInput playerInput{ };
 
 	if (m_Input->IsKeyPressed(DIK_W))
@@ -596,10 +757,10 @@ bool Engine::Update()
 
 	D3DXVECTOR3 rot = m_Graphics->GetPlayerCamera()->GetRotation();
 	float px, py, pz;
-	m_player->GetRotation(px, py, py);
+	Player()->GetRotation(px, py, py);
 	m_Graphics->GetPlayerCamera()->SetRotation(rot.x, py, rot.z);
 
-	MovePlayer(playerInput, m_player, m_dt);
+	MovePlayer(playerInput, Player(), m_dt);
 
 #endif // #if GAME_BUILD
 
@@ -711,31 +872,42 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 {
 
 #if GAME_BUILD
-	m_playerBoat->Tick(dt);
-	m_otherBoat->Tick(dt);
+	//m_playerBoat->Tick(dt);
+	//m_otherBoat->Tick(dt);
 
-	m_playerBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
-	m_otherBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
+	//m_playerBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
+	//m_otherBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
 
-	m_player->Tick(dt);
+	Player()->Tick(dt);
 
-	PHY_SetupTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+	PHY_SetupTick(Player(), m_landTerrain, m_waterTerrain, m_timeloopCompletion);
 
 	// This is just if the entity is affected by water, probably should fix that
-	if (m_player->m_underwater) {
+	if (Player()->m_underwater) {
 		m_Graphics->GetLight()->SetDiffuseColor(0.2f, 0.2f, 1.0f, 1.0f);
 	}
 	else {
-		m_Graphics->GetLight()->SetDiffuseColor(1.0f,1.0f,1.0f, 1.0f);
+		m_Graphics->GetLight()->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	PHY_ApplyGravity(m_player, dt);
-	
-	PHY_EndTick(m_player, m_landTerrain, m_waterTerrain, m_timeloopCompletion,dt);
+	PHY_ApplyGravity(Player(), dt);
 
-	m_playerBoat->Render(m_Graphics);
-	m_otherBoat->Render(m_Graphics);
-	m_player->Render(m_Graphics);
+	PHY_EndTick(Player(), m_landTerrain, m_waterTerrain, m_timeloopCompletion, dt);
+
+	for (int i = 0; i < MAXPLAYERS; ++i)
+	{
+		if (m_players[i])
+		{
+			m_players[i]->Render(m_Graphics);
+		}
+	}
+	for (int i = 0; i < MAXENTITIES; ++i)
+	{
+		if (m_entities[i])
+		{
+			m_entities[i]->Render(m_Graphics);
+		}
+	}
 #endif // #if GAME_BUILD
 
 #if USE_NETWORKING
