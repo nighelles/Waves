@@ -109,6 +109,8 @@ void Camera::Update()
 		float x, y, z;
 		m_bindedEntity->GetCameraLocation(x, y, z);
 		SetLocation(x, y, z);
+		m_bindedEntity->GetRotation(x, y, z);
+		SetRotation(x, y, z);
 	}
 	return;
 }
@@ -149,5 +151,6 @@ D3DXVECTOR3 Camera::GetRotation()
 {
 	return D3DXVECTOR3(m_rotationX, m_rotationY, m_rotationZ);
 }
+
 
 

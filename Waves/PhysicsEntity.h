@@ -15,7 +15,7 @@ public:
 	bool InitializeModel(GraphicsController* graphics, char* modelFilename, WCHAR* textureFilename);
 	
 	void Tick(float dt);
-	void Render(GraphicsController* graphics);
+	virtual void Render(GraphicsController* graphics);
 	void OrientToTerrain(ProceduralTerrain* terrain, float time);
 
 	void GetBoundingBox(D3DXVECTOR3&, D3DXVECTOR3&, D3DXVECTOR3&, D3DXVECTOR3&);

@@ -34,6 +34,8 @@
 
 #define MAXPLAYERS 5
 
+#define MAXWEAPONS 3
+
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dx11.lib")
@@ -87,8 +89,8 @@ private:
 	bool CreateEntityFromFile(
 		char* filename, float x, float y, float z,
 		float rx, float ry, float rz,
-		float vx, float vy, float vz
-		);
+		float vx, float vy, float vz,
+		bool isWeapon, int slot);
 
 	bool SpawnPlayer(PlayerEntity* player, PlayerSpawnPoint spawnpoint);
 
@@ -159,6 +161,10 @@ private:
 
 	PlayerSpawnPoint m_spawnPoints[NUMBEROFTEAMS][MAXSPAWNPOINTS];
 	int m_spawnPointIndex[NUMBEROFTEAMS];
+
+	PhysicsEntity *m_weaponEntities[MAXWEAPONS];
+	bool		  m_weapons[MAXWEAPONS];
+	int			  m_currentWeapon;
 
 	int m_playerTeam;
 	int m_playerNumber;

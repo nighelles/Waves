@@ -21,6 +21,11 @@ Engine::Engine()
 		m_entities[entityNum] = 0;
 	}
 	m_entityIndex = 0;
+	for (int wepNum = 0; wepNum != MAXWEAPONS; ++wepNum)
+	{
+		m_weaponEntities[wepNum] = 0;
+	}
+	m_currentWeapon = 0;
 #endif
 
 #if EDITOR_BUILD
@@ -131,7 +136,16 @@ bool Engine::LoadConfiguration()
 			fin >> rx >> ry >> rz;
 			fin >> vx >> vy >> vz;
 
-			CreateEntityFromFile(filename, x, y, z, rx, ry, rz, vx, vy, vz);
+			CreateEntityFromFile(filename, x, y, z, rx, ry, rz, vx, vy, vz, false, 0);
+		}
+		else if (strcmp(command, "weapon:") == 0)
+		{
+			char filename[256];
+			int slot;
+
+			fin >> filename >> slot;
+
+			CreateEntityFromFile(filename, slot, 0, 0, 0, 0, 0, 0, 0, 0, true, slot);
 		}
 		else 
 		{
@@ -154,7 +168,8 @@ bool Engine::LoadConfiguration()
 	return true;
 }
 
-bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, float rx, float ry, float rz, float vx, float vy, float vz)
+
+bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, float rx, float ry, float rz, float vx, float vy, float vz, bool isWeapon, int slot)
 {
 	fstream fin;
 	char command[256];
@@ -162,6 +177,8 @@ bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, flo
 	char textureFilename[256];
 
 	bool result;
+
+	int fps;
 
 	fin.open(filename);
 	if (fin.fail())
@@ -173,7 +190,7 @@ bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, flo
 	fin >> command;
 	while (!fin.eof())
 	{
-		if (strcmp(command, "model:") == 0) fin >> modelFilename;
+		if (strcmp(command, "model:") == 0) fin >> modelFilename >> fps;
 		else if (strcmp(command, "texture:") == 0) fin >> textureFilename;
 		else
 		{
@@ -185,26 +202,47 @@ bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, flo
 
 	fin.close();
 
-	m_entities[m_entityIndex] = new PhysicsEntity;
-
-	result = m_entities[m_entityIndex]->InitializeModel(
-		m_Graphics,
-		modelFilename,
-		ATL::CA2W(textureFilename));
-
-	if (!result)
+	if (!isWeapon)
 	{
-		OutputDebugString(L"Could not load entity. \n");
-		return false;
+		m_entities[m_entityIndex] = new PhysicsEntity;
+
+		result = m_entities[m_entityIndex]->InitializeModel(
+			m_Graphics,
+			modelFilename,
+			ATL::CA2W(textureFilename));
+
+		if (!result)
+		{
+			OutputDebugString(L"Could not load entity. \n");
+			return false;
+		}
+		result = m_entities[m_entityIndex]->Initialize();
+		if (!result) return false;
+
+		m_entities[m_entityIndex]->SetLocation(x, y, z);
+		m_entities[m_entityIndex]->SetRotation(rx, ry, rz);
+		m_entities[m_entityIndex]->SetVelocity(vx, vy, vz);
+		m_entities[m_entityIndex]->GetEntityModel()->Fps(fps);
+
+		m_entityIndex += 1;
 	}
-	result = m_entities[m_entityIndex]->Initialize();
-	if (!result) return false;
+	else {
+		m_weaponEntities[slot] = new PhysicsEntity;
 
-	m_entities[m_entityIndex]->SetLocation(x, y, z);
-	m_entities[m_entityIndex]->SetRotation(rx, ry, rz);
-	m_entities[m_entityIndex]->SetVelocity(vx, vy, vz);
+		result = m_weaponEntities[slot]->InitializeModel(
+			m_Graphics,
+			modelFilename,
+			ATL::CA2W(textureFilename));
 
-	m_entityIndex += 1;
+		if (!result)
+		{
+			OutputDebugString(L"Could not load weapon. \n");
+			return false;
+		}
+		m_weapons[slot] = true;
+
+		m_weaponEntities[slot]->GetEntityModel()->Fps(fps);
+	}
 
 	return true;
 }
@@ -326,6 +364,14 @@ bool Engine::InitializeGame()
 	if (!result) return false;
 
 	Player()->Render(m_Graphics);
+
+	for (int i = 0; i != MAXWEAPONS; ++i)
+	{
+		if (m_weaponEntities[i])
+		{
+			m_weaponEntities[i]->BindToEntity(Player());
+		}
+	}
 
 
 	// other network player
@@ -538,6 +584,16 @@ void Engine::Shutdown()
 		}
 	}
 
+	for (int wepNum = 0; wepNum != MAXWEAPONS; ++wepNum)
+	{
+		if (m_weaponEntities[wepNum])
+		{
+			m_weaponEntities[wepNum]->Shutdown();
+			delete m_weaponEntities[wepNum];
+			m_weaponEntities[wepNum] = 0;
+		}
+	}
+
 	if (m_otherBoat)
 	{
 		m_otherBoat->Shutdown();
@@ -729,7 +785,23 @@ bool Engine::Update()
 				m_entities[i]->GetEntityModel()->Animating(true);
 			}
 		}
+		for (int i = 0; i != MAXWEAPONS; ++i)
+		{
+			if (m_weaponEntities[i])
+			{
+				m_weaponEntities[i]->GetEntityModel()->Animating(true);
+			}
+		}
 	}
+
+	bool mouse1, mouse2;
+	m_Input->IsMouseClicked(mouse1, mouse2);
+	if (mouse1)
+	{
+		// "fire" main weapon
+		m_weaponEntities[m_currentWeapon]->GetEntityModel()->Animating(true);
+	}
+
 	NetworkedInput playerInput{ };
 
 	if (m_Input->IsKeyPressed(DIK_W))
@@ -746,19 +818,13 @@ bool Engine::Update()
 		playerInput.keys[Network_CONTROL] = true;
 	if (m_Input->IsKeyPressed(DIK_LSHIFT))
 		playerInput.keys[Network_SHIFT] = true;
-
 	if (m_Input->IsKeyDown(DIK_SPACE))
 		playerInput.keys[Network_SPACE] = true;
 
 	playerInput.mouseDX = mouseDX;
 	playerInput.mouseDY = mouseDY;
 
-	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
-
-	D3DXVECTOR3 rot = m_Graphics->GetPlayerCamera()->GetRotation();
-	float px, py, pz;
-	Player()->GetRotation(px, py, py);
-	m_Graphics->GetPlayerCamera()->SetRotation(rot.x, py, rot.z);
+	//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
 	MovePlayer(playerInput, Player(), m_dt);
 
@@ -865,7 +931,7 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 		player->Movement(dir.x, dir.y, dir.z, dt);
 
 
-	player->ApplyRotation(0, inp.mouseDX, 0); // THIS SHOULD BE BASED ON DT ALSO
+	player->ApplyRotation(inp.mouseDY, inp.mouseDX, 0); // THIS SHOULD BE BASED ON DT ALSO
 }
 
 void Engine::UpdateEntities(float dt, float loopCompletion)
@@ -898,6 +964,7 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	{
 		if (m_players[i])
 		{
+			m_players[i]->Tick(dt);
 			m_players[i]->Render(m_Graphics);
 		}
 	}
@@ -905,7 +972,16 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	{
 		if (m_entities[i])
 		{
+			m_entities[i]->Tick(dt);
 			m_entities[i]->Render(m_Graphics);
+		}
+	}
+	for (int i = 0; i < MAXWEAPONS; ++i)
+	{
+		if (m_weaponEntities[i])
+		{
+			m_weaponEntities[i]->Tick(dt);
+			m_weaponEntities[i]->Render(m_Graphics);
 		}
 	}
 #endif // #if GAME_BUILD

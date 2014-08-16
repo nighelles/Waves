@@ -35,12 +35,12 @@ bool Entity::Initialize() {
 
 void Entity::Shutdown()
 {
-	if (m_bindedEntity)
-	{
-		m_bindedEntity->Shutdown();
-		delete m_bindedEntity;
-		m_bindedEntity = 0;
-	}
+// 	if (m_bindedEntity)
+// 	{
+// 		m_bindedEntity->Shutdown();
+// 		delete m_bindedEntity;
+// 		m_bindedEntity = 0;
+// 	}
 }
 
 
@@ -54,8 +54,8 @@ void Entity::GetCameraLocation(float& x, float& y, float& z)
 	//code reuse :(
 	float yaw, pitch, roll;
 	yaw = m_rotationY * 0.0174532925f;
-	pitch = m_rotationX * 0.0174532925f;
-	roll = m_rotationZ * 0.0174532925f; 
+	pitch = 0;// m_rotationX * 0.0174532925f;
+	roll = 0;// m_rotationZ * 0.0174532925f;
 	
 	D3DXMatrixRotationYawPitchRoll(&rotationMatrix, yaw, pitch, roll);
 
@@ -142,7 +142,7 @@ void Entity::GetRotation(float& x, float& y, float& z)
 {
 	x = m_rotationX;
 	y = m_rotationY;
-	z = m_rotationY;
+	z = m_rotationZ;
 }
 
 void Entity::BindToEntity(Entity* entity)

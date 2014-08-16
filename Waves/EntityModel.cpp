@@ -21,6 +21,8 @@ EntityModel::EntityModel()
 	m_numFrames = 1;
 	m_currentFrame = 0;
 
+	m_fps = 24;
+
 	m_animating = false;
 
 	m_currentTime = 0;
@@ -65,6 +67,9 @@ void EntityModel::Shutdown()
 
 void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 {
+
+	m_maxTime = (float)m_numFrames / (float)m_fps;
+
 	if (m_animating && m_numFrames > 1)
 	{
 		m_currentTime += dt;

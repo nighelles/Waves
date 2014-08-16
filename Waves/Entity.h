@@ -14,8 +14,8 @@ public:
 
 	virtual void Update();
 
-	void GetCameraLocation(float&, float&, float&);
-	void GetBindLocation(float&, float&, float&);
+	virtual void GetCameraLocation(float&, float&, float&);
+	virtual void GetBindLocation(float&, float&, float&);
 
 	void SetRotation(float x, float y, float z);
 	void SetLocation(float x, float y, float z);

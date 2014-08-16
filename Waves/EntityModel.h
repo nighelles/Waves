@@ -81,6 +81,8 @@ public:
 	void Animating(bool val) { m_animating = val; }
 	int CurrentFrame() const { return m_currentFrame; }
 	void CurrentFrame(int val) { m_currentFrame = val; }
+	int Fps() const { return m_fps; }
+	void Fps(int val) { m_fps = val; }
 
 	int m_vertexCount, m_indexCount;
 	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
@@ -103,6 +105,7 @@ protected:
 
 	bool m_animating;
 
+	int m_fps;
 	float m_currentTime;
 	float m_maxTime;
 
