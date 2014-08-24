@@ -1,2 +1,2 @@
-model: resources\models\tree.bmf
-texture: resources\textures\bark.dds
+model: resources\models\tree.bmf 24
+texture: resources\models\tree.btw 
