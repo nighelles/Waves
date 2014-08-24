@@ -36,6 +36,8 @@ EntityModel::EntityModel()
 
 	m_materials = 0;
 	m_subModels = 0;
+
+	usesModelShader = true;
 }
 
 EntityModel::EntityModel(const EntityModel& other)
@@ -108,6 +110,11 @@ int EntityModel::GetIndexCount()
 ID3D11ShaderResourceView* EntityModel::GetTexture()
 {
 	return m_materials[0].texture->GetTexture();
+}
+
+EntityModel::Material* EntityModel::GetMaterial()
+{
+	return m_materials;
 }
 
 bool EntityModel::InitializeBuffers(ID3D11Device* device)

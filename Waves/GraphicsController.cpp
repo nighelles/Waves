@@ -9,6 +9,8 @@ GraphicsController::GraphicsController()
 	m_PlayerCamera = 0;
 	
 	m_DefaultShader = 0;
+	m_modelShader = 0;
+
 	m_WaterShader = 0;
 	m_SkyboxShader = 0;
 
@@ -123,6 +125,15 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 		return false;
 	}
 
+	m_modelShader = new ModelShader;
+	if (!m_modelShader) return false;
+	m_modelShader->Initialize(m_Render->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Initialize Model Shader", L"Error", MB_OK);
+		return false;
+	}
+
 	m_WaterShader = new ProceduralTerrainShader;
 	if (!m_WaterShader) return false;
 	m_WaterShader->Initialize(m_Render->GetDevice(), hwnd);
@@ -154,6 +165,12 @@ void GraphicsController::Shutdown()
 		m_DefaultShader->Shutdown();
 		delete m_DefaultShader;
 		m_DefaultShader = 0;
+	}
+	if (m_modelShader)
+	{
+		m_modelShader->Shutdown();
+		delete m_modelShader;
+		m_modelShader = 0;
 	}
 	if (m_WaterShader)
 	{
@@ -236,15 +253,24 @@ bool GraphicsController::Render(float dt)
 			m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
 			if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
 			{
-
-				m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
-				//result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture());
-				result = m_DefaultShader->Render(m_Render->GetDeviceContext(),
-					m_modelEntities[i]->GetIndexCount(),
-					worldMatrix, viewMatrix, projectionMatrix,
-					m_modelEntities[i]->GetTexture(),
-					m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
-
+				if (m_modelEntities[i]->usesModelShader)
+				{
+					m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
+					result = m_modelShader->Render(m_Render->GetDeviceContext(),
+						m_modelEntities[i]->m_subModels,
+						worldMatrix, viewMatrix, projectionMatrix,
+						m_modelEntities[i]->GetMaterial(),
+						m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(),
+						m_modelEntities[i]->m_subModelCount);
+				}
+				else {
+					m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
+					result = m_DefaultShader->Render(m_Render->GetDeviceContext(),
+						m_modelEntities[i]->m_indexCount,
+						worldMatrix, viewMatrix, projectionMatrix,
+						m_modelEntities[i]->GetTexture(),
+						m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+				}
 			}
 			else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
 			{

@@ -124,6 +124,9 @@
     <ClCompile Include="LoadBinary.cpp">
       <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="ModelShader.cpp">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -209,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="LoadBinary.h">
       <Filter>GameEngine\Entities\EntityModel\Load Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelShader.h">
+      <Filter>GameEngine\Graphics\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

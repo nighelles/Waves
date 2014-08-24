@@ -75,6 +75,7 @@ public:
 	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
 	ID3D11ShaderResourceView* GetTexture();
+	Material* GetMaterial();
 
 	ShaderType m_shaderType;
 
@@ -108,6 +109,8 @@ public:
 
 	SubModel *m_subModels;
 	Material *m_materials;
+
+	bool usesModelShader;
 
 protected:
 	virtual bool InitializeBuffers(ID3D11Device*);

@@ -9,6 +9,8 @@ Terrain::Terrain() : EntityModel()
 	m_gridSize = METERS(4);
 
 	m_initialHeight = 5.0f;
+
+	usesModelShader = false;
 }
 
 

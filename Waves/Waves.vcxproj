@@ -92,6 +92,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityModel.cpp" />
+    <ClCompile Include="ModelShader.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="NetworkController.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="EntityModel.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LoadBinary.h" />
+    <ClInclude Include="ModelShader.h" />
     <ClInclude Include="NetworkClient.h" />
     <ClInclude Include="NetworkController.h" />
     <ClInclude Include="NetworkDefinitions.h" />
