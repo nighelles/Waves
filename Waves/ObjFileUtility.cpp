@@ -4,10 +4,11 @@ using namespace std;
 
 ObjFileUtility::ObjFileUtility()
 {
-	int m_vertexCount = 0;
-	int m_textureCount = 0;
-	int m_normalCount = 0;
-	int m_faceCount = 0;
+	m_vertexCount = 0;
+	m_textureCount = 0;
+	m_normalCount = 0;
+	m_faceCount = 0;
+	m_numMats = 0;
 }
 
 
@@ -15,14 +16,25 @@ ObjFileUtility::~ObjFileUtility()
 {
 }
 
-bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, 
+bool ObjFileUtility::LoadObjFile(char* filename, char* outputFilename,
+								EntityModel::UniqueVertex *vertices, 
 								EntityModel::UniqueVertex *texcoords, 
 								EntityModel::UniqueVertex *normals, 
-								EntityModel::UniqueFace *faces)
+								EntityModel::UniqueFace *faces,
+								EntityModel::SubModel *subModels)
 {
 	ifstream fin;
+	ofstream fout;
 	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
-	char input, input2;
+	char input2;
+
+	char input[256];
+
+	char garbage[10];
+	char textureFilename[256];
+	char matName[256];
+
+	int textureIndex = 0;
 
 	vertexIndex = 0;
 	texcoordIndex = 0;
@@ -30,64 +42,89 @@ bool ObjFileUtility::LoadObjFile(char* filename, EntityModel::UniqueVertex *vert
 	faceIndex = 0;
 
 	fin.open(filename);
+	fout.open(outputFilename);
 
 	if (fin.fail()) return false;
+	if (fout.fail()) return false;
 
+	subModels = new EntityModel::SubModel[m_numMats];
+	int subModelIndex = 0;
+
+	fout << m_numMats << endl;
 
 	// REMEMBER TO CONVERT FROM LEFT HANDED COORDINATE SYSTEM
-	fin.get(input);
+	fin >> input;
 	while (!fin.eof())
 	{
-		if (input == 'v')
+		if (strcmp(input, "v") == 0)
 		{
-			fin.get(input);
 
-			if (input == ' ')
-			{
-				fin >> vertices[vertexIndex].x >> vertices[vertexIndex].y >> vertices[vertexIndex].z;
+			fin >> vertices[vertexIndex].x >> vertices[vertexIndex].y >> vertices[vertexIndex].z;
 
-				vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
-				vertexIndex++;
-			}
-
-			if (input == 't')
-			{
-				fin >> texcoords[texcoordIndex].x >> texcoords[texcoordIndex].y;
-
-				texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
-				texcoordIndex++;
-			}
-
-			if (input == 'n')
-			{
-				fin >> normals[normalIndex].x >> normals[normalIndex].y >> normals[normalIndex].z;
-
-				normals[normalIndex].z = normals[normalIndex].z * -1.0f;
-				normalIndex++;
-			}
+			vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
+			vertexIndex++;
 		}
 
-		if (input == 'f')
+		if (strcmp(input, "vt") == 0)
 		{
-			fin.get(input);
-			if (input == ' ')
-			{
-				fin >> faces[faceIndex].vIndex3 >> input2 >> faces[faceIndex].tIndex3 >> input2 >> faces[faceIndex].nIndex3
-					>> faces[faceIndex].vIndex2 >> input2 >> faces[faceIndex].tIndex2 >> input2 >> faces[faceIndex].nIndex2
-					>> faces[faceIndex].vIndex1 >> input2 >> faces[faceIndex].tIndex1 >> input2 >> faces[faceIndex].nIndex1;
+			fin >> texcoords[texcoordIndex].x >> texcoords[texcoordIndex].y;
+
+			texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
+			texcoordIndex++;
+		}
+
+		if (strcmp(input, "vn") == 0)
+		{
+			fin >> normals[normalIndex].x >> normals[normalIndex].y >> normals[normalIndex].z;
+
+			normals[normalIndex].z = normals[normalIndex].z * -1.0f;
+			normalIndex++;
+		}
+
+		if (strcmp(input, "f") == 0)
+		{
+
+			fin >> faces[faceIndex].vIndex3 >> input2 >> faces[faceIndex].tIndex3 >> input2 >> faces[faceIndex].nIndex3
+				>> faces[faceIndex].vIndex2 >> input2 >> faces[faceIndex].tIndex2 >> input2 >> faces[faceIndex].nIndex2
+				>> faces[faceIndex].vIndex1 >> input2 >> faces[faceIndex].tIndex1 >> input2 >> faces[faceIndex].nIndex1;
 				faceIndex++;
+
+		}
+
+		if (strcmp(input, "usemtl") == 0)
+		{
+
+			if (subModelIndex == 0)
+			{
+				fin >> matName;
+				subModels[subModelIndex].begin = faceIndex;
+				subModelIndex += 1;
+			}
+			else
+			{
+				subModels[subModelIndex-1].end = faceIndex;
+
+				fout << "Material: " << matName << " " <<
+					subModels[subModelIndex-1].begin << " " <<
+					subModels[subModelIndex-1].end << endl;
+			
+				subModels[subModelIndex].begin = faceIndex;
+				subModelIndex += 1;
+				fin >> matName;
 			}
 		}
 
-		while (input != '\n')
-		{
-			fin.get(input);
-		}
-
-		fin.get(input);
+		fin >> input;
 	}
 
+	subModels[subModelIndex - 1].end = faceIndex;
+
+	fout << "Material: " << matName << ".dds" << " " <<
+		subModels[subModelIndex - 1].begin << " " <<
+		subModels[subModelIndex - 1].end << endl;
+
 	fin.close();
+	fout.close();
 
 	return true;
 }
@@ -98,7 +135,12 @@ void ObjFileUtility::Shutdown()
 	return;
 }
 
-bool ObjFileUtility::loadStats(char* filename, int& numVertices, int& numTexcoords, int& numNormals, int& numFaces)
+bool ObjFileUtility::loadStats(char* filename, 
+								int& numVertices, 
+								int& numTexcoords, 
+								int& numNormals, 
+								int& numFaces,
+								int& numMats)
 {
 	bool result;
 
@@ -109,6 +151,7 @@ bool ObjFileUtility::loadStats(char* filename, int& numVertices, int& numTexcoor
 	numTexcoords = m_textureCount;
 	numNormals = m_normalCount;
 	numFaces = m_faceCount;
+	numMats = m_numMats;
 
 	return true;
 }
@@ -117,7 +160,7 @@ bool ObjFileUtility::loadStats(char* filename, int& numVertices, int& numTexcoor
 bool ObjFileUtility::AnalizeFile(char* filename)
 {
 	ifstream fin;
-	char input;
+	char input[256];
 	
 	m_vertexCount = 0;
 	m_textureCount = 0;
@@ -128,29 +171,16 @@ bool ObjFileUtility::AnalizeFile(char* filename)
 	
 	if (fin.fail() == true) return false;
 
-	fin.get(input);
+	fin >> input;
 	while (!fin.eof())
 	{
-		if (input == 'v')
-		{
-			fin.get(input);
-			if (input == ' ') { m_vertexCount++; }
-			if (input == 't') { m_textureCount++; }
-			if (input == 'n') { m_normalCount++; }
-		}
+		if (strcmp(input, "v") == 0) m_vertexCount++;
+		if (strcmp(input, "vt") == 0) m_textureCount++;
+		if (strcmp(input, "vn") == 0) m_normalCount++;
+		if (strcmp(input, "f") == 0) m_faceCount++;
+		if (strcmp(input, "usemtl") == 0) m_numMats += 1;;
 
-		if (input == 'f')
-		{
-			fin.get(input);
-			if (input == ' ') { m_faceCount++; }
-		}
-
-		while (input != '\n')
-		{
-			fin.get(input);
-		}
-
-		fin.get(input);
+		fin >> input;
 	}
 
 	fin.close();

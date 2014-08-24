@@ -5,7 +5,6 @@ Terrain::Terrain() : EntityModel()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-	m_Texture = 0;
 
 	m_gridSize = METERS(4);
 
@@ -163,16 +162,18 @@ void Terrain::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool Terrain::Initialize(ID3D11Device* device, WCHAR* textureFilename)
+bool Terrain::Initialize(ID3D11Device* device, char* textureFilename)
 {
 	bool result;
 
 	LoadModel();
 
+	m_device = device;
+
 	result = InitializeBuffers(device);
 	if (!result) return false;
 
-	result = LoadTexture(device, textureFilename);
+	result = loadBTWFile(textureFilename);
 	if (!result) return false;
 
 	return true;

@@ -23,9 +23,14 @@ public:
 	ObjFileUtility();
 	~ObjFileUtility();
 
-	bool loadStats(char* filename, int& numVertices, int& numTexcoords, int& numNormals, int& numFaces);
+	bool loadStats(char* filename, int& numVertices, int& numTexcoords, int& numNormals, int& numFaces, int& numMats);
 
-	bool LoadObjFile(char* filename, EntityModel::UniqueVertex *vertices, EntityModel::UniqueVertex *texcoords, EntityModel::UniqueVertex *normals, EntityModel::UniqueFace *faces);
+	bool LoadObjFile(char* filename, char* outputFilename,
+		EntityModel::UniqueVertex *vertices, 
+		EntityModel::UniqueVertex *texcoords, 
+		EntityModel::UniqueVertex *normals, 
+		EntityModel::UniqueFace *faces,
+		EntityModel::SubModel *subModels);
 	
 	void Shutdown();
 
@@ -36,5 +41,6 @@ private:
 	int m_textureCount;
 	int m_normalCount;
 	int m_faceCount;
+	int m_numMats;
 };
 

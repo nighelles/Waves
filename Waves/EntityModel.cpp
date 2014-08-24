@@ -1,12 +1,16 @@
 #include "EntityModel.h"
 #include "ObjFileUtility.h"
 
+#include <atldef.h>
+#include <atlstr.h>
+
 
 EntityModel::EntityModel()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-	m_Texture = 0;
+
+	m_textureIndex = 0;
 
 	m_locationX = 0.0f;
 	m_locationY = 0.0f;
@@ -29,6 +33,9 @@ EntityModel::EntityModel()
 	m_maxTime = 1;
 
 	m_isVisible = true;
+
+	m_materials = 0;
+	m_subModels = 0;
 }
 
 EntityModel::EntityModel(const EntityModel& other)
@@ -39,16 +46,13 @@ EntityModel::~EntityModel()
 {
 }
 
-bool EntityModel::Initialize(ID3D11Device* device, WCHAR* textureFilename)
+bool EntityModel::Initialize(ID3D11Device* device, char* textureFilename)
 {
 	bool result;
 
 	m_device = device;
 
-	result = InitializeBuffers(device);
-	if (!result) return false;
-
-	result = LoadTexture(device, textureFilename);
+	result = loadBTWFile(textureFilename);
 	if (!result) return false;
 	
 	return true;
@@ -65,7 +69,7 @@ void EntityModel::Shutdown()
 	return;
 }
 
-void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
+void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt, int submodelNum)
 {
 
 	m_maxTime = (float)m_numFrames / (float)m_fps;
@@ -85,7 +89,7 @@ void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 			m_currentTime += dt;
 			if (m_currentFrame > m_numFrames) m_currentFrame = m_numFrames;
 		}
-		InitializeBuffers(m_device);
+		UpdateBuffers(m_device, submodelNum);
 	}
 
 	RenderBuffers(deviceContext);
@@ -93,17 +97,17 @@ void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 	return;
 }
 
-int EntityModel::GetIndexCount()
+int EntityModel::GetIndexCount(int i)
 {
-	return m_indexCount;
+	return (m_subModels[i].end-m_subModels[i].end)*3;
 }
 
-ID3D11ShaderResourceView* EntityModel::GetTexture()
+ID3D11ShaderResourceView* EntityModel::GetTexture(int subModelNum)
 {
-	return m_Texture->GetTexture();
+	return m_materials[subModelNum].texture->GetTexture();
 }
 
-bool EntityModel::InitializeBuffers(ID3D11Device* device)
+bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
 {
 	Vertex* vertices;
 	unsigned long* indices;
@@ -112,13 +116,19 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	HRESULT result;
 	int i, vIndex, tIndex, nIndex;
 
-	vertices = new Vertex[m_vertexCount];
+	SubModel subModel = m_subModels[submodelNum];
+
+	if (subModel.end == 0) subModel.end = uniqueFaceCount;
+
+	int subModelFaces = subModel.end - subModel.begin;
+
+	vertices = new Vertex[subModelFaces * 3];
 	if (!vertices) return false;
 
-	indices = new unsigned long[m_indexCount];
+	indices = new unsigned long[subModelFaces * 3];
 	if (!indices) return false;
 
-	for (i = 0; i != uniqueFaceCount*3; ++i)
+	for (i = 0; i != subModelFaces * 3; ++i)
 	{
 		indices[i] = i;
 	}
@@ -127,7 +137,7 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	UniqueVertex *usedNormals = &(uniqueNormals[m_currentFrame*uniqueNormalCount]);
 	UniqueVertex *usedTexcoords = &(uniqueTexcoords[m_currentFrame*uniqueTextureCount]);
 
-	for (int i = 0; i != uniqueFaceCount; ++i)
+	for (int i = subModel.begin; i != subModel.end; ++i)
 	{
 		vIndex = m_modelDesc[i].vIndex1 - 1;
 		tIndex = m_modelDesc[i].tIndex1 - 1;
@@ -155,10 +165,8 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 
 	}
 
-
-
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * m_vertexCount;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * subModelFaces * 3;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -172,7 +180,7 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 	if (FAILED(result)) return false;
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * subModelFaces * 3;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -184,7 +192,7 @@ bool EntityModel::InitializeBuffers(ID3D11Device* device)
 
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 	if (FAILED(result)) return false;
-	
+
 	delete[] vertices;
 	vertices = 0;
 	delete[] indices;
@@ -228,24 +236,11 @@ bool EntityModel::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
 	bool result;
 
-	m_Texture = new Texture;
-	if (!m_Texture) return false;
-
-	result = m_Texture->Initialize(device, filename);
-	if (!result) return false;
-
 	return true;
 }
 
 void EntityModel::ReleaseTexture()
 {
-	if (m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-
 	return;
 }
 
@@ -271,7 +266,16 @@ void EntityModel::ReleaseModel()
 		delete[] uniqueTexcoords;
 		uniqueTexcoords = 0;
 	}
-
+	if (m_subModels)
+	{
+		delete[] m_subModels;
+		m_subModels = 0;
+	}
+	if (m_materials)
+	{
+		delete[] m_materials;
+		m_materials = 0;
+	}
 	return;
 }
 
@@ -279,15 +283,16 @@ bool EntityModel::LoadModel(char* filename)
 {
 	bool result;
 	ObjFileUtility *objLoader = new ObjFileUtility;
+	int a;
 
-	objLoader->loadStats(filename, uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount);
+	objLoader->loadStats(filename, uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount, a);
 
 	m_modelDesc = new UniqueFace[uniqueFaceCount];
 	uniqueVertices = new UniqueVertex[uniqueVertexCount];
 	uniqueTexcoords = new UniqueVertex[uniqueTextureCount];
 	uniqueNormals = new UniqueVertex[uniqueNormalCount];
 
-	result = objLoader->LoadObjFile(filename, uniqueVertices, uniqueTexcoords, uniqueNormals, m_modelDesc);
+	result = objLoader->LoadObjFile(filename, "garbage.txt", uniqueVertices, uniqueTexcoords, uniqueNormals, m_modelDesc, nullptr);
 
 	m_vertexCount = uniqueFaceCount * 3;
 
@@ -408,6 +413,33 @@ bool EntityModel::writeBinaryFile(char* filename)
 	fwrite(uniqueTexcoords, sizeof(float), uniqueTextureCount * 3 * m_numFrames, file);
 
 	fclose(file);
+
+	return true;
+}
+
+bool EntityModel::loadBTWFile(char* filename)
+{
+	ifstream fin;
+
+	fin.open(filename);
+	if (fin.fail()) return false;
+
+	char matfilename[256];
+	char garbage[256];
+
+	fin >> m_subModelCount;
+
+	m_subModels = new SubModel[m_subModelCount];
+	m_materials = new Material[m_subModelCount];
+
+	for (int i = 0; i != m_subModelCount; ++i)
+	{
+		fin >> garbage >> matfilename >> m_subModels[i].begin >> m_subModels[i].end;
+		m_materials[i].texture = new Texture;
+		m_materials[i].texture->Initialize(m_device, ATL::CA2W(matfilename));
+	}
+
+	fin.close();
 
 	return true;
 }

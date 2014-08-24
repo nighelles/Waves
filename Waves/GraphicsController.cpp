@@ -34,7 +34,7 @@ RenderController* GraphicsController::GetRenderController()
 	return m_Render;
 }
 
-int GraphicsController::InitializeEntityModel(char* modelFilename, WCHAR* textureFilename)
+int GraphicsController::InitializeEntityModel(char* modelFilename, char* textureFilename)
 {
 	bool result;
 
@@ -217,7 +217,7 @@ Camera* GraphicsController::GetPlayerCamera()
 bool GraphicsController::Render(float dt)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix;
-	bool result;
+	bool result = false;
 	int i;
 
 	m_Render->ClearBuffers(m_clearColor, m_clearColor, m_clearColor, 1.0f);
@@ -234,15 +234,30 @@ bool GraphicsController::Render(float dt)
 			m_Render->GetWorldMatrix(worldMatrix);
 
 			m_modelEntities[i]->ApplyEntityMatrix(worldMatrix);
-			m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
 			if (m_modelEntities[i]->m_shaderType == EntityModel::TEXTURE_SHADER)
 			{
-				//result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture());
-				result = m_DefaultShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+				for (int j = 0; j != m_modelEntities[i]->m_subModelCount; ++j)
+				{
+					m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt, i);
+					//result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture());
+					result = m_DefaultShader->Render(m_Render->GetDeviceContext(),
+						m_modelEntities[i]->GetIndexCount(j),
+						worldMatrix, viewMatrix, projectionMatrix,
+						m_modelEntities[i]->GetTexture(j),
+						m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
+				}
 			}
 			else if (m_modelEntities[i]->m_shaderType == EntityModel::WATER_SHADER)
 			{
-				result = m_WaterShader->Render(m_Render->GetDeviceContext(), m_modelEntities[i]->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_modelEntities[i]->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(), m_timeLoopCompletion);
+				for (int j = 0; j != m_modelEntities[i]->m_subModelCount; ++j)
+				{
+					result = m_WaterShader->Render(m_Render->GetDeviceContext(),
+						m_modelEntities[i]->GetIndexCount(j),
+						worldMatrix, viewMatrix, projectionMatrix,
+						m_modelEntities[i]->GetTexture(j),
+						m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(),
+						m_timeLoopCompletion);
+				}
 			} 
 			if (!result) return false;
 		}
@@ -253,8 +268,8 @@ bool GraphicsController::Render(float dt)
 	D3DXMatrixTranslation(&worldMatrix, x, y, z);
 	
 
-	m_skybox->Render(m_Render->GetDeviceContext(), dt);
-	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture());
+	m_skybox->Render(m_Render->GetDeviceContext(), dt, 0);
+	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(0), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture(0));
 
 	m_Render->DisableZBuffer();
 	m_PlayerCamera->GetHUDViewMatrix(viewMatrix);
@@ -302,7 +317,7 @@ bool GraphicsController::InitializeSkybox(char* skyboxFilename)
 		return false;
 	}
 
-	result = m_skybox->Initialize(m_Render->GetDevice(), L"resources\\textures\\redsky.dds");
+	result = m_skybox->Initialize(m_Render->GetDevice(), "resources\\entities\\skybox.btw");
 	if (!result)
 	{
 		MessageBox(m_hwnd, L"Could not Initialize Skybox Model", L"Error", MB_OK);

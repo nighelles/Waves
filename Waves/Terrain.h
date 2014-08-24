@@ -19,7 +19,7 @@ public:
 	~Terrain();
 
 	virtual bool InitializeBuffers(ID3D11Device* device);
-	virtual bool Initialize(ID3D11Device* device, WCHAR* textureFilename);
+	virtual bool Initialize(ID3D11Device* device, char* textureFilename);
 
 	virtual bool LoadModel();
 

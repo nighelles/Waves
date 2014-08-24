@@ -23,7 +23,7 @@ PhysicsEntity::~PhysicsEntity()
 {
 }
 
-bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFilename, WCHAR* textureFilename)
+bool PhysicsEntity::InitializeModel(GraphicsController* graphics, char* modelFilename, char* textureFilename)
 {
 	bool result;
 

@@ -40,7 +40,7 @@ public:
 
 	RenderController* GetRenderController();
 
-	int InitializeEntityModel(char* modelFilename, WCHAR* textureFilename);
+	int InitializeEntityModel(char* modelFilename, char* textureFilename);
 	EntityModel* GetEntityModel(int entityID);
 
 	int RegisterEntityModel(EntityModel* model);

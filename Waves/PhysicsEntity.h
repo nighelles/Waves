@@ -12,7 +12,7 @@ public:
 
 	void Shutdown();
 
-	bool InitializeModel(GraphicsController* graphics, char* modelFilename, WCHAR* textureFilename);
+	bool InitializeModel(GraphicsController* graphics, char* modelFilename, char* textureFilename);
 	
 	void Tick(float dt);
 	virtual void Render(GraphicsController* graphics);

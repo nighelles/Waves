@@ -209,7 +209,7 @@ bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, flo
 		result = m_entities[m_entityIndex]->InitializeModel(
 			m_Graphics,
 			modelFilename,
-			ATL::CA2W(textureFilename));
+			textureFilename);
 
 		if (!result)
 		{
@@ -232,7 +232,7 @@ bool Engine::CreateEntityFromFile(char* filename, float x, float y, float z, flo
 		result = m_weaponEntities[slot]->InitializeModel(
 			m_Graphics,
 			modelFilename,
-			ATL::CA2W(textureFilename));
+			textureFilename);
 
 		if (!result)
 		{
@@ -355,7 +355,7 @@ bool Engine::InitializeGame()
 	result = Player()->InitializeModel(
 		m_Graphics, 
 		"player.bmf", 
-		L"cursor.dds");
+		"cursor.dds");
 
 	SpawnPlayer(Player(), m_spawnPoints[m_playerTeam][0]);
 
@@ -431,7 +431,7 @@ bool Engine::InitializeGame()
 	m_landTerrain = new Terrain();
 	if (!m_landTerrain) return false;
 
-	result = m_landTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), ATL::CA2W(m_landTextureFilename));
+	result = m_landTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), m_landTextureFilename);
 	if (!result)
 	{
 		OutputDebugString(L"Could not Initialize Sand Terrain");
@@ -448,7 +448,7 @@ bool Engine::InitializeGame()
 	m_waterTerrain = new ProceduralTerrain();
 	if (!m_waterTerrain) return false;
 
-	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), L"water_trans.dds");
+	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), "water_trans.dds");
 	if (!result)
 	{
 		OutputDebugString(L"Could not Initialize Water Terrain");

@@ -19,6 +19,7 @@ using namespace std;
 
 char filename[20];
 char newfilename[20];
+char matfilename[20];
 
 int numFrames;
 
@@ -26,8 +27,9 @@ EntityModel::UniqueFace	  *modelDesc;
 EntityModel::UniqueVertex *uniqueVertices;
 EntityModel::UniqueVertex *uniqueNormals;
 EntityModel::UniqueVertex *uniqueTexcoords;
+EntityModel::SubModel *subModels;
 
-int numVerts, numNormals, numTexcoords, numFaces;
+int numVerts, numNormals, numTexcoords, numFaces, numMats;
 
 
 bool writeBinaryFile(char* filename);
@@ -46,25 +48,27 @@ int _tmain(int argc, _TCHAR* argv[])
 	for (int i = 0; i < numFrames; ++i)
 	{
 		sprintf(newfilename, "%s%d.obj", filename, i);
+		sprintf(matfilename, "%s.btw", filename, i);
 
 		printf("%s\n", newfilename);
 
 		if (i == 0)
 		{
 			// first file, load stats
-			objLoader->loadStats(newfilename, numVerts, numTexcoords, numNormals, numFaces);
+			objLoader->loadStats(newfilename, numVerts, numTexcoords, numNormals, numFaces, numMats);
 
 			modelDesc = new EntityModel::UniqueFace[numFaces];
 			uniqueVertices = new EntityModel::UniqueVertex[numVerts*numFrames];
 			uniqueNormals = new EntityModel::UniqueVertex[numNormals*numFrames];
 			uniqueTexcoords = new EntityModel::UniqueVertex[numTexcoords*numFrames];
+			subModels = new EntityModel::SubModel[numMats];
 		}
 
-		objLoader->LoadObjFile(newfilename, 
+		objLoader->LoadObjFile(newfilename, matfilename,
 			&(uniqueVertices[i*numVerts]),
 			&(uniqueTexcoords[i*numTexcoords]),
 			&(uniqueNormals[i*numNormals]),
-			modelDesc);
+			modelDesc, subModels);
 	}
 
 	sprintf(newfilename, "%s.bmf", filename);
@@ -77,6 +81,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	delete[] uniqueVertices;
 	delete[] uniqueNormals;
 	delete[] uniqueTexcoords;
+	delete[] subModels;
 
 	return 0;
 }

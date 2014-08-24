@@ -11,6 +11,8 @@
 
 #define FRAMES_PER_SECOND 24.0f
 
+#define MAX_TEXTURES 5
+
 using namespace std;
 
 class EntityModel
@@ -38,6 +40,17 @@ public:
 		int tIndex1, tIndex2, tIndex3;
 	};
 
+	struct Material
+	{
+		Texture *texture;
+	};
+
+	struct SubModel
+	{
+		int begin;
+		int end;
+	};
+
 public:
 	struct Model
 	{
@@ -51,17 +64,17 @@ public:
 	EntityModel(const EntityModel&);
 	~EntityModel();
 
-	virtual bool Initialize(ID3D11Device*, WCHAR*);
+	virtual bool Initialize(ID3D11Device*, char*);
 	virtual void Shutdown();
-	void Render(ID3D11DeviceContext*, float dt);
+	void Render(ID3D11DeviceContext*, float dt, int submodelNum);
 
-	int GetIndexCount();
+	int GetIndexCount(int i);
 	void SetLocation(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
 
 	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
-	ID3D11ShaderResourceView* GetTexture();
+	ID3D11ShaderResourceView* GetTexture(int subModelNum);
 
 	ShaderType m_shaderType;
 
@@ -72,6 +85,8 @@ public:
 
 	bool loadBinaryFile(char* filename);
 	bool writeBinaryFile(char* filename);
+
+	bool loadBTWFile(char* filename);
 
 	virtual bool LoadModel(char*);
 
@@ -86,11 +101,16 @@ public:
 
 	int m_vertexCount, m_indexCount;
 	int uniqueVertexCount, uniqueTextureCount, uniqueNormalCount, uniqueFaceCount;
+	int m_subModelCount;
+	
 	UniqueVertex *uniqueVertices, *uniqueTexcoords, *uniqueNormals;
 	UniqueFace* m_modelDesc;
 
+	SubModel *m_subModels;
+	Material *m_materials;
+
 protected:
-	virtual bool InitializeBuffers(ID3D11Device*);
+	virtual bool UpdateBuffers(ID3D11Device*, int submodelNum);
 	void ShutdownBuffers();
 	virtual void RenderBuffers(ID3D11DeviceContext*);
 
@@ -117,7 +137,7 @@ protected:
 
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 
-	Texture* m_Texture; // ADD multiple textures?
+	int		 m_textureIndex;
 
 	ID3D11Device* m_device;
 };
