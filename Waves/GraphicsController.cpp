@@ -9,6 +9,7 @@ GraphicsController::GraphicsController()
 	m_PlayerCamera = 0;
 	
 	m_DefaultShader = 0;
+	m_TerrainShader = 0;
 	m_modelShader = 0;
 
 	m_WaterShader = 0;
@@ -125,6 +126,15 @@ bool GraphicsController::Initialize(int screenWidth, int screenHeight, HWND hwnd
 		return false;
 	}
 
+	m_TerrainShader = new TerrainShader;
+	if (!m_TerrainShader) return false;
+	m_TerrainShader->Initialize(m_Render->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not Initialize Terrain Shader", L"Error", MB_OK);
+		return false;
+	}
+
 	m_modelShader = new ModelShader;
 	if (!m_modelShader) return false;
 	m_modelShader->Initialize(m_Render->GetDevice(), hwnd);
@@ -165,6 +175,12 @@ void GraphicsController::Shutdown()
 		m_DefaultShader->Shutdown();
 		delete m_DefaultShader;
 		m_DefaultShader = 0;
+	}
+	if (m_TerrainShader)
+	{
+		m_TerrainShader->Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
 	}
 	if (m_modelShader)
 	{
@@ -264,11 +280,12 @@ bool GraphicsController::Render(float dt)
 						m_modelEntities[i]->m_subModelCount);
 				}
 				else {
+					// Terrain
 					m_modelEntities[i]->Render(m_Render->GetDeviceContext(), dt);
-					result = m_DefaultShader->Render(m_Render->GetDeviceContext(),
+					result = m_TerrainShader->Render(m_Render->GetDeviceContext(),
 						m_modelEntities[i]->m_indexCount,
 						worldMatrix, viewMatrix, projectionMatrix,
-						m_modelEntities[i]->GetTexture(),
+						((Terrain*)m_modelEntities[i])->GetTexture(0), ((Terrain*)m_modelEntities[i])->GetTexture(1),
 						m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor());
 				}
 			}
@@ -277,7 +294,7 @@ bool GraphicsController::Render(float dt)
 				result = m_WaterShader->Render(m_Render->GetDeviceContext(),
 					m_modelEntities[i]->GetIndexCount(),
 					worldMatrix, viewMatrix, projectionMatrix,
-					m_modelEntities[i]->GetTexture(),
+					m_modelEntities[i]->GetTexture(0),
 					m_Light->GetDirection(), m_Light->GetDiffuseColor(), m_Light->GetFillColor(),
 					m_timeLoopCompletion);
 			}
@@ -291,7 +308,7 @@ bool GraphicsController::Render(float dt)
 	
 
 	m_skybox->Render(m_Render->GetDeviceContext(), dt);
-	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture());
+	result = m_SkyboxShader->Render(m_Render->GetDeviceContext(), m_skybox->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_skybox->GetTexture(0));
 
 	m_Render->DisableZBuffer();
 	m_PlayerCamera->GetHUDViewMatrix(viewMatrix);

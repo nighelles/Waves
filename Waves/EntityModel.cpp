@@ -107,9 +107,9 @@ int EntityModel::GetIndexCount()
 	return m_indexCount;
 }
 
-ID3D11ShaderResourceView* EntityModel::GetTexture()
+ID3D11ShaderResourceView* EntityModel::GetTexture(int i)
 {
-	return m_materials[0].texture->GetTexture();
+	return m_materials[i].texture->GetTexture();
 }
 
 EntityModel::Material* EntityModel::GetMaterial()

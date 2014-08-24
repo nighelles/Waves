@@ -74,7 +74,7 @@ public:
 
 	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
-	ID3D11ShaderResourceView* GetTexture();
+	ID3D11ShaderResourceView* GetTexture(int i);
 	Material* GetMaterial();
 
 	ShaderType m_shaderType;

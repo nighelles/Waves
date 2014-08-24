@@ -10,15 +10,17 @@
 
 #include "Camera.h"
 #include "EntityModel.h"
-#include "TextureShader.h"
-#include "ModelShader.h"
 #include "Light.h"
 
 #include "Bitmap.h"
 
 #include "ProceduralTerrain.h"
+
+#include "ModelShader.h"
+#include "TextureShader.h"
 #include "ProceduralTerrainShader.h"
 #include "SkyboxShader.h"
+#include "TerrainShader.h"
 
 #include "PhysicsDefs.h"
 
@@ -63,6 +65,7 @@ private:
 	Camera* m_PlayerCamera;
 
 	TextureShader* m_DefaultShader;
+	TerrainShader* m_TerrainShader;
 	ModelShader* m_modelShader;
 
 	ProceduralTerrainShader* m_WaterShader;
