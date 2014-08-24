@@ -355,7 +355,7 @@ bool Engine::InitializeGame()
 	result = Player()->InitializeModel(
 		m_Graphics, 
 		"player.bmf", 
-		"cursor.dds");
+		"player.btw");
 
 	SpawnPlayer(Player(), m_spawnPoints[m_playerTeam][0]);
 
@@ -448,10 +448,10 @@ bool Engine::InitializeGame()
 	m_waterTerrain = new ProceduralTerrain();
 	if (!m_waterTerrain) return false;
 
-	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), "water_trans.dds");
+	result = m_waterTerrain->Initialize(m_Graphics->GetRenderController()->GetDevice(), "resources\\entities\\water.btw");
 	if (!result)
 	{
-		OutputDebugString(L"Could not Initialize Water Terrain");
+		OutputDebugString(L"Could not Initialize Water Terrain! \n");
 		return false;
 	}
 	m_waterTerrain->m_shaderType = EntityModel::WATER_SHADER;

@@ -1,6 +1,6 @@
 map: levels\maps\niles3.txt
 groundtexture: resources\entities\land.btw
-skyboxtexture: resources\textures\redsky.dds
+skyboxtexture: resources\entities\water.btw
 playerstart: 0 100 20 100 0 0 0
 playerstart: 1 100 100 100 0 0 0
 weapon: resources\entities\glock.wep 0

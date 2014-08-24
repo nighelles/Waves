@@ -52,6 +52,9 @@ bool EntityModel::Initialize(ID3D11Device* device, char* textureFilename)
 
 	m_device = device;
 
+	result = InitializeBuffers(m_device);
+	if (!result) return false;
+
 	result = loadBTWFile(textureFilename);
 	if (!result) return false;
 	
@@ -69,7 +72,7 @@ void EntityModel::Shutdown()
 	return;
 }
 
-void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt, int submodelNum)
+void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt)
 {
 
 	m_maxTime = (float)m_numFrames / (float)m_fps;
@@ -89,7 +92,7 @@ void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt, int submo
 			m_currentTime += dt;
 			if (m_currentFrame > m_numFrames) m_currentFrame = m_numFrames;
 		}
-		UpdateBuffers(m_device, submodelNum);
+		InitializeBuffers(m_device);
 	}
 
 	RenderBuffers(deviceContext);
@@ -97,17 +100,17 @@ void EntityModel::Render(ID3D11DeviceContext* deviceContext, float dt, int submo
 	return;
 }
 
-int EntityModel::GetIndexCount(int i)
+int EntityModel::GetIndexCount()
 {
-	return (m_subModels[i].end-m_subModels[i].end)*3;
+	return m_indexCount;
 }
 
-ID3D11ShaderResourceView* EntityModel::GetTexture(int subModelNum)
+ID3D11ShaderResourceView* EntityModel::GetTexture()
 {
-	return m_materials[subModelNum].texture->GetTexture();
+	return m_materials[0].texture->GetTexture();
 }
 
-bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
+bool EntityModel::InitializeBuffers(ID3D11Device* device)
 {
 	Vertex* vertices;
 	unsigned long* indices;
@@ -116,19 +119,13 @@ bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
 	HRESULT result;
 	int i, vIndex, tIndex, nIndex;
 
-	SubModel subModel = m_subModels[submodelNum];
-
-	if (subModel.end == 0) subModel.end = uniqueFaceCount;
-
-	int subModelFaces = subModel.end - subModel.begin;
-
-	vertices = new Vertex[subModelFaces * 3];
+	vertices = new Vertex[m_vertexCount];
 	if (!vertices) return false;
 
-	indices = new unsigned long[subModelFaces * 3];
+	indices = new unsigned long[m_vertexCount];
 	if (!indices) return false;
 
-	for (i = 0; i != subModelFaces * 3; ++i)
+	for (i = 0; i != m_vertexCount; ++i)
 	{
 		indices[i] = i;
 	}
@@ -137,7 +134,7 @@ bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
 	UniqueVertex *usedNormals = &(uniqueNormals[m_currentFrame*uniqueNormalCount]);
 	UniqueVertex *usedTexcoords = &(uniqueTexcoords[m_currentFrame*uniqueTextureCount]);
 
-	for (int i = subModel.begin; i != subModel.end; ++i)
+	for (int i = 0; i != uniqueFaceCount; ++i)
 	{
 		vIndex = m_modelDesc[i].vIndex1 - 1;
 		tIndex = m_modelDesc[i].tIndex1 - 1;
@@ -166,7 +163,7 @@ bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
 	}
 
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * subModelFaces * 3;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * m_vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
@@ -180,7 +177,7 @@ bool EntityModel::UpdateBuffers(ID3D11Device* device, int submodelNum)
 	if (FAILED(result)) return false;
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * subModelFaces * 3;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_vertexCount;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -420,6 +417,7 @@ bool EntityModel::writeBinaryFile(char* filename)
 bool EntityModel::loadBTWFile(char* filename)
 {
 	ifstream fin;
+	bool result;
 
 	fin.open(filename);
 	if (fin.fail()) return false;
@@ -436,10 +434,19 @@ bool EntityModel::loadBTWFile(char* filename)
 	{
 		fin >> garbage >> matfilename >> m_subModels[i].begin >> m_subModels[i].end;
 		m_materials[i].texture = new Texture;
-		m_materials[i].texture->Initialize(m_device, ATL::CA2W(matfilename));
+		result = m_materials[i].texture->Initialize(m_device, ATL::CA2W(matfilename));
 	}
 
 	fin.close();
+
+	if (!result)
+	{
+		OutputDebugString(L"Could Not load texture file!\n");
+		return false; 
+	}
+	else {
+		OutputDebugString(L"Loaded texture file.\n");
+	}
 
 	return true;
 }

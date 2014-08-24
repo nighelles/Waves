@@ -66,15 +66,15 @@ public:
 
 	virtual bool Initialize(ID3D11Device*, char*);
 	virtual void Shutdown();
-	void Render(ID3D11DeviceContext*, float dt, int submodelNum);
+	void Render(ID3D11DeviceContext*, float dt);
 
-	int GetIndexCount(int i);
+	int GetIndexCount();
 	void SetLocation(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
 
 	void ApplyEntityMatrix(D3DXMATRIX& entityMatrix);
 
-	ID3D11ShaderResourceView* GetTexture(int subModelNum);
+	ID3D11ShaderResourceView* GetTexture();
 
 	ShaderType m_shaderType;
 
@@ -110,7 +110,7 @@ public:
 	Material *m_materials;
 
 protected:
-	virtual bool UpdateBuffers(ID3D11Device*, int submodelNum);
+	virtual bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	virtual void RenderBuffers(ID3D11DeviceContext*);
 
