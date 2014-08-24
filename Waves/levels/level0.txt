@@ -5,3 +5,7 @@ playerstart: 0 100 20 100 0 0 0
 playerstart: 1 100 100 100 0 0 0
 weapon: resources\entities\glock.wep 0
 entity: resources\entities\tree.ent 100 5 100 0 0 0 0 0 0
+entity: resources\entities\tree.ent 110 5 100 0 0 0 0 0 0
+entity: resources\entities\tree.ent 100 5 110 0 0 0 0 0 0
+entity: resources\entities\tree.ent 93 5 115 0 0 0 0 0 0
+entity: resources\entities\tree.ent 112 5 106 0 0 0 0 0 0
