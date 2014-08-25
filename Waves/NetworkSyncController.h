@@ -11,7 +11,7 @@ class NetworkSyncController
 private:
 	struct NetworkState
 	{
-		NetworkedEntity *entities;
+		NetworkedEntity entities[MAXNETWORKENTITIES];
 	};
 
 public:
@@ -42,7 +42,7 @@ private:
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];
 
-	NetworkState* m_networkStates;
+	NetworkState m_networkStates[MAXACKDELAY];
 	int m_currentNetworkState;
 
 	int m_datastream[DATALENGTH/sizeof(int)];
