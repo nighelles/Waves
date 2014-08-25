@@ -460,7 +460,7 @@ bool Engine::ConnectNetworking()
 		CreateLocalPlayer();
 	}
 
-	for (int i = 0; i != m_entityIndex-1; ++i)
+	for (int i = 0; i != m_entityIndex; ++i)
 	{
 		m_networkSyncController->RegisterEntity(m_entities[i]);
 	}
@@ -468,11 +468,6 @@ bool Engine::ConnectNetworking()
 	{
 		m_networkSyncController->RegisterEntity(m_entities[i]);
 	}
-
-	// set later after we debug position
-	//m_Graphics->GetEntityModel(m_player->ModelID())->IsVisible(false);
-
-	m_networkSyncController->RegisterEntity(m_playerBoat);
 
 	// done loading
 	m_networkLoadingBitmap->SetVisible(false);
@@ -719,7 +714,7 @@ void Engine::Run()
 				{
 					m_gameState = GAME_PLAYING;
 					m_connectedToServer = true;
-					OutputDebugString(L"Player Joined");
+					OutputDebugString(L"Player Joined\n");
 				}
 
 				result = Update();
@@ -737,7 +732,7 @@ void Engine::Run()
 				{
 					if (ConnectNetworking())
 					{
-						OutputDebugString(L"Player Joined");
+						OutputDebugString(L"Player Joined\n");
 					}
 				}
 #endif
