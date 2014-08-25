@@ -10,7 +10,7 @@ enum NetworkMessageType { JOINREQUEST = 0xAAAA, JOINACCEPT = 0xAAAB, CLIENTSENDI
 enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CONTROL, Network_SPACE };
 
 #define MAXNETWORKENTITIES 10
-#define MAXACKDELAY 10
+#define MAXACKDELAY 100
 
 #define DATALENGTH 4060
 #define STREAMLENGTH 1015

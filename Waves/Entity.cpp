@@ -92,16 +92,16 @@ void Entity::ApplyRotation(float x, float y, float z)
 
 void Entity::SetRotation(float x, float y, float z)
 {
-	if (x) m_rotationX = x;
-	if (y) m_rotationY = y;
-	if (z) m_rotationZ = z;
+	m_rotationX = x;
+	m_rotationY = y;
+	m_rotationZ = z;
 }
 
 void Entity::SetLocation(float x, float y, float z)
 {
-	if (x) m_locationX = x;
-	if (y) m_locationY = y;
-	if (z) m_locationZ = z;
+	m_locationX = x;
+	m_locationY = y;
+	m_locationZ = z;
 }
 
 void Entity::ApplyTranslation(float x, float y, float z)
