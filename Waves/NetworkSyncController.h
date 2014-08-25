@@ -11,7 +11,7 @@ class NetworkSyncController
 private:
 	struct NetworkState
 	{
-		NetworkedEntity entities[MAXNETWORKENTITIES];
+		NetworkedEntity *entities;
 	};
 
 public:

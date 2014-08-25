@@ -23,6 +23,10 @@ NetworkSyncController::NetworkSyncController()
 	m_currentNetworkState = 0;
 
 	m_networkStates = new NetworkState[MAXACKDELAY];
+	for (int i = 0; i != MAXACKDELAY; ++i)
+	{
+		m_networkStates[i].entities = new NetworkedEntity[MAXNETWORKENTITIES];
+	}
 
 	return;
 }
@@ -92,7 +96,7 @@ bool NetworkSyncController::SyncEntityStates()
 		newState.entities[i].NewNetworkedEntity(m_entities[i]);
 	}
 
-	char* currentState = (char*)&(m_networkStates[m_currentNetworkState]);
+	void* currentState = &(m_networkStates[m_currentNetworkState]);
 	memcpy(currentState, 0, sizeof(NetworkState));
 
 	m_networkStates[m_currentNetworkState] = newState;
