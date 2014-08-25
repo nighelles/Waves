@@ -89,11 +89,14 @@ bool NetworkSyncController::SyncEntityStates()
 		NewNetworkedEntity(&(newState.entities[i]),m_entities[i]);
 	}
 
-	memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
-	m_networkStates[m_currentNetworkState] = newState;
-
 	m_currentNetworkState += 1;
 	if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
+
+	if (m_isServer)
+	{
+		memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
+		m_networkStates[m_currentNetworkState] = newState;
+	}
 
 	if (m_isServer)
 	{
@@ -221,9 +224,9 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 
 int NetworkSyncController::DeltaCompress()
 {
-	int clientStateLocation = m_currentNetworkState + (m_ack - m_clientAck);
+	int clientStateLocation = m_currentNetworkState - (m_ack - m_clientAck);
 
-	while (!(clientStateLocation < MAXACKDELAY)) clientStateLocation -= MAXACKDELAY;
+	while (!(clientStateLocation < 0)) clientStateLocation += MAXACKDELAY;
 
 	char data[DATALENGTH];
 	char olddata[DATALENGTH];
@@ -276,9 +279,15 @@ bool NetworkSyncController::DeltaUncompress()
 
 void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent)
 {
-	ent->GetLocation(net->x, net->y, net->z);
-	ent->GetVelocity(net->x, net->y, net->z);
-	ent->GetRotation(net->rx, net->ry, net->rz);
+	float x, y, z, vx, vy, vz, rx, ry, rz;
+	ent->GetLocation(x, y, z);
+	ent->GetVelocity(vx, vy, vz);
+	ent->GetRotation(rx, ry, rz);
+	net->x = x; net->y = y; net->z = z;
+	net->vx = vx; net->vy = vy; net->vz = vz;
+	net->rx = rx; net->ry = ry; net->rz = rz;
+
+	return;
 }
 void NetworkSyncController::ApplyChanges(NetworkedEntity net, PhysicsEntity* ent)
 {
