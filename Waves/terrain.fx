@@ -57,7 +57,14 @@ float4 PS(PixelIn pin) : SV_Target
 	float4 color;
 	float flatness;
 
-	flatness = pow(dot(pin.normal, float3(0, 1, 0)),2);
+	flatness = dot(pin.normal, float3(0, 2, 0));
+
+	flatness = flatness / 2;
+
+	if (flatness > 1.0f)
+	{
+		flatness = 1.0f;
+	}
 
 	color = fillColor;
 

@@ -10,7 +10,6 @@
 #include <iostream>
 
 #define FRAMES_PER_SECOND 24.0f
-
 #define MAX_TEXTURES 5
 
 using namespace std;
