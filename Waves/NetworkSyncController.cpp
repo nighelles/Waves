@@ -234,6 +234,8 @@ int NetworkSyncController::DeltaCompress()
 	}
 	m_datastream[dataIndex] = 0xFF;
 	m_datastream[dataIndex + 1] = 0xFF;
+
+	return true;
 }
 
 bool NetworkSyncController::DeltaUncompress()
@@ -257,5 +259,7 @@ bool NetworkSyncController::DeltaUncompress()
 	}
 
 	memcpy(m_networkStates[0].entities, data, sizeof(m_networkStates[0].entities));
+
+	return true;
 }
 
