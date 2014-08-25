@@ -96,8 +96,7 @@ bool NetworkSyncController::SyncEntityStates()
 			m_currentNetworkState += 1;
 			if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
 
-			memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
-			m_networkStates[m_currentNetworkState] = newState;
+			memcpy(&(m_networkStates[m_currentNetworkState]), &newState, sizeof(NetworkState));
 
 			m_serverMessage.ack = m_ack;
 			m_serverMessage.messageType = SERVERSENDSTATE;
@@ -230,7 +229,7 @@ int NetworkSyncController::DeltaCompress()
 	char data[DATALENGTH];
 	char olddata[DATALENGTH];
 
-	memcpy(data, m_networkStates[0].entities, sizeof(m_networkStates[0].entities));
+	memcpy(data, m_networkStates[m_currentNetworkState].entities, sizeof(m_networkStates[0].entities));
 	memcpy(olddata, m_networkStates[clientStateLocation].entities, sizeof(m_networkStates[clientStateLocation].entities));
 
 	int dataIndex=0;

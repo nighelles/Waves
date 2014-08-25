@@ -1,7 +1,7 @@
 map: levels\maps\map1.txt
 groundtexture: resources\entities\land.btw
 skyboxtexture: resources\entities\water.btw
-playerstart: 0 100 20 100 0 0 0
+playerstart: 0 123 20 100 0 0 0
 playerstart: 1 100 100 100 0 0 0
 weapon: resources\entities\glock.wep 0
 entity: resources\entities\tree.ent 100 5 100 0 0 0 0 0 0

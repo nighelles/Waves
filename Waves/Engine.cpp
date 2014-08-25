@@ -467,7 +467,7 @@ bool Engine::ConnectNetworking()
 	}
 	for (int i = 0; i != m_numPlayers; ++i)
 	{
-		m_networkSyncController->RegisterEntity(m_entities[i]);
+		m_networkSyncController->RegisterEntity(m_players[i]);
 	}
 
 	// done loading
