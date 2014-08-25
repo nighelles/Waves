@@ -16,6 +16,7 @@ Engine::Engine()
 	{
 		m_players[playerNum] = 0;
 	}
+	m_numPlayers = 0;
 	for (int entityNum = 0; entityNum != MAXENTITIES; ++entityNum)
 	{
 		m_entities[entityNum] = 0;
@@ -345,33 +346,12 @@ bool Engine::InitializeGame()
 	LoadConfiguration();
 
 	// Initialize our player
-
 	m_playerNumber = 0;
 	m_playerTeam = 0;
 
-	m_players[m_playerNumber] = new PlayerEntity;
-
-	result = Player()->InitializeModel(
-		m_Graphics, 
-		"player.bmf", 
-		"player.btw");
-
-	SpawnPlayer(Player(), m_spawnPoints[m_playerTeam][0]);
-
-	if (!result) return false;
-	result = Player()->Initialize();
-	if (!result) return false;
-
-	Player()->Render(m_Graphics);
-
-	for (int i = 0; i != MAXWEAPONS; ++i)
-	{
-		if (m_weaponEntities[i])
-		{
-			m_weaponEntities[i]->BindToEntity(Player());
-		}
-	}
-
+#if !USE_NETWORKING
+	CreateLocalPlayer();
+#endif
 
 	// other network player
 
@@ -508,6 +488,8 @@ bool Engine::ConnectNetworking()
 		if (!m_server->WaitForClient()) 
 			return false;
 
+		CreateLocalPlayer();
+		NewNetworkPlayer();
 		m_networkSyncController->Initialize(m_isServer, m_server);
 	}
 	else {
@@ -515,17 +497,16 @@ bool Engine::ConnectNetworking()
 			return false;
 
 		m_networkSyncController->Initialize(m_isServer, m_client);
+
+		NewNetworkPlayer(); //for the server's Player
+		CreateLocalPlayer();
 	}
 
-	for each (Entity ent in m_entities)
+	for each (PhysicsEntity *ent in m_entities)
 	{
 		m_networkSyncController->RegisterEntity(ent);
 	}
-	for each (Entity ent in m_spawnPoints)
-	{
-		m_networkSyncController->RegisterEntity(ent);
-	}
-	for each (Entity ent in m_players)
+	for each (PhysicsEntity *ent in m_players)
 	{
 		m_networkSyncController->RegisterEntity(ent);
 	}
@@ -540,12 +521,65 @@ bool Engine::ConnectNetworking()
 	return true;
 }
 
-bool NewNetworkPlayer()
+bool Engine::NewNetworkPlayer()
 {
-	//TODO
+	bool result;
+
+	m_players[m_numPlayers] = new PlayerEntity;
+
+	result = m_players[m_numPlayers]->InitializeModel(
+		m_Graphics,
+		"player.bmf",
+		"player.btw");
+
+	SpawnPlayer(m_players[m_numPlayers], m_spawnPoints[m_playerTeam][0]);
+
+	if (!result) return false;
+	result = m_players[m_numPlayers]->Initialize();
+	if (!result) return false;
+
+	m_players[m_numPlayers]->Render(m_Graphics);
+
+	m_numPlayers += 1;
+
+	return true;
 }
 
 #endif //#if USE_NETWORKING
+
+bool Engine::CreateLocalPlayer()
+{
+	bool result;
+
+	m_players[m_numPlayers] = new PlayerEntity;
+
+	m_playerNumber = m_numPlayers;
+
+	result = Player()->InitializeModel(
+		m_Graphics,
+		"player.bmf",
+		"player.btw");
+
+	SpawnPlayer(Player(), m_spawnPoints[m_playerTeam][0]);
+
+	if (!result) return false;
+	result = Player()->Initialize();
+	if (!result) return false;
+
+	Player()->Render(m_Graphics);
+
+	for (int i = 0; i != MAXWEAPONS; ++i)
+	{
+		if (m_weaponEntities[i])
+		{
+			m_weaponEntities[i]->BindToEntity(Player());
+		}
+	}
+
+	m_numPlayers += 1;
+
+	return true;
+}
 
 void Engine::Shutdown()
 {
@@ -885,16 +919,9 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-	if (m_isServer)
-	{
-		m_networkSyncController->SyncPlayerInput(&playerInput);
 
-		MovePlayer(playerInput, m_otherPlayer, m_dt);
-	}
-	else 
-	{
-		m_networkSyncController->SyncPlayerInput(&playerInput);
-	}
+	m_networkSyncController->SyncPlayerInput(&playerInput);
+
 
 #endif //#if USE_NETWORKING
 

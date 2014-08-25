@@ -74,6 +74,7 @@ public:
 	bool InitializeNetworking();
 	bool ConnectNetworking();
 	bool NewNetworkPlayer();
+	bool CreateLocalPlayer();
 
 	void Shutdown();
 	void Run();
@@ -123,6 +124,8 @@ private:
 
 	PlayerEntity* m_players[MAXPLAYERS];
 	PhysicsEntity* m_entities[MAXENTITIES];
+
+	int m_numPlayers;
 
 	int m_entityIndex;
 
