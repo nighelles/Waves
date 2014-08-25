@@ -104,7 +104,7 @@ bool NetworkSyncController::SyncEntityStates()
 
 			DeltaCompress();
 
-			memcpy(m_serverMessage.data, m_datastream, DATALENGTH);
+			memcpy(m_serverMessage.data, (char*)m_datastream, DATALENGTH);
 
 			result = ((NetworkServer*)m_networkController)->SendDataToClient((char*)&m_serverMessage, sizeof(m_serverMessage));
 			m_ack += 1;

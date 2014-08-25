@@ -349,9 +349,10 @@ bool Engine::InitializeGame()
 	m_playerNumber = 0;
 	m_playerTeam = 0;
 
-	CreateLocalPlayer();
 #if USE_NETWORKING
-	m_numPlayers -= 1;
+	m_numPlayers = 0;
+#else
+	CreateLocalPlayer();
 #endif
 
 #endif //#if GAME_BUILD
@@ -727,15 +728,6 @@ void Engine::Run()
 #endif
 			else if (m_gameState == GAME_PLAYING)
 			{
-#if USE_NETWORKING
-				if (m_server)
-				{
-					if (ConnectNetworking())
-					{
-						OutputDebugString(L"Player Joined\n");
-					}
-				}
-#endif
 				// Main game logic
 				result = Update();
 				if (!result) done = true;
