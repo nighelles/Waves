@@ -142,7 +142,7 @@ bool NetworkSyncController::SyncEntityStates()
 	return result;
 }
 
-bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
+bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 {
 	bool result;
 
@@ -160,6 +160,9 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 		if (m_clientMessage.messageType = CLIENTSENDINPUT)
 		{
 			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
+
+			playerNum = m_clientMessage.playerNumber;
+
 			if (m_clientMessage.ack != m_ack - 1)
 			{
 				m_waitCount += 1;
@@ -195,6 +198,8 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 	{
 		m_clientMessage.messageType = CLIENTSENDINPUT;
 		m_clientMessage.ack = m_clientAck;
+
+		m_clientMessage.playerNumber = playerNum;
 
 		m_clientMessage.input.keys[Network_W] = inp->keys[Network_W];
 		m_clientMessage.input.keys[Network_A] = inp->keys[Network_A];

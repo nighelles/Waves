@@ -886,7 +886,10 @@ bool Engine::Update()
 
 	if (m_connectedToServer)
 	{
-		m_networkSyncController->SyncPlayerInput(&playerInput);
+		int playerNum = m_playerNumber;
+		m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
+
+		MovePlayer(playerInput, m_players[playerNum], m_dt);
 	}
 
 #endif //#if USE_NETWORKING

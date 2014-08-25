@@ -44,5 +44,6 @@ typedef struct
 {
 	NetworkMessageType	messageType;
 	UINT32 ack;
+	int		playerNumber;
 	NetworkedInput input;
 } ClientNetworkMessage;
