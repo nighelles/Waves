@@ -125,7 +125,7 @@ bool NetworkSyncController::SyncEntityStates()
 		{
 			m_clientAck = m_serverMessage.ack;
 
-			memcpy(m_datastream, m_serverMessage.data, DATALENGTH);
+			memcpy(m_datastream, (char*)m_serverMessage.data, DATALENGTH);
 
 			DeltaUncompress();
 
