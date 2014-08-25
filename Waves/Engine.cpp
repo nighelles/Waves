@@ -724,7 +724,7 @@ void Engine::Run()
 				{
 					m_gameState = GAME_PLAYING;
 					m_connectedToServer = true;
-					MessageBox(m_hwnd, L"Player Joined", L"Error", MB_OK);
+					OutputDebugString(L"Player Joined");
 				}
 
 				result = Update();
@@ -741,7 +741,7 @@ void Engine::Run()
 				{
 					if (ConnectNetworking())
 					{
-						MessageBox(m_hwnd, L"Player Joined", L"Error", MB_OK);
+						OutputDebugString(L"Player Joined");
 					}
 				}
 				// Main game logic
