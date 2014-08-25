@@ -42,7 +42,7 @@ private:
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];
 
-	NetworkState m_networkStates[MAXACKDELAY];
+	NetworkState* m_networkStates;
 	int m_currentNetworkState;
 
 	int m_datastream[DATALENGTH/sizeof(int)];
