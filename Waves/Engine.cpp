@@ -48,7 +48,7 @@ Engine::Engine()
 
 	m_gameState = GAME_MENU;
 
-	m_playerConnected = false;
+	m_connectedToServer = false;
 
 	// LOADING VARIABLES
 	for (int i = 0; i != NUMBEROFTEAMS; ++i)
@@ -351,52 +351,13 @@ bool Engine::InitializeGame()
 
 #if !USE_NETWORKING
 	CreateLocalPlayer();
-#endif
 
-	// other network player
-
-// 	m_otherPlayer = new PlayerEntity;
-// 	
-// 	result = m_player->InitializeModel(
-// 		m_Graphics,
-// 		"player.bmf",
-// 		L"cursor.dds");
-// 
-// 	if (!result) return false;
-// 	result = m_otherPlayer->Initialize();
-// 	if (!result) return false;
-// 
-// 	m_otherPlayer->SetLocation(0.0f, METERS(5.0f), 0.0f);
-// 	m_otherPlayer->Render(m_Graphics);
-
-// 	Initialize a boat model
-// 		m_playerBoat = new PhysicsEntity;
-// 	
-// 		result = m_playerBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-// 		if (!result) return false;
-// 		result = m_playerBoat->Initialize();
-// 		if (!result) return false;
-// 	
-// 	
-// 		// Initialize other person's boat
-// 		m_otherBoat = new PhysicsEntity;
-// 		result = m_otherBoat->InitializeModel(m_Graphics, "Boat.obj", L"wood_tiling.dds");
-// 		if (!result) return false;
-// 		result = m_otherBoat->Initialize();
-// 		if (!result) return false;
-// 	
-// 		// Put things in place
-// 		m_playerBoat->SetLocation(100.0f, 0, 0);
-// 		m_playerBoat->Render(m_Graphics);
-// 	
-// 		m_otherBoat->SetLocation(100.0f, 0, 0);
-// 		m_otherBoat->Render(m_Graphics);
-
-	// Attach Camera to boat model
 	m_Graphics->GetPlayerCamera()->BindToEntity(Player());
 
 	m_Graphics->GetPlayerCamera()->Update();
 	m_Graphics->GetPlayerCamera()->Render();
+#endif
+
 #endif //#if GAME_BUILD
 
 #if EDITOR_BUILD
@@ -578,6 +539,11 @@ bool Engine::CreateLocalPlayer()
 
 	m_numPlayers += 1;
 
+	m_Graphics->GetPlayerCamera()->BindToEntity(Player());
+
+	m_Graphics->GetPlayerCamera()->Update();
+	m_Graphics->GetPlayerCamera()->Render();
+
 	return true;
 }
 
@@ -742,6 +708,9 @@ void Engine::Run()
 #if USE_NETWORKING
 					m_gameState = GAME_WAIT_NETWORK;
 					InitializeNetworking();
+					CreateLocalPlayer();
+					m_playerNumber = 0; 
+					// Allow the player to mess around before it starts
 #endif
 				}
 
@@ -751,14 +720,30 @@ void Engine::Run()
 #if USE_NETWORKING
 			else if (m_gameState == GAME_WAIT_NETWORK)
 			{
-				if (ConnectNetworking()) m_gameState = GAME_PLAYING;
+				if (ConnectNetworking())
+				{
+					m_gameState = GAME_PLAYING;
+					m_connectedToServer = true;
+					MessageBox(m_hwnd, L"Player Joined", L"Error", MB_OK);
+				}
 
+				result = Update();
+				if (!result) done = true;
 				result = Render();
+				if (!result) done = true;
+				result = PostUpdate();
 				if (!result) done = true;
 			}
 #endif
 			else if (m_gameState == GAME_PLAYING)
 			{
+				if (m_server)
+				{
+					if (ConnectNetworking())
+					{
+						MessageBox(m_hwnd, L"Player Joined", L"Error", MB_OK);
+					}
+				}
 				// Main game logic
 				result = Update();
 				if (!result) done = true;
@@ -919,9 +904,10 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-
-	m_networkSyncController->SyncPlayerInput(&playerInput);
-
+	if (m_connectedToServer)
+	{
+		m_networkSyncController->SyncPlayerInput(&playerInput);
+	}
 
 #endif //#if USE_NETWORKING
 
@@ -1040,8 +1026,10 @@ bool Engine::PostUpdate()
 
 #if USE_NETWORKING
 
+	if (m_connectedToServer)
+	{
 		m_networkSyncController->SyncEntityStates();
-
+	}
 #endif //#if USE_NETWORKING
 
 	return true;

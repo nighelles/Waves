@@ -145,7 +145,7 @@ private:
 	NetworkServer* m_server;
 	NetworkClient* m_client;
 
-	bool m_playerConnected;
+	bool m_connectedToServer;
 
 	NetworkSyncController* m_networkSyncController;
 
