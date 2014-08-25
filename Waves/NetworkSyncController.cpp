@@ -163,6 +163,8 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 
 			playerNum = m_clientMessage.playerNumber;
 
+			m_clientAck = m_clientMessage.ack;
+
 			if (m_clientMessage.ack != m_ack - 1)
 			{
 				m_waitCount += 1;
