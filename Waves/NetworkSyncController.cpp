@@ -89,6 +89,9 @@ bool NetworkSyncController::SyncEntityStates()
 
 	m_networkStates[m_currentNetworkState] = newState;
 
+	m_currentNetworkState += 1;
+	if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
+
 	if (m_isServer)
 	{
 		if (!m_waiting)
