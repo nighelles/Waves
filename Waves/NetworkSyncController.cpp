@@ -22,9 +22,9 @@ NetworkSyncController::NetworkSyncController()
 
 	m_currentNetworkState = 0;
 
-	m_networkStates[MAXACKDELAY] = { };
-	m_datastream[DATALENGTH / 4] = {};
+	NetworkState m_networkStates[MAXACKDELAY] = {};
 
+	m_datastream[STREAMLENGTH] = { 0 };
 
 	return;
 }
@@ -86,12 +86,10 @@ bool NetworkSyncController::SyncEntityStates()
 
 	for (int i = 0; i != m_numEntities; ++i)
 	{
-		newState.entities[i].NewNetworkedEntity(m_entities[i]);
+		NewNetworkedEntity(&(newState.entities[i]),m_entities[i]);
 	}
 
-	void* currentState = &(m_networkStates[m_currentNetworkState]);
-	memcpy(currentState, 0, sizeof(NetworkState));
-
+	memset(m_networkStates[m_currentNetworkState], 0, sizeof(NetworkState));
 	m_networkStates[m_currentNetworkState] = newState;
 
 	m_currentNetworkState += 1;
@@ -134,7 +132,7 @@ bool NetworkSyncController::SyncEntityStates()
 
 			for (int i = 0; i != m_numEntities; ++i)
 			{
-				m_networkStates[m_clientAck].entities[i].ApplyChanges(m_entities[i]);
+				ApplyChanges(m_networkStates[0].entities[i],m_entities[i]);
 			}
 		}
 	}
@@ -229,7 +227,7 @@ int NetworkSyncController::DeltaCompress()
 	memcpy(olddata, m_networkStates[clientStateLocation].entities, sizeof(m_networkStates[clientStateLocation].entities));
 
 	int dataIndex=0;
-	memcpy(m_datastream, 0, sizeof(m_datastream));
+	memset(m_datastream, 0, sizeof(m_datastream));
 
 	for (int offset = 0; offset != DATALENGTH; ++offset)
 	{
@@ -271,3 +269,15 @@ bool NetworkSyncController::DeltaUncompress()
 	return true;
 }
 
+void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent)
+{
+	ent->GetLocation(net->x, net->y, net->z);
+	ent->GetVelocity(net->x, net->y, net->z);
+	ent->GetRotation(net->rx, net->ry, net->rz);
+}
+void NetworkSyncController::ApplyChanges(NetworkedEntity net, PhysicsEntity* ent)
+{
+	ent->SetLocation(net.x, net.y, net.z);
+	ent->SetVelocity(net.vx, net.vy, net.vz);
+	ent->SetRotation(net.rx, net.ry, net.rz);
+}

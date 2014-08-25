@@ -13,6 +13,7 @@ enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CO
 #define MAXACKDELAY 10
 
 #define DATALENGTH 4060
+#define STREAMLENGTH 1015
 
 typedef struct
 {
@@ -20,24 +21,11 @@ typedef struct
 	float mouseDX, mouseDY;
 } NetworkedInput;
 
-typedef struct NetworkedEntity
+typedef struct
 {
 	float x, y, z;
 	float vx, vy, vz;
 	float rx, ry, rz;
-
-	void NewNetworkedEntity(PhysicsEntity* ent)
-	{
-		ent->GetLocation(x, y, z);
-		ent->GetVelocity(x, y, z);
-		ent->GetRotation(rx, ry, rz);
-	}
-	void ApplyChanges(PhysicsEntity* ent)
-	{
-		ent->SetLocation(x, y, z);
-		ent->SetVelocity(vx, vy, vz);
-		ent->SetRotation(rx, ry, rz);
-	}
 } NetworkedEntity;
 
 typedef struct

@@ -9,10 +9,10 @@
 class NetworkSyncController
 {
 private:
-	struct NetworkState
+	typedef struct
 	{
 		NetworkedEntity entities[MAXNETWORKENTITIES];
-	};
+	} NetworkState;
 
 public:
 	NetworkSyncController();
@@ -28,6 +28,8 @@ public:
 
 	int DeltaCompress();
 	bool DeltaUncompress();
+	void NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent);
+	void ApplyChanges(NetworkedEntity net, PhysicsEntity* ent);
 
 private:
 	bool m_isServer;
@@ -45,7 +47,7 @@ private:
 	NetworkState m_networkStates[MAXACKDELAY];
 	int m_currentNetworkState;
 
-	int m_datastream[DATALENGTH / 4];
+	int m_datastream[STREAMLENGTH];
 
 	ClientNetworkMessage m_clientMessage;
 	ServerNetworkMessage m_serverMessage;
