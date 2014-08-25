@@ -24,7 +24,7 @@
 
 #include "PhysicsDefs.h"
 
-const bool FULL_SCREEN = true;
+const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = METERS(1000);
 const float SCREEN_NEAR = 0.1f;

@@ -7,6 +7,8 @@ PlayerEntity::PlayerEntity() : PhysicsEntity()
 	m_jumpStrength = METERS(G_CONST / 2);
 	m_airbornControl = 0.5;
 	m_runMultiplier = 2.0;
+
+	type = PLAYER;
 }
 
 

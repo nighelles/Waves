@@ -21,6 +21,8 @@ Entity::Entity()
 
 	m_binded = false;
 	m_bindedEntity = 0;
+
+	type = ENTITY;
 }
 
 

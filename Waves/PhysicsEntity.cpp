@@ -16,6 +16,8 @@ PhysicsEntity::PhysicsEntity() : Entity()
 	m_bouyancy = METERS(G_CONST);
 
 	m_entityModel = 0;
+
+	type = PHYSICS;
 }
 
 

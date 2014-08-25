@@ -6,6 +6,8 @@
 class Entity
 {
 public:
+	typedef enum {ENTITY,PHYSICS,PLAYER,WEAPON,VEHICLE,BUILDING} EntityType;
+public:
 	Entity();
 	~Entity();
 
@@ -53,5 +55,11 @@ protected:
 	float m_width;
 	float m_height;
 	float m_depth;
+
+public:
+	float Height() const { return m_height; }
+	void Height(float val) { m_height = val; }
+
+	EntityType type;
 };
 

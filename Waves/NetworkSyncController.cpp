@@ -15,9 +15,12 @@ NetworkSyncController::NetworkSyncController()
 	m_numEntities = 0;
 
 	m_ack = 0;
+	m_clientAck = 0;
 
 	m_waitCount = 0;
 	m_waiting = false;
+
+	m_currentNetworkState = 0;
 
 	return;
 }
@@ -75,26 +78,27 @@ bool NetworkSyncController::SyncEntityStates()
 
 	result = true;
 
+	//sync current entity states
+	NetworkState newState;
+	for (int i = 0; i != m_numEntities; ++i)
+	{
+		newState.entities[i].NewNetworkedEntity(m_entities[i]);
+	}
+
+	memcpy(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
+
+	m_networkStates[m_currentNetworkState] = newState;
+
 	if (m_isServer)
 	{
 		if (!m_waiting)
 		{
 			m_serverMessage.ack = m_ack;
 			m_serverMessage.messageType = SERVERSENDSTATE;
-			m_serverMessage.numEntityStates = m_numEntities;
 
-			for (int i = 0; i != m_numEntities; ++i)
-			{
-				m_entities[i]->GetLocation(x, y, z);
-				m_entities[i]->GetRotation(yaw, pitch, roll);
+			DeltaCompress();
 
-				m_serverMessage.entityStates[i].position = D3DXVECTOR3(x, y, z);
-				m_serverMessage.entityStates[i].velocity = m_entities[i]->GetVelocity();
-				m_serverMessage.entityStates[i].rotation = D3DXVECTOR3(yaw, pitch, roll);
-
-
-				m_serverMessage.entityStates[i].physicsEntityID = i;
-			}
+			memcpy(m_serverMessage.data, m_datastream, DATALENGTH);
 
 			result = ((NetworkServer*)m_networkController)->SendDataToClient((char*)&m_serverMessage, sizeof(m_serverMessage));
 			m_ack += 1;
@@ -105,7 +109,7 @@ bool NetworkSyncController::SyncEntityStates()
 	}
 	else 
 	{
-		char serverData[256];
+		char serverData[sizeof(ServerNetworkMessage)];
 		int dataSize = sizeof(serverData);
 
 		((NetworkClient*)m_networkController)->GetDataFromServer(serverData, dataSize);
@@ -114,35 +118,15 @@ bool NetworkSyncController::SyncEntityStates()
 
 		if (m_serverMessage.messageType == SERVERSENDSTATE)
 		{
-			ServerNetworkMessage* newState = (ServerNetworkMessage*)&m_serverMessage;
+			m_clientAck = m_serverMessage.ack;
 
-			if (newState->ack != m_ack + 1)
+			memcpy(m_datastream, m_serverMessage.data, DATALENGTH);
+
+			DeltaUncompress();
+
+			for (int i = 0; i != m_numEntities; ++i)
 			{
-				char msg[100];
-				sprintf_s(msg, 100, "we (client) lost state from ack # %d to #%d \n", m_ack, newState->ack);
-				OutputDebugString(ATL::CA2W(msg));
-			}
-			
-			m_ack = newState->ack;
-
-			for (int i = 0; i != newState->numEntityStates; ++i)
-			{
-				entityIndex = newState->entityStates[i].physicsEntityID;
-				x = newState->entityStates[i].position.x;
-				y = newState->entityStates[i].position.y;
-				z = newState->entityStates[i].position.z;
-				
-				yaw = newState->entityStates[i].rotation.x;
-				pitch = newState->entityStates[i].rotation.y;
-				roll = newState->entityStates[i].rotation.z;
-
-				m_entities[entityIndex]->SetVelocity(
-					newState->entityStates[i].velocity.x,
-					newState->entityStates[i].velocity.y,
-					newState->entityStates[i].velocity.z);
-
-				m_entities[entityIndex]->SetLocation(x, y, z);
-				m_entities[entityIndex]->SetRotation(0, pitch, 0);
+				m_networkStates[m_clientAck].entities[i].ApplyChanges(m_entities[i]);
 			}
 		}
 	}
@@ -204,7 +188,7 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 	else
 	{
 		m_clientMessage.messageType = CLIENTSENDINPUT;
-		m_clientMessage.ack = m_ack;
+		m_clientMessage.ack = m_clientAck;
 
 		m_clientMessage.input.keys[Network_W] = inp->keys[Network_W];
 		m_clientMessage.input.keys[Network_A] = inp->keys[Network_A];
@@ -222,5 +206,56 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp)
 
 	if (!result) OutputDebugString(L"Could not sync player input.\n");
 	return result;
+}
+
+int NetworkSyncController::DeltaCompress()
+{
+	int clientStateLocation = m_currentNetworkState + (m_ack - m_clientAck);
+
+	while (!(clientStateLocation < MAXACKDELAY)) clientStateLocation -= MAXACKDELAY;
+
+	char data[DATALENGTH];
+	char olddata[DATALENGTH];
+
+	memcpy(data, m_networkStates[0].entities, sizeof(m_networkStates[0].entities));
+	memcpy(olddata, m_networkStates[clientStateLocation].entities, sizeof(m_networkStates[clientStateLocation].entities));
+
+	int dataIndex=0;
+	memcpy(m_datastream, 0, sizeof(m_datastream));
+
+	for (int offset = 0; offset != DATALENGTH; ++offset)
+	{
+		if (data[offset] != olddata[offset])
+		{
+			m_datastream[dataIndex] = offset;
+			m_datastream[dataIndex + 1] = data[offset];
+			dataIndex += 2;
+		}
+	}
+	m_datastream[dataIndex] = 0xFF;
+	m_datastream[dataIndex + 1] = 0xFF;
+}
+
+bool NetworkSyncController::DeltaUncompress()
+{
+	char entityCount;
+	char dataValue;
+
+	char data[DATALENGTH];
+
+	memcpy(data, m_networkStates[0].entities, sizeof(m_networkStates[0].entities));
+
+	for (int dataIndex = 0; dataIndex != DATALENGTH; dataIndex += 2)
+	{
+		if (m_datastream[dataIndex] = 0xFF && m_datastream[dataIndex + 1] == 0xFF)
+		{
+			break;
+		}
+		else {
+			data[m_datastream[dataIndex]] = m_datastream[dataIndex + 1];
+		}
+	}
+
+	memcpy(m_networkStates[0].entities, data, sizeof(m_networkStates[0].entities));
 }
 

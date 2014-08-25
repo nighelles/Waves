@@ -24,11 +24,12 @@
 
 #include "Physics.h"
 
-#define USE_NETWORKING 0
+#define USE_NETWORKING 1
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
 
 #define NUMBEROFTEAMS 2
+
 #define MAXSPAWNPOINTS 10
 #define MAXENTITIES 10
 
@@ -69,8 +70,10 @@ public:
 	bool Initialize();
 	bool LoadConfiguration();
 	bool InitializeGame();
+
 	bool InitializeNetworking();
 	bool ConnectNetworking();
+	bool NewNetworkPlayer();
 
 	void Shutdown();
 	void Run();
@@ -142,8 +145,6 @@ private:
 	bool m_playerConnected;
 
 	NetworkSyncController* m_networkSyncController;
-
-	NetworkPlayer m_networkPlayer;
 
 	bool m_isServer;
 	char m_serverAddress[16];

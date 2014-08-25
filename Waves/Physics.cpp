@@ -7,8 +7,9 @@ void PHY_SetupTick(
 	ProceduralTerrain* water, float loopCompletion)
 {
 	float x, y, z;
+
 	en->GetLocation(x, y, z);
-	if (y < water->CalculateDeterministicHeight(x, z, loopCompletion))
+	if (y + en->Height() < water->CalculateDeterministicHeight(x, z, loopCompletion))
 		en->m_underwater = true;
 	else
 		en->m_underwater = false;

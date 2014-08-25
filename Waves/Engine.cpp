@@ -44,7 +44,6 @@ Engine::Engine()
 	m_client = 0;
 
 	m_networkSyncController = 0;
-	m_networkPlayer = { };
 
 	m_gameState = GAME_MENU;
 
@@ -291,9 +290,6 @@ bool Engine::Initialize()
 	result = m_Graphics->Initialize(screenWidth, screenHeight, m_hwnd);
 	if (!result) return false;
 
-	// LOAD CONFIGURATION FROM FILE AFTER COMPONANTS OF THE ENGINE EXIST
-	LoadConfiguration();
-
 	result = m_Graphics->InitializeSkybox(m_skyboxTextureFilename);
 	if (!result)
 	{
@@ -345,6 +341,9 @@ bool Engine::InitializeGame()
 	bool result;
 
 #if GAME_BUILD
+	// LOAD CONFIGURATION FROM FILE AFTER COMPONANTS OF THE ENGINE EXIST
+	LoadConfiguration();
+
 	// Initialize our player
 
 	m_playerNumber = 0;
@@ -518,18 +517,17 @@ bool Engine::ConnectNetworking()
 		m_networkSyncController->Initialize(m_isServer, m_client);
 	}
 
-	if (m_server) {
-		m_networkSyncController->RegisterEntity(m_player); //server
-		m_networkSyncController->RegisterEntity(m_otherPlayer); // not server
-		m_player->SetLocation(METERS(-100), 0, METERS(-100));
-		m_otherPlayer->SetLocation(METERS(100), 0, METERS(100));
-	}
-	else 
+	for each (Entity ent in m_entities)
 	{
-		m_networkSyncController->RegisterEntity(m_otherPlayer); // server
-		m_networkSyncController->RegisterEntity(m_player); // notserver
-		m_otherPlayer->SetLocation(METERS(-100), 0, METERS(-100));
-		m_player->SetLocation(METERS(100), 0, METERS(100));
+		m_networkSyncController->RegisterEntity(ent);
+	}
+	for each (Entity ent in m_spawnPoints)
+	{
+		m_networkSyncController->RegisterEntity(ent);
+	}
+	for each (Entity ent in m_players)
+	{
+		m_networkSyncController->RegisterEntity(ent);
 	}
 
 	// set later after we debug position
@@ -540,6 +538,11 @@ bool Engine::ConnectNetworking()
 	// done loading
 	m_networkLoadingBitmap->SetVisible(false);
 	return true;
+}
+
+bool NewNetworkPlayer()
+{
+	//TODO
 }
 
 #endif //#if USE_NETWORKING
@@ -944,10 +947,6 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 	//m_playerBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
 	//m_otherBoat->OrientToTerrain(m_waterTerrain, m_timeloopCompletion);
 
-	Player()->Tick(dt);
-
-	PHY_SetupTick(Player(), m_landTerrain, m_waterTerrain, m_timeloopCompletion);
-
 	// This is just if the entity is affected by water, probably should fix that
 	if (Player()->m_underwater) {
 		m_Graphics->GetLight()->SetDiffuseColor(0.2f, 0.2f, 1.0f, 1.0f);
@@ -956,15 +955,14 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 		m_Graphics->GetLight()->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	PHY_ApplyGravity(Player(), dt);
-
-	PHY_EndTick(Player(), m_landTerrain, m_waterTerrain, m_timeloopCompletion, dt);
-
 	for (int i = 0; i < MAXPLAYERS; ++i)
 	{
 		if (m_players[i])
 		{
 			m_players[i]->Tick(dt);
+			PHY_SetupTick(m_players[i], m_landTerrain, m_waterTerrain, m_timeloopCompletion);
+			PHY_ApplyGravity(m_players[i], dt);
+			PHY_EndTick(m_players[i], m_landTerrain, m_waterTerrain, m_timeloopCompletion, dt);
 			m_players[i]->Render(m_Graphics);
 		}
 	}
@@ -985,14 +983,6 @@ void Engine::UpdateEntities(float dt, float loopCompletion)
 		}
 	}
 #endif // #if GAME_BUILD
-
-#if USE_NETWORKING
-	m_otherPlayer->Tick(dt);
-	PHY_SetupTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion);
-	PHY_ApplyGravity(m_otherPlayer, dt);
-	PHY_EndTick(m_otherPlayer, m_landTerrain, m_waterTerrain, m_timeloopCompletion, dt);
-	m_otherPlayer->Render(m_Graphics);
-#endif
 
 #if EDITOR_BUILD
 	m_editCursor->Render(m_Graphics);

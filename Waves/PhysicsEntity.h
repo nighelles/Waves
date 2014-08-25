@@ -26,6 +26,7 @@ public:
 	void SetVelocity(float x, float y, float z);
 
 	D3DXVECTOR3 GetVelocity() { return D3DXVECTOR3(m_velocityX, m_velocityY, m_velocityZ); };
+	void GetVelocity(float& x, float& y, float& z) { x = m_velocityX; y = m_velocityY; z = m_velocityZ; };
 
 	float m_impulseX, m_impulseY, m_impulseZ;
 	float m_velocityX, m_velocityY, m_velocityZ;

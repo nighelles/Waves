@@ -8,6 +8,11 @@
 
 class NetworkSyncController
 {
+private:
+	struct NetworkState
+	{
+		NetworkedEntity entities[MAXNETWORKENTITIES];
+	};
 
 public:
 	NetworkSyncController();
@@ -21,18 +26,26 @@ public:
 	bool SyncEntityStates();
 	bool SyncPlayerInput(NetworkedInput* inp);
 
+	int DeltaCompress();
+	bool DeltaUncompress();
+
 private:
 	bool m_isServer;
 
 	NetworkController* m_networkController;
 
-	UINT32 m_ack;
+	UINT32 m_ack, m_clientAck;
 
 	int m_waitCount;
 	bool m_waiting;
 
 	int m_numEntities;
-	PhysicsEntity* m_entities[3];
+	PhysicsEntity* m_entities[MAXNETWORKENTITIES];
+
+	NetworkState m_networkStates[MAXACKDELAY];
+	int m_currentNetworkState;
+
+	int m_datastream[DATALENGTH/sizeof(int)];
 
 	ClientNetworkMessage m_clientMessage;
 	ServerNetworkMessage m_serverMessage;
