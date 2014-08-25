@@ -718,11 +718,7 @@ void Engine::Run()
 					OutputDebugString(L"Player Joined\n");
 				}
 
-				result = Update();
-				if (!result) done = true;
 				result = Render();
-				if (!result) done = true;
-				result = PostUpdate();
 				if (!result) done = true;
 			}
 #endif
