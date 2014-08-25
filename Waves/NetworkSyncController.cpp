@@ -261,7 +261,7 @@ bool NetworkSyncController::DeltaUncompress()
 
 	for (int dataIndex = 0; dataIndex != DATALENGTH; dataIndex += 2)
 	{
-		if (m_datastream[dataIndex] = 0xFF && m_datastream[dataIndex + 1] == 0xFF)
+		if (m_datastream[dataIndex] == 0xFF && m_datastream[dataIndex + 1] == 0xFF)
 		{
 			break;
 		}
