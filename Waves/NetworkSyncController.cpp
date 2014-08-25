@@ -60,7 +60,7 @@ int NetworkSyncController::RegisterEntity(PhysicsEntity* entity)
 	m_entities[m_numEntities] = entity;
 	if (!m_entities[m_numEntities])
 	{
-		OutputDebugString(L"Can't register entity to Network Sync Controller");
+		OutputDebugString(L"Can't register entity to Network Sync Controller\n");
 		return -1;
 	}
 

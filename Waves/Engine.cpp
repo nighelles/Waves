@@ -349,13 +349,9 @@ bool Engine::InitializeGame()
 	m_playerNumber = 0;
 	m_playerTeam = 0;
 
-#if !USE_NETWORKING
 	CreateLocalPlayer();
-
-	m_Graphics->GetPlayerCamera()->BindToEntity(Player());
-
-	m_Graphics->GetPlayerCamera()->Update();
-	m_Graphics->GetPlayerCamera()->Render();
+#if USE_NETWORKING
+	m_numPlayers -= 1;
 #endif
 
 #endif //#if GAME_BUILD
@@ -449,9 +445,10 @@ bool Engine::ConnectNetworking()
 		if (!m_server->WaitForClient()) 
 			return false;
 
+		m_networkSyncController->Initialize(m_isServer, m_server);
+
 		CreateLocalPlayer();
 		NewNetworkPlayer();
-		m_networkSyncController->Initialize(m_isServer, m_server);
 	}
 	else {
 		if (!m_client->ConnectToServer(m_serverAddress)) 
@@ -463,13 +460,13 @@ bool Engine::ConnectNetworking()
 		CreateLocalPlayer();
 	}
 
-	for each (PhysicsEntity *ent in m_entities)
+	for (int i = 0; i != m_entityIndex-1; ++i)
 	{
-		m_networkSyncController->RegisterEntity(ent);
+		m_networkSyncController->RegisterEntity(m_entities[i]);
 	}
-	for each (PhysicsEntity *ent in m_players)
+	for (int i = 0; i != m_numPlayers; ++i)
 	{
-		m_networkSyncController->RegisterEntity(ent);
+		m_networkSyncController->RegisterEntity(m_entities[i]);
 	}
 
 	// set later after we debug position
@@ -708,8 +705,6 @@ void Engine::Run()
 #if USE_NETWORKING
 					m_gameState = GAME_WAIT_NETWORK;
 					InitializeNetworking();
-					CreateLocalPlayer();
-					m_playerNumber = 0; 
 					// Allow the player to mess around before it starts
 #endif
 				}
@@ -737,6 +732,7 @@ void Engine::Run()
 #endif
 			else if (m_gameState == GAME_PLAYING)
 			{
+#if USE_NETWORKING
 				if (m_server)
 				{
 					if (ConnectNetworking())
@@ -744,6 +740,7 @@ void Engine::Run()
 						OutputDebugString(L"Player Joined");
 					}
 				}
+#endif
 				// Main game logic
 				result = Update();
 				if (!result) done = true;
