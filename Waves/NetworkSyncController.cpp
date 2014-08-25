@@ -89,7 +89,7 @@ bool NetworkSyncController::SyncEntityStates()
 		NewNetworkedEntity(&(newState.entities[i]),m_entities[i]);
 	}
 
-	memset(m_networkStates[m_currentNetworkState], 0, sizeof(NetworkState));
+	memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
 	m_networkStates[m_currentNetworkState] = newState;
 
 	m_currentNetworkState += 1;
