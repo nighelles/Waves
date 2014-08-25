@@ -45,7 +45,7 @@ private:
 	NetworkState m_networkStates[MAXACKDELAY];
 	int m_currentNetworkState;
 
-	int m_datastream[DATALENGTH/sizeof(int)];
+	int m_datastream[DATALENGTH / 4];
 
 	ClientNetworkMessage m_clientMessage;
 	ServerNetworkMessage m_serverMessage;

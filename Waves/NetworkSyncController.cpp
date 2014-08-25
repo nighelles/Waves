@@ -22,6 +22,10 @@ NetworkSyncController::NetworkSyncController()
 
 	m_currentNetworkState = 0;
 
+	m_networkStates[MAXACKDELAY] = { };
+	m_datastream[DATALENGTH / 4] = {};
+
+
 	return;
 }
 
