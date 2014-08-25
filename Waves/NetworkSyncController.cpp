@@ -81,27 +81,24 @@ bool NetworkSyncController::SyncEntityStates()
 
 	result = true;
 
-	//sync current entity states
-	NetworkState newState;
-
-	for (int i = 0; i != m_numEntities; ++i)
-	{
-		NewNetworkedEntity(&(newState.entities[i]),m_entities[i]);
-	}
-
-	m_currentNetworkState += 1;
-	if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
-
-	if (m_isServer)
-	{
-		memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
-		m_networkStates[m_currentNetworkState] = newState;
-	}
-
 	if (m_isServer)
 	{
 		if (!m_waiting)
 		{
+			//sync current entity states
+			NetworkState newState;
+
+			for (int i = 0; i != m_numEntities; ++i)
+			{
+				NewNetworkedEntity(&(newState.entities[i]), m_entities[i]);
+			}
+
+			m_currentNetworkState += 1;
+			if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
+
+			memset(&(m_networkStates[m_currentNetworkState]), 0, sizeof(NetworkState));
+			m_networkStates[m_currentNetworkState] = newState;
+
 			m_serverMessage.ack = m_ack;
 			m_serverMessage.messageType = SERVERSENDSTATE;
 
@@ -226,7 +223,7 @@ int NetworkSyncController::DeltaCompress()
 {
 	int clientStateLocation = m_currentNetworkState - (m_ack - m_clientAck);
 
-	while (!(clientStateLocation < 0)) clientStateLocation += MAXACKDELAY;
+	while ((clientStateLocation < 0)) clientStateLocation += MAXACKDELAY;
 
 	char data[DATALENGTH];
 	char olddata[DATALENGTH];
