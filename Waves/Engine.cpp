@@ -1011,7 +1011,7 @@ bool Engine::PostUpdate()
 
 	if (m_connectedToServer)
 	{
-		m_networkSyncController->SyncEntityStates();
+		m_networkSyncController->SyncEntityStates(m_dt);
 	}
 #endif //#if USE_NETWORKING
 
