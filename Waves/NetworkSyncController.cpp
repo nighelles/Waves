@@ -126,7 +126,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 			m_waiting = true;
 
-			if (m_clientAck = m_ack - 1)
+			if (m_clientAck == m_ack - 1)
 			{
 				// This was a good packet
 				m_goodPackets += 1;
@@ -171,6 +171,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 				NewNetworkedEntity(&(newState.entities[i]), m_entities[i]);
 			}
 
+			
 			NextNetworkState();
 
 			memcpy(&(m_predictedStates[m_currentNetworkState]), &newState, sizeof(NetworkState));
@@ -182,14 +183,14 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 			int serverAtIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
 			if (DoStatesDiffer(
-				&m_networkStates[m_currentNetworkState],
+				&m_networkStates[serverAtIndex],
 				&m_predictedStates[m_currentNetworkState],
 				m_numEntities))
 			{
 				OutputDebugString(L"Had to change prediction.\n");
 				for (int i = 0; i != m_numEntities; ++i)
 				{
-					ApplyChanges(m_networkStates[m_currentNetworkState].entities[i], m_entities[i]);
+					ApplyChanges(m_networkStates[serverAtIndex].entities[i], m_entities[i]);
 				}
 			}
 			else {
@@ -207,15 +208,15 @@ bool NetworkSyncController::DoStatesDiffer(NetworkState *a, NetworkState *b, int
 {
 	for (int i = 0; i != num; ++i)
 	{
-		if (fabs(a->entities[i].x -  b->entities[i].x) > 0.1) return true;
-		if (fabs(a->entities[i].y -  b->entities[i].y) > 0.1) return true;
-		if (fabs(a->entities[i].z -  b->entities[i].z) > 0.1) return true;
-		if (fabs(a->entities[i].vx - b->entities[i].vx) > 0.1) return true;
-		if (fabs(a->entities[i].vy - b->entities[i].vy) > 0.1) return true;
-		if (fabs(a->entities[i].vz - b->entities[i].vz) > 0.1) return true;
-		if (fabs(a->entities[i].rx - b->entities[i].rx) > 0.1) return true;
-		if (fabs(a->entities[i].ry - b->entities[i].ry) > 0.1) return true;
-		if (fabs(a->entities[i].rz - b->entities[i].rz) > 0.1) return true;
+		if (fabs(a->entities[i].x -  b->entities[i].x) > 0.5) return true;
+		if (fabs(a->entities[i].y -  b->entities[i].y) > 0.5) return true;
+		if (fabs(a->entities[i].z -  b->entities[i].z) > 0.5) return true;
+		if (fabs(a->entities[i].vx - b->entities[i].vx) > 0.5) return true;
+		if (fabs(a->entities[i].vy - b->entities[i].vy) > 0.5) return true;
+		if (fabs(a->entities[i].vz - b->entities[i].vz) > 0.5) return true;
+		if (fabs(a->entities[i].rx - b->entities[i].rx) > 0.5) return true;
+		if (fabs(a->entities[i].ry - b->entities[i].ry) > 0.5) return true;
+		if (fabs(a->entities[i].rz - b->entities[i].rz) > 0.5) return true;
 	}
 	return false;
 }
@@ -369,7 +370,7 @@ bool NetworkSyncController::DeltaUncompress(int fromAck)
 		}
 	}
 
-	memcpy(m_networkStates[m_currentNetworkState].entities, data, sizeof(m_networkStates[m_currentNetworkState].entities));
+	memcpy(m_networkStates[oldindex].entities, data, sizeof(m_networkStates[oldindex].entities));
 
 	return true;
 }

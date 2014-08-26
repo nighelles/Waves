@@ -779,7 +779,11 @@ bool Engine::Update()
 	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
 	m_dtAccum += m_dt;
+#if USE_NETWORKING
 	if (m_dtAccum > (1.0f / PHYSICSFRAMERATE))
+#else
+	if (1)
+#endif
 	{
 		m_updatePhysics = true;
 
