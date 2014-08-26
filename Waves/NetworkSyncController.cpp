@@ -56,7 +56,6 @@ void NetworkSyncController::Shutdown()
 	if (m_networkController)
 	{
 		m_networkController->Shutdown(); 
-		delete m_networkController;
 		m_networkController = 0;
 	}
 	for (int i = 0; i != m_numEntities; ++i)
