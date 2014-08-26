@@ -4,7 +4,8 @@
 #include <atldef.h>
 #include <atlstr.h>
 
-#define MAX_WAIT 1000
+#define NETWORKWAITSLOW .3
+#define NETWORKWAITFAST .1
 
 NetworkSyncController::NetworkSyncController()
 {
@@ -17,13 +18,15 @@ NetworkSyncController::NetworkSyncController()
 	m_ack = 0;
 	m_clientAck = 0;
 
-	m_waitCount = 0;
+	m_waitTime = 0;
 	m_waiting = false;
+	m_packetSpacing = NETWORKWAITSLOW;
+	m_goodPackets = 0;
 
 	m_currentNetworkState = 0;
 
 	NetworkState m_networkStates[MAXACKDELAY] = {};
-
+	
 	m_datastream[STREAMLENGTH] = { 0 };
 
 	return;
@@ -72,7 +75,7 @@ int NetworkSyncController::RegisterEntity(PhysicsEntity* entity)
 	return m_numEntities - 1;
 }
 
-bool NetworkSyncController::SyncEntityStates()
+bool NetworkSyncController::SyncEntityStates(float dt)
 {
 	float x, y, z, yaw, pitch, roll;
 	int entityIndex;
@@ -80,6 +83,14 @@ bool NetworkSyncController::SyncEntityStates()
 	bool result;
 
 	result = true;
+
+	m_waitTime += dt;
+
+	if (m_waitTime > m_packetSpacing)
+	{
+		m_waitTime -= m_packetSpacing;
+		m_waiting = false;
+	}
 
 	if (m_isServer)
 	{
@@ -109,7 +120,25 @@ bool NetworkSyncController::SyncEntityStates()
 			m_ack += 1;
 
 			m_waiting = true;
-			m_waitCount = 0;
+
+			if (m_clientAck = m_ack - 1)
+			{
+				// This was a good packet
+				m_goodPackets += 1;
+				if (m_goodPackets > 10 && m_packetSpacing == NETWORKWAITSLOW)
+				{
+					m_packetSpacing = NETWORKWAITFAST;
+					OutputDebugString(L"Moving to faster packets\n");
+				}
+			}
+			else {
+				m_goodPackets -= 1;
+				if (m_goodPackets < 10 && m_packetSpacing == NETWORKWAITFAST)
+				{
+					m_packetSpacing = NETWORKWAITSLOW;
+					OutputDebugString(L"Moving to slower packets\n");
+				}
+			}
 		}
 	}
 	else 
@@ -146,7 +175,7 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 	bool result;
 
 	result = true;
-
+	
 	if (m_isServer)
 	{
 		char clientData[256];
@@ -156,30 +185,13 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 
 		m_clientMessage = *((ClientNetworkMessage*)clientData);
 
-		if (m_clientMessage.messageType = CLIENTSENDINPUT)
+		if (m_clientMessage.messageType == CLIENTSENDINPUT)
 		{
 			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
 
 			playerNum = m_clientMessage.playerNumber;
 
 			m_clientAck = m_clientMessage.ack;
-
-			if (m_clientMessage.ack != m_ack - 1)
-			{
-				m_waitCount += 1;
-				if (m_waitCount == MAX_WAIT)
-				{
-					char msg[100];
-					sprintf_s(msg, 100, "FORCE: Client at ack# %d, should be %d \n", m_clientMessage.ack, m_ack - 1);
-					OutputDebugString(ATL::CA2W(msg));
-					m_waitCount = 0;
-					m_waiting = false;
-				}
-			}
-			else {
-				m_waiting = false;
-				m_waitCount = 0;
-			}
 
 			bool w, a, s, d;
 

@@ -23,7 +23,7 @@ public:
 
 	int RegisterEntity(PhysicsEntity* entity);
 
-	bool SyncEntityStates();
+	bool SyncEntityStates(float dt);
 	bool SyncPlayerInput(NetworkedInput* inp, int& playerNum);
 
 	int DeltaCompress();
@@ -38,8 +38,10 @@ private:
 
 	UINT32 m_ack, m_clientAck;
 
-	int m_waitCount;
+	float m_waitTime;
+	float m_packetSpacing;
 	bool m_waiting;
+	int m_goodPackets;
 
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];
