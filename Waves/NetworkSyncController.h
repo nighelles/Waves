@@ -43,11 +43,14 @@ private:
 
 	UINT32 m_ack, m_clientAck;
 
+	int m_serverAtIndex;
+
 	float m_waitTime;
 	float m_packetSpacing;
 	bool m_waiting;
 	int m_goodPackets;
 	int m_goodThreshold;
+	bool m_checkAgainstNetwork;
 
 	bool m_sendInput;
 	NetworkedInput m_inpAcc;
