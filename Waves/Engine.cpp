@@ -50,6 +50,13 @@ Engine::Engine()
 
 	m_connectedToServer = false;
 
+	// Timing variables
+	m_dt = 0;
+	m_dtAccum = 0;
+	m_timeloopCompletion = 0;
+
+	m_updatePhysics = false;
+
 	// LOADING VARIABLES
 	for (int i = 0; i != NUMBEROFTEAMS; ++i)
 	{
@@ -771,128 +778,134 @@ bool Engine::Update()
 
 	m_timeloopCompletion = (newtime.wSecond * 1000 + newtime.wMilliseconds) / 60000.0;
 
-	m_Input->GetMouseDelta(mouseIDX, mouseIDY);
+	m_dtAccum += m_dt;
+	if (m_dtAccum > (1.0f / PHYSICSFRAMERATE))
+	{
+		m_updatePhysics = true;
 
-	mouseDX = mouseIDX * m_dt * 10;
-	mouseDY = mouseIDY * m_dt * 10;
+		m_Input->GetMouseDelta(mouseIDX, mouseIDY);
+
+		mouseDX = mouseIDX * m_dtAccum * 10;
+		mouseDY = mouseIDY * m_dtAccum * 10;
 
 #if GAME_BUILD
 
-	if (m_Input->IsKeyPressed(DIK_T))
-	{
-		for (int i = 0; i != MAXENTITIES; ++i)
+		if (m_Input->IsKeyPressed(DIK_T))
 		{
-			if (m_entities[i])
+			for (int i = 0; i != MAXENTITIES; ++i)
 			{
-				m_entities[i]->GetEntityModel()->Animating(true);
+				if (m_entities[i])
+				{
+					m_entities[i]->GetEntityModel()->Animating(true);
+				}
+			}
+			for (int i = 0; i != MAXWEAPONS; ++i)
+			{
+				if (m_weaponEntities[i])
+				{
+					m_weaponEntities[i]->GetEntityModel()->Animating(true);
+				}
 			}
 		}
-		for (int i = 0; i != MAXWEAPONS; ++i)
+
+		bool mouse1, mouse2;
+		m_Input->IsMouseClicked(mouse1, mouse2);
+		if (mouse1)
 		{
-			if (m_weaponEntities[i])
-			{
-				m_weaponEntities[i]->GetEntityModel()->Animating(true);
-			}
+			// "fire" main weapon
+			m_weaponEntities[m_currentWeapon]->GetEntityModel()->Animating(true);
 		}
-	}
 
-	bool mouse1, mouse2;
-	m_Input->IsMouseClicked(mouse1, mouse2);
-	if (mouse1)
-	{
-		// "fire" main weapon
-		m_weaponEntities[m_currentWeapon]->GetEntityModel()->Animating(true);
-	}
+		NetworkedInput playerInput{};
 
-	NetworkedInput playerInput{ };
+		if (m_Input->IsKeyPressed(DIK_W))
+			playerInput.keys[Network_W] = true;
+		if (m_Input->IsKeyPressed(DIK_A))
+			playerInput.keys[Network_A] = true;
+		if (m_Input->IsKeyPressed(DIK_S))
+			playerInput.keys[Network_S] = true;
+		if (m_Input->IsKeyPressed(DIK_D))
+			playerInput.keys[Network_D] = true;
+		if (m_Input->IsKeyPressed(DIK_SPACE))
+			playerInput.keys[Network_SPACE] = true;
+		if (m_Input->IsKeyPressed(DIK_LCONTROL))
+			playerInput.keys[Network_CONTROL] = true;
+		if (m_Input->IsKeyPressed(DIK_LSHIFT))
+			playerInput.keys[Network_SHIFT] = true;
+		if (m_Input->IsKeyDown(DIK_SPACE))
+			playerInput.keys[Network_SPACE] = true;
 
-	if (m_Input->IsKeyPressed(DIK_W))
-		playerInput.keys[Network_W] = true;
-	if (m_Input->IsKeyPressed(DIK_A))
-		playerInput.keys[Network_A] = true;
-	if (m_Input->IsKeyPressed(DIK_S))
-		playerInput.keys[Network_S] = true;
-	if (m_Input->IsKeyPressed(DIK_D))
-		playerInput.keys[Network_D] = true;
-	if (m_Input->IsKeyPressed(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = true;
-	if (m_Input->IsKeyPressed(DIK_LCONTROL))
-		playerInput.keys[Network_CONTROL] = true;
-	if (m_Input->IsKeyPressed(DIK_LSHIFT))
-		playerInput.keys[Network_SHIFT] = true;
-	if (m_Input->IsKeyDown(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = true;
+		playerInput.mouseDX = mouseDX;
+		playerInput.mouseDY = mouseDY;
 
-	playerInput.mouseDX = mouseDX;
-	playerInput.mouseDY = mouseDY;
+		//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
-	//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
-
-	MovePlayer(playerInput, Player(), m_dt);
+		MovePlayer(playerInput, Player(), m_dtAccum);
 
 #endif // #if GAME_BUILD
 
 #if EDITOR_BUILD
-	m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
+		m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, mouseDX, 0.0);
 
-	if (m_Input->IsKeyPressed(DIK_W))
-		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, 5.0f);
-	if (m_Input->IsKeyPressed(DIK_A))
-		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(-5.0f, 0.0f, 0.0f);
-	if (m_Input->IsKeyPressed(DIK_S))
-		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, -5.0f);
-	if (m_Input->IsKeyPressed(DIK_D))
-		m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(5.0f, 0.0f, 0.0f);
-	if (m_Input->IsKeyDown(DIK_F))
-		m_waterTerrain->IsVisible(!m_waterTerrain->IsVisible());
-	
-	D3DXVECTOR3 editorRayOrigin, editorRayDirection, editorRayIntersection;
-	bool editorRayIntersected;
+		if (m_Input->IsKeyPressed(DIK_W))
+			m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, 5.0f);
+		if (m_Input->IsKeyPressed(DIK_A))
+			m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(-5.0f, 0.0f, 0.0f);
+		if (m_Input->IsKeyPressed(DIK_S))
+			m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(0.0f, 0.0f, -5.0f);
+		if (m_Input->IsKeyPressed(DIK_D))
+			m_Graphics->GetPlayerCamera()->ApplyTranslationRelative(5.0f, 0.0f, 0.0f);
+		if (m_Input->IsKeyDown(DIK_F))
+			m_waterTerrain->IsVisible(!m_waterTerrain->IsVisible());
 
-	editorRayOrigin = m_Graphics->GetPlayerCamera()->GetPosition();
-	editorRayDirection = m_Graphics->GetPlayerCamera()->GetDirection();
+		D3DXVECTOR3 editorRayOrigin, editorRayDirection, editorRayIntersection;
+		bool editorRayIntersected;
 
-	editorRayIntersected = PHY_GetRayIntersection(m_landTerrain, &editorRayOrigin, &editorRayDirection, &editorRayIntersection);
+		editorRayOrigin = m_Graphics->GetPlayerCamera()->GetPosition();
+		editorRayDirection = m_Graphics->GetPlayerCamera()->GetDirection();
 
-	if (editorRayIntersected)
-	{
-		float cursorY = editorRayIntersection.y;
-		if (cursorY < 5.0f && m_waterTerrain->IsVisible()) cursorY = 5.0f;
+		editorRayIntersected = PHY_GetRayIntersection(m_landTerrain, &editorRayOrigin, &editorRayDirection, &editorRayIntersection);
 
-		m_editCursor->SetLocation(editorRayIntersection.x, cursorY, editorRayIntersection.z);
-		
-		if (m_Input->IsKeyPressed(DIK_Q))
+		if (editorRayIntersected)
 		{
-			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, -5.0);
-			m_editedSomething = true;
+			float cursorY = editorRayIntersection.y;
+			if (cursorY < 5.0f && m_waterTerrain->IsVisible()) cursorY = 5.0f;
+
+			m_editCursor->SetLocation(editorRayIntersection.x, cursorY, editorRayIntersection.z);
+
+			if (m_Input->IsKeyPressed(DIK_Q))
+			{
+				m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, -5.0);
+				m_editedSomething = true;
+			}
+			if (m_Input->IsKeyPressed(DIK_E))
+			{
+				m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0);
+				m_editedSomething = true;
+			}
+			if (m_Input->IsKeyPressed(DIK_R))
+			{
+				m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0f);
+				m_editedSomething = true;
+			}
 		}
-		if (m_Input->IsKeyPressed(DIK_E))
-		{
-			m_landTerrain->ApplyVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0);
-			m_editedSomething = true;
-		}
-		if (m_Input->IsKeyPressed(DIK_R))
-		{
-			m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0f);
-			m_editedSomething = true;
-		}
-	}
 
 #endif
 
-	UpdateEntities(m_dt, m_timeloopCompletion);
+		UpdateEntities(m_dtAccum, m_timeloopCompletion);
 
 #if USE_NETWORKING
 
-	if (m_connectedToServer)
-	{
-		int playerNum = m_playerNumber;
-		m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
+		if (m_connectedToServer)
+		{
+			int playerNum = m_playerNumber;
+			m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
 
-		if (m_server) MovePlayer(playerInput, m_players[playerNum], m_dt);
-	}
+			if (m_server) MovePlayer(playerInput, m_players[playerNum], m_dtAccum);
+		}
 
 #endif //#if USE_NETWORKING
+	}
 
 
 	return true;
@@ -1011,10 +1024,15 @@ bool Engine::PostUpdate()
 
 	if (m_connectedToServer)
 	{
-		m_networkSyncController->SyncEntityStates(m_dt);
+		m_networkSyncController->SyncEntityStates(m_dtAccum);
 	}
-#endif //#if USE_NETWORKING
 
+#endif //#if USE_NETWORKING
+	if (m_updatePhysics)
+	{
+		m_updatePhysics = false;
+		m_dtAccum = 0.0f;
+	}
 	return true;
 }
 

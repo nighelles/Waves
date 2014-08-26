@@ -24,9 +24,11 @@
 
 #include "Physics.h"
 
-#define USE_NETWORKING 1
+#define USE_NETWORKING 0
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
+
+#define PHYSICSFRAMERATE 30.0f
 
 #define NUMBEROFTEAMS 2
 
@@ -138,10 +140,16 @@ private:
 
 	Bitmap* m_crosshair;
 
+	// timing variables
 	float m_timeloopCompletion;
 
 	float m_dt;
 
+	float m_dtAccum;
+
+	bool m_updatePhysics;
+
+	// end timing variables
 	NetworkServer* m_server;
 	NetworkClient* m_client;
 

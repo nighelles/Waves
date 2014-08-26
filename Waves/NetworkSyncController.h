@@ -42,6 +42,7 @@ private:
 	float m_packetSpacing;
 	bool m_waiting;
 	int m_goodPackets;
+	int m_goodThreshold;
 
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];

@@ -4,9 +4,6 @@
 #include <atldef.h>
 #include <atlstr.h>
 
-#define NETWORKWAITSLOW .3
-#define NETWORKWAITFAST .1
-
 NetworkSyncController::NetworkSyncController()
 {
 	m_isServer = 0;
@@ -16,12 +13,13 @@ NetworkSyncController::NetworkSyncController()
 	m_numEntities = 0;
 
 	m_ack = 0;
-	m_clientAck = 0;
+	m_clientAck = -1;
 
 	m_waitTime = 0;
 	m_waiting = false;
-	m_packetSpacing = NETWORKWAITSLOW;
+	m_packetSpacing = 0.2;
 	m_goodPackets = 0;
+	m_goodThreshold = 5;
 
 	m_currentNetworkState = 0;
 
@@ -125,17 +123,21 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			{
 				// This was a good packet
 				m_goodPackets += 1;
-				if (m_goodPackets > 10 && m_packetSpacing == NETWORKWAITSLOW)
+				if (m_goodPackets > m_goodThreshold)
 				{
-					m_packetSpacing = NETWORKWAITFAST;
+					m_packetSpacing = 0.05;
+					m_goodPackets = m_goodThreshold;
+
 					OutputDebugString(L"Moving to faster packets\n");
 				}
 			}
 			else {
 				m_goodPackets -= 1;
-				if (m_goodPackets < 10 && m_packetSpacing == NETWORKWAITFAST)
+				if (m_goodPackets < -m_goodThreshold)
 				{
-					m_packetSpacing = NETWORKWAITSLOW;
+					m_goodPackets = -m_goodThreshold;
+					m_packetSpacing = .3;
+
 					OutputDebugString(L"Moving to slower packets\n");
 				}
 			}
