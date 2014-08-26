@@ -50,6 +50,7 @@ private:
 	bool m_waiting;
 	int m_goodPackets;
 	int m_goodThreshold;
+	bool m_checkAgainstNetwork;
 
 	bool m_sendInput;
 	NetworkedInput m_inpAcc;

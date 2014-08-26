@@ -23,6 +23,8 @@ NetworkSyncController::NetworkSyncController()
 	m_goodPackets = 0;
 	m_goodThreshold = 5;
 
+	m_checkAgainstNetwork = false;
+
 	m_currentNetworkState = 0;
 
 	m_sendInput = false;
@@ -180,6 +182,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			memcpy(m_datastream, (char*)m_serverMessage.data, DATALENGTH);
 
 			int newIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
+
 			if (m_serverAtIndex != newIndex)
 			{
 				memcpy(
@@ -187,24 +190,30 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 					&(m_networkStates[m_serverAtIndex]), 
 					sizeof(m_networkStates[m_serverAtIndex]));
 
+				m_checkAgainstNetwork = true;
 				m_serverAtIndex = newIndex;
 			}
 
 			DeltaUncompress(m_serverMessage.clientAck);
 
-			if (DoStatesDiffer(
-				&m_networkStates[m_serverAtIndex],
-				&m_predictedStates[m_currentNetworkState],
-				m_numEntities))
+			if (m_checkAgainstNetwork)
 			{
-				OutputDebugString(L"Had to change prediction.\n");
-				for (int i = 0; i != m_numEntities; ++i)
+				if (DoStatesDiffer(
+					&m_networkStates[m_serverAtIndex],
+					&m_predictedStates[m_serverAtIndex],
+					m_numEntities))
 				{
-					ApplyChanges(m_networkStates[m_serverAtIndex].entities[i], m_entities[i]);
+					OutputDebugString(L"Had to change prediction.\n");
+					for (int i = 0; i != m_numEntities; ++i)
+					{
+						ApplyChanges(m_networkStates[m_serverAtIndex].entities[i], m_entities[i]);
+					}
 				}
-			}
-			else {
-				OutputDebugString(L"Got to keep prediction. \n");
+				else {
+					OutputDebugString(L"Got to keep prediction. \n");
+				}
+
+				m_checkAgainstNetwork = false;
 			}
 		}
 	}
