@@ -59,7 +59,7 @@ bool NetworkClient::GetDataFromServer(char* data, int datasize)
 
 	int bytes = recvfrom(m_socketHandle, (char*)data, datasize, 0, (sockaddr*)&from, &fromLength);
 	
-	if (bytes == SOCKET_ERROR)
+	if (bytes == SOCKET_ERROR && WSAGetLastError()!=10035)
 	{
 		OutputDebugString(L"Socket Error\n");
 		char msg[100];
