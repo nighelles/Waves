@@ -331,9 +331,16 @@ void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEnti
 	ent->GetLocation(x, y, z);
 	ent->GetVelocity(vx, vy, vz);
 	ent->GetRotation(rx, ry, rz);
-	net->x = x; net->y = y; net->z = z;
-	net->vx = vx; net->vy = vy; net->vz = vz;
-	net->rx = rx; net->ry = ry; net->rz = rz;
+	net->x = net->y = net->z = net->vx = net->vy = net->vz = net->rx = net->ry = net->rz = 0;
+	if (x > 0.000001) net->x = x; 
+	if (y > 0.000001) net->y = y;
+	if (z > 0.000001) net->z = z;
+	if (vx > 0.000001) net->vx = vx;
+	if (vy > 0.000001) net->vy = vy;
+	if (vz > 0.000001) net->vz = vz;
+	if (rx > 0.000001) net->rx = rx;
+	if (ry > 0.000001) net->ry = ry;
+	if (rz > 0.000001) net->rz = rz;
 
 	return;
 }
