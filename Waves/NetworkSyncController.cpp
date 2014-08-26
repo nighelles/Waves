@@ -4,6 +4,8 @@
 #include <atldef.h>
 #include <atlstr.h>
 
+#include <math.h>
+
 NetworkSyncController::NetworkSyncController()
 {
 	m_isServer = 0;
@@ -175,10 +177,10 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			DeltaUncompress();
 
 			int serverAtIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
-			if (memcmp(
-				&(m_networkStates[m_currentNetworkState]),
-				&(m_predictedStates[serverAtIndex]),
-				sizeof(m_predictedStates[serverAtIndex])) != 0)
+			if (DoStatesDiffer(
+				&m_networkStates[m_currentNetworkState],
+				&m_predictedStates[serverAtIndex],
+				m_numEntities))
 			{
 				for (int i = 0; i != m_numEntities; ++i)
 				{
@@ -191,6 +193,11 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 	if (!result) OutputDebugString(L"Couldn't sync entity states.\n");
 
 	return result;
+}
+
+bool NetworkSyncController::DoStatesDiffer(NetworkState *a, NetworkState *b, int num)
+{
+	return memcmp(a, b, num*sizeof(NetworkState))!=0;
 }
 
 bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
@@ -307,7 +314,7 @@ bool NetworkSyncController::DeltaUncompress()
 
 	char data[DATALENGTH];
 
-	memcpy(data, m_networkStates[m_currentNetworkState].entities, sizeof(m_networkStates[m_currentNetworkState].entities));
+	memcpy(data, m_networkStates[m_currentNetworkState-1].entities, sizeof(m_networkStates[m_currentNetworkState-1].entities));
 
 	for (int dataIndex = 0; dataIndex != DATALENGTH; dataIndex += 2)
 	{
@@ -331,16 +338,24 @@ void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEnti
 	ent->GetLocation(x, y, z);
 	ent->GetVelocity(vx, vy, vz);
 	ent->GetRotation(rx, ry, rz);
-	net->x = net->y = net->z = net->vx = net->vy = net->vz = net->rx = net->ry = net->rz = 0;
-	if (x > 0.000001) net->x = x; 
-	if (y > 0.000001) net->y = y;
-	if (z > 0.000001) net->z = z;
-	if (vx > 0.000001) net->vx = vx;
-	if (vy > 0.000001) net->vy = vy;
-	if (vz > 0.000001) net->vz = vz;
-	if (rx > 0.000001) net->rx = rx;
-	if (ry > 0.000001) net->ry = ry;
-	if (rz > 0.000001) net->rz = rz;
+	if (fabs(x) < 0.0001) x = 0;
+	if (fabs(y) < 0.0001) y = 0;
+	if (fabs(z) < 0.0001) z = 0;
+	if (fabs(vx) < 0.0001) vx = 0;
+	if (fabs(vy) < 0.0001) vy = 0;
+	if (fabs(vz) < 0.0001) vz = 0;
+	if (fabs(rx) < 0.0001) rx = 0;
+	if (fabs(ry) < 0.0001) ry = 0;
+	if (fabs(rz) < 0.0001) rz = 0;
+	net->x = x; 
+	net->y = y;
+	net->z = z;
+	net->vx = vx;
+	net->vy = vy;
+	net->vz = vz;
+	net->rx = rx;
+	net->ry = ry;
+	net->rz = rz;
 
 	return;
 }

@@ -34,6 +34,7 @@ public:
 	bool DeltaUncompress();
 	void NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent);
 	void ApplyChanges(NetworkedEntity net, PhysicsEntity* ent);
+	bool DoStatesDiffer(NetworkState *a, NetworkState *b, int num);
 
 private:
 	bool m_isServer;

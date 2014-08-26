@@ -1,3 +1,3 @@
-isServer: 1
-serverIP: 127.0.0.1
+isServer: 0
+serverIP: 192.168.1.159
 level: levels\level0.txt
