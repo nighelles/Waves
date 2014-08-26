@@ -126,7 +126,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 			m_waiting = true;
 
-			if (m_clientAck == m_ack - 1)
+			if (m_clientAck > m_ack - 5)
 			{
 				// This was a good packet
 				m_goodPackets += 1;
@@ -179,18 +179,28 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			// Then look at what the server sent us
 			memcpy(m_datastream, (char*)m_serverMessage.data, DATALENGTH);
 
+			int newIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
+			if (m_serverAtIndex != newIndex)
+			{
+				memcpy(
+					&(m_networkStates[newIndex]), 
+					&(m_networkStates[m_serverAtIndex]), 
+					sizeof(m_networkStates[m_serverAtIndex]));
+
+				m_serverAtIndex = newIndex;
+			}
+
 			DeltaUncompress(m_serverMessage.clientAck);
 
-			int serverAtIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
 			if (DoStatesDiffer(
-				&m_networkStates[serverAtIndex],
+				&m_networkStates[m_serverAtIndex],
 				&m_predictedStates[m_currentNetworkState],
 				m_numEntities))
 			{
 				OutputDebugString(L"Had to change prediction.\n");
 				for (int i = 0; i != m_numEntities; ++i)
 				{
-					ApplyChanges(m_networkStates[serverAtIndex].entities[i], m_entities[i]);
+					ApplyChanges(m_networkStates[m_serverAtIndex].entities[i], m_entities[i]);
 				}
 			}
 			else {

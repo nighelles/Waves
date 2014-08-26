@@ -43,6 +43,8 @@ private:
 
 	UINT32 m_ack, m_clientAck;
 
+	int m_serverAtIndex;
+
 	float m_waitTime;
 	float m_packetSpacing;
 	bool m_waiting;
