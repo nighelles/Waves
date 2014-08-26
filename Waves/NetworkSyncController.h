@@ -31,7 +31,7 @@ public:
 	void NextNetworkState();
 	int GetIndexForAckDifference(int ackNew, int ackOld);
 
-	bool DeltaUncompress();
+	bool DeltaUncompress(int fromAck);
 	void NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent);
 	void ApplyChanges(NetworkedEntity net, PhysicsEntity* ent);
 	bool DoStatesDiffer(NetworkState *a, NetworkState *b, int num);
@@ -48,6 +48,9 @@ private:
 	bool m_waiting;
 	int m_goodPackets;
 	int m_goodThreshold;
+
+	bool m_sendInput;
+	NetworkedInput m_inpAcc;
 
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];

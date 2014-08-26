@@ -25,6 +25,9 @@ NetworkSyncController::NetworkSyncController()
 
 	m_currentNetworkState = 0;
 
+	m_sendInput = false;
+	NetworkedInput m_inpAcc = {};
+
 	NetworkState m_networkStates[MAXACKDELAY] = {};
 	NetworkState m_predictedStates[MAXACKDELAY] = {};
 	
@@ -89,6 +92,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 	if (m_waitTime > m_packetSpacing)
 	{
+		m_sendInput = true;
 		m_waitTime -= m_packetSpacing;
 		m_waiting = false;
 	}
@@ -174,18 +178,22 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			// Then look at what the server sent us
 			memcpy(m_datastream, (char*)m_serverMessage.data, DATALENGTH);
 
-			DeltaUncompress();
+			DeltaUncompress(m_serverMessage.clientAck);
 
 			int serverAtIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
 			if (DoStatesDiffer(
 				&m_networkStates[m_currentNetworkState],
-				&m_predictedStates[serverAtIndex],
+				&m_predictedStates[m_currentNetworkState],
 				m_numEntities))
 			{
+				OutputDebugString(L"Had to change prediction.\n");
 				for (int i = 0; i != m_numEntities; ++i)
 				{
 					ApplyChanges(m_networkStates[m_currentNetworkState].entities[i], m_entities[i]);
 				}
+			}
+			else {
+				OutputDebugString(L"Got to keep prediction. \n");
 			}
 		}
 	}
@@ -197,7 +205,19 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 bool NetworkSyncController::DoStatesDiffer(NetworkState *a, NetworkState *b, int num)
 {
-	return memcmp(a, b, num*sizeof(NetworkState))!=0;
+	for (int i = 0; i != num; ++i)
+	{
+		if (fabs(a->entities[i].x -  b->entities[i].x) > 0.1) return true;
+		if (fabs(a->entities[i].y -  b->entities[i].y) > 0.1) return true;
+		if (fabs(a->entities[i].z -  b->entities[i].z) > 0.1) return true;
+		if (fabs(a->entities[i].vx - b->entities[i].vx) > 0.1) return true;
+		if (fabs(a->entities[i].vy - b->entities[i].vy) > 0.1) return true;
+		if (fabs(a->entities[i].vz - b->entities[i].vz) > 0.1) return true;
+		if (fabs(a->entities[i].rx - b->entities[i].rx) > 0.1) return true;
+		if (fabs(a->entities[i].ry - b->entities[i].ry) > 0.1) return true;
+		if (fabs(a->entities[i].rz - b->entities[i].rz) > 0.1) return true;
+	}
+	return false;
 }
 
 bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
@@ -239,23 +259,41 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 	}
 	else
 	{
-		m_clientMessage.messageType = CLIENTSENDINPUT;
-		m_clientMessage.ack = m_clientAck;
+		if (m_sendInput)
+		{
+			m_clientMessage.messageType = CLIENTSENDINPUT;
+			m_clientMessage.ack = m_clientAck;
 
-		m_clientMessage.playerNumber = playerNum;
+			m_clientMessage.playerNumber = playerNum;
 
-		m_clientMessage.input.keys[Network_W] = inp->keys[Network_W];
-		m_clientMessage.input.keys[Network_A] = inp->keys[Network_A];
-		m_clientMessage.input.keys[Network_S] = inp->keys[Network_S];
-		m_clientMessage.input.keys[Network_D] = inp->keys[Network_D];
-		m_clientMessage.input.keys[Network_SHIFT] = inp->keys[Network_SHIFT];
-		m_clientMessage.input.keys[Network_CONTROL] = inp->keys[Network_CONTROL];
-		m_clientMessage.input.keys[Network_SPACE] = inp->keys[Network_SPACE];
+			m_clientMessage.input.keys[Network_W]		=	m_inpAcc.keys[Network_W];
+			m_clientMessage.input.keys[Network_A]		=	m_inpAcc.keys[Network_A];
+			m_clientMessage.input.keys[Network_S]		=	m_inpAcc.keys[Network_S];
+			m_clientMessage.input.keys[Network_D]		=	m_inpAcc.keys[Network_D];
+			m_clientMessage.input.keys[Network_SHIFT]	=	m_inpAcc.keys[Network_SHIFT];
+			m_clientMessage.input.keys[Network_CONTROL] =	m_inpAcc.keys[Network_CONTROL];
+			m_clientMessage.input.keys[Network_SPACE]	=	m_inpAcc.keys[Network_SPACE];
 
-		m_clientMessage.input.mouseDX = inp->mouseDX;
-		m_clientMessage.input.mouseDY = inp->mouseDY;
+			m_clientMessage.input.mouseDX = m_inpAcc.mouseDX;
+			m_clientMessage.input.mouseDY = m_inpAcc.mouseDY;
 
-		result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
+			memset(&m_inpAcc, 0, sizeof(m_inpAcc));
+
+			result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
+			
+			m_sendInput = false;
+		}
+		else {
+			m_inpAcc.keys[Network_W      ] = inp->keys[Network_W      ] || m_inpAcc.keys[Network_W      ];
+			m_inpAcc.keys[Network_A      ] = inp->keys[Network_A      ] || m_inpAcc.keys[Network_A      ];
+			m_inpAcc.keys[Network_S      ] = inp->keys[Network_S      ] || m_inpAcc.keys[Network_S      ];
+			m_inpAcc.keys[Network_D      ] = inp->keys[Network_D      ] || m_inpAcc.keys[Network_D      ];
+			m_inpAcc.keys[Network_SHIFT  ] = inp->keys[Network_SHIFT  ] || m_inpAcc.keys[Network_SHIFT  ];
+			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] || m_inpAcc.keys[Network_CONTROL];
+			m_inpAcc.keys[Network_SPACE  ] = inp->keys[Network_SPACE  ] || m_inpAcc.keys[Network_SPACE  ];
+			m_inpAcc.mouseDX += inp->mouseDX;
+			m_inpAcc.mouseDY += inp->mouseDY;
+		}
 	}
 
 	if (!result) OutputDebugString(L"Could not sync player input.\n");
@@ -274,8 +312,10 @@ int NetworkSyncController::GetIndexForAckDifference(int ackNew, int ackOld)
 void NetworkSyncController::NextNetworkState()
 {
 	m_currentNetworkState += 1;
-	if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
-
+	if (m_currentNetworkState >= MAXACKDELAY)
+	{
+		m_currentNetworkState -= MAXACKDELAY;
+	}
 	return;
 }
 
@@ -307,14 +347,16 @@ int NetworkSyncController::DeltaCompress()
 	return true;
 }
 
-bool NetworkSyncController::DeltaUncompress()
+bool NetworkSyncController::DeltaUncompress(int fromAck)
 {
 	char entityCount;
 	char dataValue;
 
 	char data[DATALENGTH];
 
-	memcpy(data, m_networkStates[m_currentNetworkState-1].entities, sizeof(m_networkStates[m_currentNetworkState-1].entities));
+	int oldindex = GetIndexForAckDifference(m_clientAck, fromAck);
+
+	memcpy(data, m_networkStates[oldindex].entities, sizeof(m_networkStates[oldindex].entities));
 
 	for (int dataIndex = 0; dataIndex != DATALENGTH; dataIndex += 2)
 	{
@@ -338,15 +380,6 @@ void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEnti
 	ent->GetLocation(x, y, z);
 	ent->GetVelocity(vx, vy, vz);
 	ent->GetRotation(rx, ry, rz);
-	if (fabs(x) < 0.0001) x = 0;
-	if (fabs(y) < 0.0001) y = 0;
-	if (fabs(z) < 0.0001) z = 0;
-	if (fabs(vx) < 0.0001) vx = 0;
-	if (fabs(vy) < 0.0001) vy = 0;
-	if (fabs(vz) < 0.0001) vz = 0;
-	if (fabs(rx) < 0.0001) rx = 0;
-	if (fabs(ry) < 0.0001) ry = 0;
-	if (fabs(rz) < 0.0001) rz = 0;
 	net->x = x; 
 	net->y = y;
 	net->z = z;
