@@ -24,6 +24,7 @@ NetworkSyncController::NetworkSyncController()
 	m_currentNetworkState = 0;
 
 	NetworkState m_networkStates[MAXACKDELAY] = {};
+	NetworkState m_predictedStates[MAXACKDELAY] = {};
 	
 	m_datastream[STREAMLENGTH] = { 0 };
 
@@ -102,12 +103,12 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 				NewNetworkedEntity(&(newState.entities[i]), m_entities[i]);
 			}
 
-			m_currentNetworkState += 1;
-			if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
+			NextNetworkState();
 
 			memcpy(&(m_networkStates[m_currentNetworkState]), &newState, sizeof(NetworkState));
 
 			m_serverMessage.ack = m_ack;
+			m_serverMessage.clientAck = m_clientAck;
 			m_serverMessage.messageType = SERVERSENDSTATE;
 
 			DeltaCompress();
@@ -156,13 +157,33 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 		{
 			m_clientAck = m_serverMessage.ack;
 
+			//Create new state from what WE think it should be
+			NetworkState newState;
+
+			for (int i = 0; i != m_numEntities; ++i)
+			{
+				NewNetworkedEntity(&(newState.entities[i]), m_entities[i]);
+			}
+
+			NextNetworkState();
+
+			memcpy(&(m_predictedStates[m_currentNetworkState]), &newState, sizeof(NetworkState));
+
+			// Then look at what the server sent us
 			memcpy(m_datastream, (char*)m_serverMessage.data, DATALENGTH);
 
 			DeltaUncompress();
 
-			for (int i = 0; i != m_numEntities; ++i)
+			int serverAtIndex = GetIndexForAckDifference(m_clientAck, m_serverMessage.clientAck);
+			if (memcmp(
+				&(m_networkStates[m_currentNetworkState]),
+				&(m_predictedStates[serverAtIndex]),
+				sizeof(m_predictedStates[serverAtIndex])) != 0)
 			{
-				ApplyChanges(m_networkStates[0].entities[i],m_entities[i]);
+				for (int i = 0; i != m_numEntities; ++i)
+				{
+					ApplyChanges(m_networkStates[m_currentNetworkState].entities[i], m_entities[i]);
+				}
 			}
 		}
 	}
@@ -234,11 +255,26 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 	return result;
 }
 
+int NetworkSyncController::GetIndexForAckDifference(int ackNew, int ackOld)
+{
+	int loc = m_currentNetworkState - (ackNew - ackOld);
+
+	while ((loc < 0)) loc += MAXACKDELAY;
+
+	return loc;
+};
+
+void NetworkSyncController::NextNetworkState()
+{
+	m_currentNetworkState += 1;
+	if (m_currentNetworkState >= MAXACKDELAY) m_currentNetworkState -= MAXACKDELAY;
+
+	return;
+}
+
 int NetworkSyncController::DeltaCompress()
 {
-	int clientStateLocation = m_currentNetworkState - (m_ack - m_clientAck);
-
-	while ((clientStateLocation < 0)) clientStateLocation += MAXACKDELAY;
+	int clientStateLocation = GetIndexForAckDifference(m_ack, m_clientAck);
 
 	char data[DATALENGTH];
 	char olddata[DATALENGTH];
@@ -271,7 +307,7 @@ bool NetworkSyncController::DeltaUncompress()
 
 	char data[DATALENGTH];
 
-	memcpy(data, m_networkStates[0].entities, sizeof(m_networkStates[0].entities));
+	memcpy(data, m_networkStates[m_currentNetworkState].entities, sizeof(m_networkStates[m_currentNetworkState].entities));
 
 	for (int dataIndex = 0; dataIndex != DATALENGTH; dataIndex += 2)
 	{
@@ -284,7 +320,7 @@ bool NetworkSyncController::DeltaUncompress()
 		}
 	}
 
-	memcpy(m_networkStates[0].entities, data, sizeof(m_networkStates[0].entities));
+	memcpy(m_networkStates[m_currentNetworkState].entities, data, sizeof(m_networkStates[m_currentNetworkState].entities));
 
 	return true;
 }

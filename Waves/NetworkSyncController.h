@@ -27,6 +27,10 @@ public:
 	bool SyncPlayerInput(NetworkedInput* inp, int& playerNum);
 
 	int DeltaCompress();
+
+	void NextNetworkState();
+	int GetIndexForAckDifference(int ackNew, int ackOld);
+
 	bool DeltaUncompress();
 	void NewNetworkedEntity(NetworkedEntity *net, PhysicsEntity* ent);
 	void ApplyChanges(NetworkedEntity net, PhysicsEntity* ent);
@@ -48,6 +52,7 @@ private:
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];
 
 	NetworkState m_networkStates[MAXACKDELAY];
+	NetworkState m_predictedStates[MAXACKDELAY];
 	int m_currentNetworkState;
 
 	int m_datastream[STREAMLENGTH];
