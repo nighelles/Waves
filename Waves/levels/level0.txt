@@ -1,4 +1,4 @@
-map: levels\maps\map1.txt
+map: levels\maps\niles3.txt
 groundtexture: resources\entities\land.btw
 skyboxtexture: resources\entities\water.btw
 playerstart: 0 123 20 100 0 0 0

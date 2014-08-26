@@ -126,7 +126,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 			m_waiting = true;
 
-			if (m_clientAck == m_ack - 1)
+			if (m_clientAck > m_ack - 5)
 			{
 				// This was a good packet
 				m_goodPackets += 1;
