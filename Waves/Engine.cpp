@@ -896,8 +896,6 @@ bool Engine::Update()
 
 #endif
 
-		UpdateEntities(m_dtAccum, m_timeloopCompletion);
-
 #if USE_NETWORKING
 
 		if (m_connectedToServer)
@@ -909,6 +907,8 @@ bool Engine::Update()
 		}
 
 #endif //#if USE_NETWORKING
+
+		UpdateEntities(m_dtAccum, m_timeloopCompletion);
 	}
 
 
