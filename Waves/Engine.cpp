@@ -903,7 +903,7 @@ bool Engine::Update()
 			int playerNum = m_playerNumber;
 			m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
 
-			if (m_server) MovePlayer(playerInput, m_players[playerNum], PHYSICS_TICK_TIME);
+			if (m_server && playerNum!=m_playerNumber) MovePlayer(playerInput, m_players[playerNum], PHYSICS_TICK_TIME);
 		}
 
 #endif //#if USE_NETWORKING
