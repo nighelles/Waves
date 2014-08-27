@@ -133,7 +133,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 				m_goodPackets += 1;
 				if (m_goodPackets > m_goodThreshold)
 				{
-					m_packetSpacing = 0.1;
+					m_packetSpacing = 0.05;
 					m_goodPackets = m_goodThreshold;
 
 					OutputDebugString(L"Moving to faster packets\n");
