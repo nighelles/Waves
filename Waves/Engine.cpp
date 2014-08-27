@@ -789,8 +789,8 @@ bool Engine::Update()
 
 		m_Input->GetMouseDelta(mouseIDX, mouseIDY);
 
-		mouseDX = mouseIDX * m_dtAccum * 10;
-		mouseDY = mouseIDY * m_dtAccum * 10;
+		mouseDX = mouseIDX * PHYSICS_TICK_TIME * 10;
+		mouseDY = mouseIDY * PHYSICS_TICK_TIME * 10;
 
 #if GAME_BUILD
 
@@ -844,7 +844,7 @@ bool Engine::Update()
 
 		//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
-		MovePlayer(playerInput, Player(), m_dtAccum);
+		MovePlayer(playerInput, Player(), PHYSICS_TICK_TIME);
 
 #endif // #if GAME_BUILD
 
@@ -903,12 +903,12 @@ bool Engine::Update()
 			int playerNum = m_playerNumber;
 			m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
 
-			if (m_server) MovePlayer(playerInput, m_players[playerNum], m_dtAccum);
+			if (m_server) MovePlayer(playerInput, m_players[playerNum], PHYSICS_TICK_TIME);
 		}
 
 #endif //#if USE_NETWORKING
 
-		UpdateEntities(m_dtAccum, m_timeloopCompletion);
+		UpdateEntities(PHYSICS_TICK_TIME, m_timeloopCompletion);
 	}
 
 
@@ -1028,7 +1028,7 @@ bool Engine::PostUpdate()
 
 	if (m_connectedToServer)
 	{
-		m_networkSyncController->SyncEntityStates(m_dtAccum);
+		m_networkSyncController->SyncEntityStates(PHYSICS_TICK_TIME);
 	}
 
 #endif //#if USE_NETWORKING
