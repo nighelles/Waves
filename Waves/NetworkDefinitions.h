@@ -15,6 +15,8 @@ enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CO
 #define DATALENGTH 580
 #define STREAMLENGTH 1015
 
+#define ERROR_INTERPOLATION_TIME .2f
+
 typedef struct
 {
 	bool keys[7];
