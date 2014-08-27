@@ -23,6 +23,10 @@ NetworkSyncController::NetworkSyncController()
 	m_goodPackets = 0;
 	m_goodThreshold = 5;
 
+	m_errorInterpolation = 0.0f;
+	m_errorInterpolationTime = 0.0f;
+	m_correctingError = false;
+
 	m_checkAgainstNetwork = false;
 
 	m_currentNetworkState = 0;
@@ -91,15 +95,15 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 	m_waitTime += dt;
 
-	if (m_waitTime > m_packetSpacing)
-	{
-		m_sendInput = true;
-		m_waitTime -= m_packetSpacing;
-		m_waiting = false;
-	}
-
 	if (m_isServer)
 	{
+		if (m_waitTime > m_packetSpacing)
+		{
+			m_sendInput = true;
+			m_waitTime -= m_packetSpacing;
+			m_waiting = false;
+		}
+
 		if (!m_waiting)
 		{
 			//sync current entity states
@@ -162,6 +166,8 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 		if (m_serverMessage.messageType == SERVERSENDSTATE)
 		{
+			m_sendInput = true;
+
 			m_clientAck = m_serverMessage.ack;
 
 			//Create new state from what WE think it should be
@@ -199,20 +205,36 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			{
 				if (DoStatesDiffer(
 					&m_networkStates[m_serverAtIndex],
-					&m_predictedStates[m_serverAtIndex],
+					&m_predictedStates[m_serverAtIndex-1],
 					m_numEntities))
 				{
+					m_correctingError = true;
+					m_errorInterpolationTime = 0.0f;
+					m_errorInterpolation = 0.0f;
 					OutputDebugString(L"Had to change prediction.\n");
-					for (int i = 0; i != m_numEntities; ++i)
-					{
-						ApplyChanges(m_networkStates[m_serverAtIndex].entities[i], m_entities[i]);
-					}
 				}
 				else {
 					OutputDebugString(L"Got to keep prediction. \n");
 				}
 
 				m_checkAgainstNetwork = false;
+			}
+		}
+		if (m_correctingError)
+		{
+			OutputDebugString(L"Changing prediction.\n");
+			for (int i = 0; i != m_numEntities; ++i)
+			{
+				m_errorInterpolationTime += dt;
+				m_errorInterpolation = m_errorInterpolationTime / ERROR_INTERPOLATION_TIME;
+
+				if (m_errorInterpolation > 1.0f) {
+					m_errorInterpolation = 1.0f;
+					m_correctingError = false;
+				}
+				ApplyChanges(m_predictedStates[m_serverAtIndex].entities[i],
+					m_networkStates[m_serverAtIndex].entities[i],
+					m_entities[i], m_errorInterpolation);
 			}
 		}
 	}
@@ -258,22 +280,35 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 		{
 			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
 
+			memcpy(&m_inpAcc, &(newClientInput->input), sizeof(NetworkedInput));
+
 			playerNum = m_clientMessage.playerNumber;
 
 			m_clientAck = m_clientMessage.ack;
 
-			bool w, a, s, d;
+			inp->keys[Network_W] = m_inpAcc.keys[Network_W];
+			inp->keys[Network_A] = m_inpAcc.keys[Network_A];
+			inp->keys[Network_S] = m_inpAcc.keys[Network_S];
+			inp->keys[Network_D] = m_inpAcc.keys[Network_D];
+			inp->keys[Network_SHIFT] = m_inpAcc.keys[Network_SHIFT];
+			inp->keys[Network_CONTROL] = m_inpAcc.keys[Network_CONTROL];
+			inp->keys[Network_SPACE] = m_inpAcc.keys[Network_SPACE];
 
-			w = inp->keys[Network_W] = newClientInput->input.keys[Network_W];
-			a = inp->keys[Network_A] = newClientInput->input.keys[Network_A];
-			s = inp->keys[Network_S] = newClientInput->input.keys[Network_S];
-			d = inp->keys[Network_D] = newClientInput->input.keys[Network_D];
-			inp->keys[Network_SHIFT] = newClientInput->input.keys[Network_SHIFT];
-			inp->keys[Network_CONTROL] = newClientInput->input.keys[Network_CONTROL];
-			inp->keys[Network_SPACE] = newClientInput->input.keys[Network_SPACE];
+			inp->mouseDX = m_inpAcc.mouseDX;
+			inp->mouseDY = m_inpAcc.mouseDY;
+		}
+		else 
+		{
+			inp->keys[Network_W] = m_inpAcc.keys[Network_W];
+			inp->keys[Network_A] = m_inpAcc.keys[Network_A];
+			inp->keys[Network_S] = m_inpAcc.keys[Network_S];
+			inp->keys[Network_D] = m_inpAcc.keys[Network_D];
+			inp->keys[Network_SHIFT] = m_inpAcc.keys[Network_SHIFT];
+			inp->keys[Network_CONTROL] = m_inpAcc.keys[Network_CONTROL];
+			inp->keys[Network_SPACE] = m_inpAcc.keys[Network_SPACE];
 
-			inp->mouseDX = newClientInput->input.mouseDX;
-			inp->mouseDY = newClientInput->input.mouseDY;
+			//inp->mouseDX = m_inpAcc->input.mouseDX;
+			//inp->mouseDY = m_inpAcc->input.mouseDY;
 		}
 	}
 	else
@@ -411,9 +446,23 @@ void NetworkSyncController::NewNetworkedEntity(NetworkedEntity *net, PhysicsEnti
 
 	return;
 }
-void NetworkSyncController::ApplyChanges(NetworkedEntity net, PhysicsEntity* ent)
+void NetworkSyncController::ApplyChanges(
+	NetworkedEntity current, NetworkedEntity net,
+	PhysicsEntity* ent, float interpolation)
 {
-	ent->SetLocation(net.x, net.y, net.z);
-	ent->SetVelocity(net.vx, net.vy, net.vz);
-	ent->SetRotation(net.rx, net.ry, net.rz);
+	float x, y, z;
+	float vx, vy, vz;
+	float rx, ry, rz;
+	x = net.x  *(interpolation)+current.x  *(1.0f - interpolation);
+	y = net.y  *(interpolation)+current.y  *(1.0f - interpolation);
+	z = net.z  *(interpolation)+current.z  *(1.0f - interpolation);
+	vx = net.vx *(interpolation)+current.vx *(1.0f - interpolation);
+	vy = net.vy *(interpolation)+current.vy *(1.0f - interpolation);
+	vz = net.vz *(interpolation)+current.vz *(1.0f - interpolation);
+	rx = net.rx *(interpolation)+current.rx *(1.0f - interpolation);
+	ry = net.ry *(interpolation)+current.ry *(1.0f - interpolation);
+	rz = net.rz *(interpolation)+current.rz *(1.0f - interpolation);
+	ent->SetLocation(x, y, z);
+	ent->SetVelocity(vx, vy, vz);
+	ent->SetRotation(rx, ry, rz);
 }
