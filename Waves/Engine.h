@@ -28,7 +28,7 @@
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
 
-#define PHYSICSFRAMERATE 60.0f
+#define PHYSICS_TICK_TIME .015f
 
 #define NUMBEROFTEAMS 2
 
