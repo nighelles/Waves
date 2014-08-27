@@ -307,6 +307,8 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 			inp->keys[Network_CONTROL] = m_inpAcc.keys[Network_CONTROL];
 			inp->keys[Network_SPACE] = m_inpAcc.keys[Network_SPACE];
 
+
+			playerNum = m_clientMessage.playerNumber;
 			//inp->mouseDX = m_inpAcc->input.mouseDX;
 			//inp->mouseDY = m_inpAcc->input.mouseDY;
 		}
