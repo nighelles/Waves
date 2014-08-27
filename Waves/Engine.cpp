@@ -780,7 +780,7 @@ bool Engine::Update()
 
 	m_dtAccum += m_dt;
 #if USE_NETWORKING
-	if (m_dtAccum > (1.0f / PHYSICSFRAMERATE))
+	if (m_dtAccum >PHYSICS_TICK_TIME)
 #else
 	if (1)
 #endif
