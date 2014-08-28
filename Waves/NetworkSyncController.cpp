@@ -272,7 +272,7 @@ bool NetworkSyncController::SyncPlayerInputServer(NetworkedInput* inp, int& play
 	char clientData[256];
 	int dataSize = sizeof(clientData);
 
-	((NetworkClient*)m_networkController)->GetDataFromServer(clientData, dataSize);
+	((NetworkServer*)m_networkController)->GetDataFromClient(clientData, dataSize);
 
 	m_clientMessage = *((ClientNetworkMessage*)clientData);
 
