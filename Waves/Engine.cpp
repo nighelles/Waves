@@ -921,7 +921,7 @@ bool Engine::Update()
 			if (playerNum != m_playerNumber) {
 				for (int i = 0; i != numActions; ++i)
 				{
-					MovePlayer(playerInput, m_players[playerNum], 0.05f);
+					MovePlayer(clientInput[i], m_players[playerNum], 0.05f);
 				}
 			}
 		}
