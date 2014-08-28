@@ -3,7 +3,7 @@
 
 PlayerEntity::PlayerEntity() : PhysicsEntity()
 {
-	m_maxWalkSpeed = METERS(5);
+	m_maxWalkSpeed = METERS(10);
 	m_jumpStrength = METERS(G_CONST / 2);
 	m_airbornControl = 0.5;
 	m_runMultiplier = 2.0;
