@@ -33,7 +33,6 @@ NetworkSyncController::NetworkSyncController()
 
 	m_sendInput = false;
 	NetworkedInput m_inp = {0};
-	m_inpIndex = 0;
 
 	NetworkState m_networkStates[MAXACKDELAY] = {0};
 	NetworkState m_predictedStates[MAXACKDELAY] = {0};
@@ -284,23 +283,19 @@ bool NetworkSyncController::SyncPlayerInputServer(NetworkedInput* inp, int& play
 
 		playerNum = m_clientMessage.playerNumber;
 
-		numActions = m_clientMessage.numActions;
-
 		m_clientAck = m_clientMessage.ack;
 
-		for (int i = 0; i != numActions; ++i)
-		{
-			inp[i].keys[Network_W] = m_inp[i].keys[Network_W];
-			inp[i].keys[Network_A] = m_inp[i].keys[Network_A];
-			inp[i].keys[Network_S] = m_inp[i].keys[Network_S];
-			inp[i].keys[Network_D] = m_inp[i].keys[Network_D];
-			inp[i].keys[Network_SHIFT] = m_inp[i].keys[Network_SHIFT];
-			inp[i].keys[Network_CONTROL] = m_inp[i].keys[Network_CONTROL];
-			inp[i].keys[Network_SPACE] = m_inp[i].keys[Network_SPACE];
 
-			inp[i].mouseDX = m_inp[i].mouseDX;
-			inp[i].mouseDY = m_inp[i].mouseDY;
-		}
+		inp->keys[Network_W] = m_inp.keys[Network_W];
+		inp->keys[Network_A] = m_inp.keys[Network_A];
+		inp->keys[Network_S] = m_inp.keys[Network_S];
+		inp->keys[Network_D] = m_inp.keys[Network_D];
+		inp->keys[Network_SHIFT] = m_inp.keys[Network_SHIFT];
+		inp->keys[Network_CONTROL] = m_inp.keys[Network_CONTROL];
+		inp->keys[Network_SPACE] = m_inp.keys[Network_SPACE];
+		   
+		inp->mouseDY = m_inp.mouseDY;
+		inp->mouseDX = m_inp.mouseDX;
 	}
 
 	if (!result) OutputDebugString(L"Could not sync player input.\n");
@@ -313,17 +308,15 @@ bool NetworkSyncController::SyncPlayerInputClient(NetworkedInput* inp, int& play
 
 	result = true;
 
-	
-	m_inp[m_inpIndex].keys[Network_W] = inp->keys[Network_W];
-	m_inp[m_inpIndex].keys[Network_A] = inp->keys[Network_A];
-	m_inp[m_inpIndex].keys[Network_S] = inp->keys[Network_S];
-	m_inp[m_inpIndex].keys[Network_D] = inp->keys[Network_D];
-	m_inp[m_inpIndex].keys[Network_SHIFT] = inp->keys[Network_SHIFT];
-	m_inp[m_inpIndex].keys[Network_CONTROL] = inp->keys[Network_CONTROL];
-	m_inp[m_inpIndex].keys[Network_SPACE] = inp->keys[Network_SPACE];
-	m_inp[m_inpIndex].mouseDX = inp->mouseDX;
-	m_inp[m_inpIndex].mouseDY = inp->mouseDY;
-	m_inpIndex += 1;
+	m_inp.keys[Network_W] = inp->keys[Network_W];
+	m_inp.keys[Network_A] = inp->keys[Network_A];
+	m_inp.keys[Network_S] = inp->keys[Network_S];
+	m_inp.keys[Network_D] = inp->keys[Network_D];
+	m_inp.keys[Network_SHIFT] = inp->keys[Network_SHIFT];
+	m_inp.keys[Network_CONTROL] = inp->keys[Network_CONTROL];
+	m_inp.keys[Network_SPACE] = inp->keys[Network_SPACE];
+	m_inp.mouseDX = inp->mouseDX;
+	m_inp.mouseDY = inp->mouseDY;
 
 	if (m_sendInput)
 	{
@@ -332,20 +325,17 @@ bool NetworkSyncController::SyncPlayerInputClient(NetworkedInput* inp, int& play
 
 		m_clientMessage.playerNumber = playerNum;
 
-		for (int i = 0; i != m_inpIndex; ++i)
-		{
-			m_clientMessage.input[i].keys[Network_W] = m_inp[i].keys[Network_W];
-			m_clientMessage.input[i].keys[Network_A] = m_inp[i].keys[Network_A];
-			m_clientMessage.input[i].keys[Network_S] = m_inp[i].keys[Network_S];
-			m_clientMessage.input[i].keys[Network_D] = m_inp[i].keys[Network_D];
-			m_clientMessage.input[i].keys[Network_SHIFT] = m_inp[i].keys[Network_SHIFT];
-			m_clientMessage.input[i].keys[Network_CONTROL] = m_inp[i].keys[Network_CONTROL];
-			m_clientMessage.input[i].keys[Network_SPACE] = m_inp[i].keys[Network_SPACE];
-			m_clientMessage.input[i].mouseDX = m_inp[i].mouseDX;
-			m_clientMessage.input[i].mouseDY = m_inp[i].mouseDY;
-		}
+		m_clientMessage.input.keys[Network_W] = m_inp.keys[Network_W];
+		m_clientMessage.input.keys[Network_A] = m_inp.keys[Network_A];
+		m_clientMessage.input.keys[Network_S] = m_inp.keys[Network_S];
+		m_clientMessage.input.keys[Network_D] = m_inp.keys[Network_D];
+		m_clientMessage.input.keys[Network_SHIFT] = m_inp.keys[Network_SHIFT];
+		m_clientMessage.input.keys[Network_CONTROL] = m_inp.keys[Network_CONTROL];
+		m_clientMessage.input.keys[Network_SPACE] = m_inp.keys[Network_SPACE];
+		m_clientMessage.input.mouseDX = m_inp.mouseDX;
+		m_clientMessage.input.mouseDY = m_inp.mouseDY;
+
 		memset(&m_inp, 0, sizeof(m_inp));
-		m_inpIndex = 0;
 
 		result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
 

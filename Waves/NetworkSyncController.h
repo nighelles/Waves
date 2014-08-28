@@ -37,8 +37,7 @@ public:
 	void ApplyChanges(NetworkedEntity current, NetworkedEntity net, PhysicsEntity* ent, float interpolation);
 	bool DoStatesDiffer(NetworkState *a, NetworkState *b, int num);
 
-	bool Waiting() const { return m_waiting; }
-	void Waiting(bool val) { m_waiting = val; }
+	bool SendInput() const { return m_sendInput; }
 
 private:
 	bool m_isServer;
@@ -62,8 +61,7 @@ private:
 	bool m_correctingError;
 
 	bool m_sendInput;
-	NetworkedInput m_inp[20];
-	int				m_inpIndex;
+	NetworkedInput m_inp;
 
 	int m_numEntities;
 	PhysicsEntity* m_entities[MAXNETWORKENTITIES];

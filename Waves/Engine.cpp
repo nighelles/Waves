@@ -796,7 +796,11 @@ bool Engine::Update()
 
 	NetworkedInput playerInput{};
 
-	if (m_updatePhysics)
+#if USE_NETWORKING
+	if (!m_networkSyncController->SendInput())
+#else
+	if (1)
+#endif
 	{
 		if (m_Input->IsKeyPressed(DIK_T))
 		{
@@ -912,17 +916,14 @@ bool Engine::Update()
 		}
 		if (m_isServer && m_connectedToServer)
 		{
-			NetworkedInput clientInput[20]{};
-			int playerNum = m_playerNumber;
+			NetworkedInput clientInput{};
+			int playerNum = -1;
 			int numActions;
 
-			m_networkSyncController->SyncPlayerInputServer(clientInput, playerNum, numActions);
+			m_networkSyncController->SyncPlayerInputServer(&clientInput, playerNum, numActions);
 
-			if (playerNum != m_playerNumber) {
-				for (int i = 0; i != numActions; ++i)
-				{
-					MovePlayer(clientInput[i], m_players[playerNum], 0.05f);
-				}
+			if (playerNum != -1) {
+				MovePlayer(clientInput, m_players[playerNum], 0.05f);
 			}
 		}
 
