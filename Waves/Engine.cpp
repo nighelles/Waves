@@ -927,22 +927,22 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 	if (inp.keys[Network_W])
 		dir.z += inp.keys[Network_W];
 	if (inp.keys[Network_A])
-		dir.x -= inp.keys[Network_W];
+		dir.x -= inp.keys[Network_A];
 	if (inp.keys[Network_S])
-		dir.z -= inp.keys[Network_W];
+		dir.z -= inp.keys[Network_S];
 	if (inp.keys[Network_D])
-		dir.x += inp.keys[Network_W];
+		dir.x += inp.keys[Network_D];
 	if (inp.keys[Network_SPACE])
-		dir.y += inp.keys[Network_W];
+		dir.y += inp.keys[Network_SPACE];
 	if (inp.keys[Network_CONTROL])
-		dir.y -= inp.keys[Network_W];
+		dir.y -= inp.keys[Network_CONTROL];
 
 	if (inp.keys[Network_SHIFT] > 0)
 		player->Run(true);
 	else
 		player->Run(false);
 
-	if (inp.keys[Network_SPACE])
+	if (inp.keys[Network_SPACE] > 0)
 	{
 		player->Jump(dt);
 	}

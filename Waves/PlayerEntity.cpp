@@ -41,7 +41,7 @@ void PlayerEntity::Movement(float x, float y, float z, float dt)
 
 	D3DXVec3TransformCoord(&walkVec, &walkVec, &rot);
 
-	D3DXVec3Normalize(&walkVec, &walkVec);
+	//D3DXVec3Normalize(&walkVec, &walkVec);
 
 	walkVec *= m_maxWalkSpeed;
 	if (m_run) walkVec *= m_runMultiplier;

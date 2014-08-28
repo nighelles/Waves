@@ -233,7 +233,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 					m_errorInterpolation = 1.0f;
 					m_correctingError = false;
 				}
-				ApplyChanges(m_predictedStates[m_serverAtIndex].entities[i],
+				ApplyChanges(m_predictedStates[m_serverAtIndex-1].entities[i],
 					m_networkStates[m_serverAtIndex].entities[i],
 					m_entities[i], m_errorInterpolation);
 			}
