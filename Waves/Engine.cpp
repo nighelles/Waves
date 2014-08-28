@@ -789,8 +789,8 @@ bool Engine::Update()
 	}
 	m_Input->GetMouseDelta(mouseIDX, mouseIDY);
 
-	mouseDX = mouseIDX * PHYSICS_TICK_TIME * 10;
-	mouseDY = mouseIDY * PHYSICS_TICK_TIME * 10;
+	mouseDX = mouseIDX * m_dt * 10;
+	mouseDY = mouseIDY * m_dt * 10;
 
 #if GAME_BUILD
 
@@ -823,24 +823,27 @@ bool Engine::Update()
 	NetworkedInput playerInput{};
 
 	if (m_Input->IsKeyPressed(DIK_W))
-		playerInput.keys[Network_W] = true;
+		playerInput.keys[Network_W] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_A))
-		playerInput.keys[Network_A] = true;
+		playerInput.keys[Network_A] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_S))
-		playerInput.keys[Network_S] = true;
+		playerInput.keys[Network_S] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_D))
-		playerInput.keys[Network_D] = true;
+		playerInput.keys[Network_D] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = true;
+		playerInput.keys[Network_SPACE] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_LCONTROL))
-		playerInput.keys[Network_CONTROL] = true;
+		playerInput.keys[Network_CONTROL] = m_dt;
 	if (m_Input->IsKeyPressed(DIK_LSHIFT))
-		playerInput.keys[Network_SHIFT] = true;
+		playerInput.keys[Network_SHIFT] = m_dt;
 	if (m_Input->IsKeyDown(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = true;
+		playerInput.keys[Network_SPACE] = m_dt;
 
 	playerInput.mouseDX = mouseDX;
 	playerInput.mouseDY = mouseDY;
+
+	if (m_Input->IsKeyDown(DIK_P))
+		playerInput.mouseDY = 10;
 
 	//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
@@ -922,18 +925,19 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 	D3DXVECTOR3 dir = D3DXVECTOR3(0, 0, 0);
 
 	if (inp.keys[Network_W])
-		dir.z += 1;
+		dir.z += inp.keys[Network_W];
 	if (inp.keys[Network_A])
-		dir.x -= 1;
+		dir.x -= inp.keys[Network_W];
 	if (inp.keys[Network_S])
-		dir.z -= 1;
+		dir.z -= inp.keys[Network_W];
 	if (inp.keys[Network_D])
-		dir.x += 1;
+		dir.x += inp.keys[Network_W];
 	if (inp.keys[Network_SPACE])
-		dir.y += 1;
+		dir.y += inp.keys[Network_W];
 	if (inp.keys[Network_CONTROL])
-		dir.y -= 1;
-	if (inp.keys[Network_SHIFT])
+		dir.y -= inp.keys[Network_W];
+
+	if (inp.keys[Network_SHIFT] > 0)
 		player->Run(true);
 	else
 		player->Run(false);

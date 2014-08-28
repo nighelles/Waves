@@ -55,13 +55,13 @@ void PlayerEntity::Movement(float x, float y, float z, float dt)
 		if (m_underwater)
 		{
 			walkVec *= 0.5;
-			ApplyImpulseAccel(walkVec.x, walkVec.y, walkVec.z, dt);
+			ApplyImpulseDirect(walkVec.x, walkVec.y, walkVec.z);
 		}
 		else 
 		{
 			// in the air
 			walkVec *= m_airbornControl;
-			ApplyImpulseAccel(walkVec.x, 0, walkVec.z, dt);
+			ApplyImpulseDirect(walkVec.x, 0, walkVec.z);
 		}
 	}
 	

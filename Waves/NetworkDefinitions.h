@@ -19,7 +19,7 @@ enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CO
 
 typedef struct
 {
-	bool keys[7];
+	float keys[7];
 	float mouseDX, mouseDY;
 } NetworkedInput;
 

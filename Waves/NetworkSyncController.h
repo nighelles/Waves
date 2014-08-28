@@ -36,6 +36,9 @@ public:
 	void ApplyChanges(NetworkedEntity current, NetworkedEntity net, PhysicsEntity* ent, float interpolation);
 	bool DoStatesDiffer(NetworkState *a, NetworkState *b, int num);
 
+	bool Waiting() const { return m_waiting; }
+	void Waiting(bool val) { m_waiting = val; }
+
 private:
 	bool m_isServer;
 
@@ -48,6 +51,7 @@ private:
 	float m_waitTime;
 	float m_packetSpacing;
 	bool m_waiting;
+
 	int m_goodPackets;
 	int m_goodThreshold;
 	bool m_checkAgainstNetwork;

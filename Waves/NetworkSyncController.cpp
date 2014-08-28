@@ -19,7 +19,7 @@ NetworkSyncController::NetworkSyncController()
 
 	m_waitTime = 0;
 	m_waiting = false;
-	m_packetSpacing = 0.2;
+	m_packetSpacing = 0.05;
 	m_goodPackets = 0;
 	m_goodThreshold = 5;
 
@@ -95,14 +95,15 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 	m_waitTime += dt;
 
+	if (m_waitTime > m_packetSpacing)
+	{
+		/*m_sendInput = true;*/
+		m_waitTime -= m_packetSpacing;
+		m_waiting = false;
+	}
+
 	if (m_isServer)
 	{
-		if (m_waitTime > m_packetSpacing)
-		{
-			m_sendInput = true;
-			m_waitTime -= m_packetSpacing;
-			m_waiting = false;
-		}
 
 		if (!m_waiting)
 		{
@@ -205,7 +206,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			{
 				if (DoStatesDiffer(
 					&m_networkStates[m_serverAtIndex],
-					&m_predictedStates[m_serverAtIndex-1],
+					&m_predictedStates[m_serverAtIndex],
 					m_numEntities))
 				{
 					m_correctingError = true;
@@ -307,6 +308,16 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 
 			m_clientMessage.playerNumber = playerNum;
 
+			m_inpAcc.keys[Network_W] = inp->keys[Network_W] + m_inpAcc.keys[Network_W];
+			m_inpAcc.keys[Network_A] = inp->keys[Network_A] + m_inpAcc.keys[Network_A];
+			m_inpAcc.keys[Network_S] = inp->keys[Network_S] + m_inpAcc.keys[Network_S];
+			m_inpAcc.keys[Network_D] = inp->keys[Network_D] + m_inpAcc.keys[Network_D];
+			m_inpAcc.keys[Network_SHIFT] = inp->keys[Network_SHIFT] + m_inpAcc.keys[Network_SHIFT];
+			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] + m_inpAcc.keys[Network_CONTROL];
+			m_inpAcc.keys[Network_SPACE] = inp->keys[Network_SPACE] + m_inpAcc.keys[Network_SPACE];
+			m_inpAcc.mouseDX += inp->mouseDX;
+			m_inpAcc.mouseDY += inp->mouseDY;
+
 			m_clientMessage.input.keys[Network_W]		=	m_inpAcc.keys[Network_W];
 			m_clientMessage.input.keys[Network_A]		=	m_inpAcc.keys[Network_A];
 			m_clientMessage.input.keys[Network_S]		=	m_inpAcc.keys[Network_S];
@@ -325,13 +336,13 @@ bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
 			m_sendInput = false;
 		}
 		else {
-			m_inpAcc.keys[Network_W      ] = inp->keys[Network_W      ] || m_inpAcc.keys[Network_W      ];
-			m_inpAcc.keys[Network_A      ] = inp->keys[Network_A      ] || m_inpAcc.keys[Network_A      ];
-			m_inpAcc.keys[Network_S      ] = inp->keys[Network_S      ] || m_inpAcc.keys[Network_S      ];
-			m_inpAcc.keys[Network_D      ] = inp->keys[Network_D      ] || m_inpAcc.keys[Network_D      ];
-			m_inpAcc.keys[Network_SHIFT  ] = inp->keys[Network_SHIFT  ] || m_inpAcc.keys[Network_SHIFT  ];
-			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] || m_inpAcc.keys[Network_CONTROL];
-			m_inpAcc.keys[Network_SPACE  ] = inp->keys[Network_SPACE  ] || m_inpAcc.keys[Network_SPACE  ];
+			m_inpAcc.keys[Network_W] = inp->keys[Network_W] + m_inpAcc.keys[Network_W];
+			m_inpAcc.keys[Network_A] = inp->keys[Network_A] + m_inpAcc.keys[Network_A];
+			m_inpAcc.keys[Network_S] = inp->keys[Network_S] + m_inpAcc.keys[Network_S];
+			m_inpAcc.keys[Network_D] = inp->keys[Network_D] + m_inpAcc.keys[Network_D];
+			m_inpAcc.keys[Network_SHIFT] = inp->keys[Network_SHIFT] + m_inpAcc.keys[Network_SHIFT];
+			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] + m_inpAcc.keys[Network_CONTROL];
+			m_inpAcc.keys[Network_SPACE] = inp->keys[Network_SPACE] + m_inpAcc.keys[Network_SPACE];
 			m_inpAcc.mouseDX += inp->mouseDX;
 			m_inpAcc.mouseDY += inp->mouseDY;
 		}
