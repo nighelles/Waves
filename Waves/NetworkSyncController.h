@@ -24,8 +24,8 @@ public:
 	int RegisterEntity(PhysicsEntity* entity);
 
 	bool SyncEntityStates(float dt);
-	bool SyncPlayerInputServer(NetworkedInput* inp, int& playerNum, int& numActions);
-	bool SyncPlayerInputClient(NetworkedInput* inp, int& playerNum);
+	bool SyncPlayerInputServer(NetworkedInput* inp, int& playerNum);
+	bool SyncPlayerInputClient(NetworkedInput inp, int& playerNum);
 
 	int DeltaCompress();
 

@@ -797,7 +797,7 @@ bool Engine::Update()
 	NetworkedInput playerInput{};
 
 #if USE_NETWORKING
-	if (!m_networkSyncController->SendInput())
+	if (m_networkSyncController->SendInput())
 #else
 	if (1)
 #endif
@@ -908,19 +908,19 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-		if (!m_isServer && m_connectedToServer)
+		if (!m_isServer && m_connectedToServer && m_networkSyncController->SendInput())
 		{
+
 			int playerNum = m_playerNumber;
-			m_networkSyncController->SyncPlayerInputClient(&playerInput, playerNum);
+			m_networkSyncController->SyncPlayerInputClient(playerInput, playerNum);
 
 		}
 		if (m_isServer && m_connectedToServer)
 		{
 			NetworkedInput clientInput{};
 			int playerNum = -1;
-			int numActions;
 
-			m_networkSyncController->SyncPlayerInputServer(&clientInput, playerNum, numActions);
+			m_networkSyncController->SyncPlayerInputServer(&clientInput, playerNum);
 
 			if (playerNum != -1) {
 				MovePlayer(clientInput, m_players[playerNum], 0.05f);
