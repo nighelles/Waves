@@ -48,7 +48,7 @@ void PlayerEntity::Movement(float x, float y, float z, float dt)
 
 	if (m_grounded)
 	{
-		SetVelocity(walkVec.x, m_velocityY, walkVec.z);
+		ApplyImpulseDirect(walkVec.x, m_velocityY, walkVec.z);
 	}
 	else
 	{
