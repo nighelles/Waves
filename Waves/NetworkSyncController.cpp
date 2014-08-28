@@ -32,11 +32,11 @@ NetworkSyncController::NetworkSyncController()
 	m_currentNetworkState = 0;
 
 	m_sendInput = false;
-	NetworkedInput m_inp = {};
+	NetworkedInput m_inp = {0};
 	m_inpIndex = 0;
 
-	NetworkState m_networkStates[MAXACKDELAY] = {};
-	NetworkState m_predictedStates[MAXACKDELAY] = {};
+	NetworkState m_networkStates[MAXACKDELAY] = {0};
+	NetworkState m_predictedStates[MAXACKDELAY] = {0};
 	
 	m_datastream[STREAMLENGTH] = { 0 };
 
@@ -324,6 +324,7 @@ bool NetworkSyncController::SyncPlayerInputClient(NetworkedInput* inp, int& play
 	m_inp[m_inpIndex].mouseDX = inp->mouseDX;
 	m_inp[m_inpIndex].mouseDY = inp->mouseDY;
 	m_inpIndex += 1;
+
 	if (m_sendInput)
 	{
 		m_clientMessage.messageType = CLIENTSENDINPUT;
