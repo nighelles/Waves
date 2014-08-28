@@ -19,7 +19,7 @@ enum { Network_W = 0, Network_A, Network_S, Network_D, Network_SHIFT, Network_CO
 
 typedef struct
 {
-	float keys[7];
+	bool keys[7];
 	float mouseDX, mouseDY;
 } NetworkedInput;
 
@@ -48,5 +48,6 @@ typedef struct
 	NetworkMessageType	messageType;
 	UINT32 ack;
 	int		playerNumber;
-	NetworkedInput input;
+	int		numActions;
+	NetworkedInput input[20];
 } ClientNetworkMessage;

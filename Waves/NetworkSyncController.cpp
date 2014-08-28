@@ -32,7 +32,8 @@ NetworkSyncController::NetworkSyncController()
 	m_currentNetworkState = 0;
 
 	m_sendInput = false;
-	NetworkedInput m_inpAcc = {};
+	NetworkedInput m_inp = {};
+	m_inpIndex = 0;
 
 	NetworkState m_networkStates[MAXACKDELAY] = {};
 	NetworkState m_predictedStates[MAXACKDELAY] = {};
@@ -206,7 +207,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			{
 				if (DoStatesDiffer(
 					&m_networkStates[m_serverAtIndex],
-					&m_predictedStates[m_serverAtIndex],
+					&m_predictedStates[m_serverAtIndex-1],
 					m_numEntities))
 				{
 					m_correctingError = true;
@@ -233,7 +234,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 					m_errorInterpolation = 1.0f;
 					m_correctingError = false;
 				}
-				ApplyChanges(m_predictedStates[m_serverAtIndex-1].entities[i],
+				ApplyChanges(m_predictedStates[m_serverAtIndex].entities[i],
 					m_networkStates[m_serverAtIndex].entities[i],
 					m_entities[i], m_errorInterpolation);
 			}
@@ -262,91 +263,94 @@ bool NetworkSyncController::DoStatesDiffer(NetworkState *a, NetworkState *b, int
 	return false;
 }
 
-bool NetworkSyncController::SyncPlayerInput(NetworkedInput* inp, int& playerNum)
+bool NetworkSyncController::SyncPlayerInputServer(NetworkedInput* inp, int& playerNum, int& numActions)
 {
 	bool result;
 
 	result = true;
 	
-	if (m_isServer)
+	char clientData[256];
+	int dataSize = sizeof(clientData);
+
+	((NetworkClient*)m_networkController)->GetDataFromServer(clientData, dataSize);
+
+	m_clientMessage = *((ClientNetworkMessage*)clientData);
+
+	if (m_clientMessage.messageType == CLIENTSENDINPUT)
 	{
-		char clientData[256];
-		int dataSize = sizeof(clientData);
+		ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
 
-		((NetworkClient*)m_networkController)->GetDataFromServer(clientData, dataSize);
+		memcpy(&m_inp, &(newClientInput->input), sizeof(NetworkedInput));
 
-		m_clientMessage = *((ClientNetworkMessage*)clientData);
+		playerNum = m_clientMessage.playerNumber;
 
-		if (m_clientMessage.messageType == CLIENTSENDINPUT)
+		numActions = m_clientMessage.numActions;
+
+		m_clientAck = m_clientMessage.ack;
+
+		for (int i = 0; i != numActions; ++i)
 		{
-			ClientNetworkMessage* newClientInput = (ClientNetworkMessage*)&m_clientMessage;
+			inp[i].keys[Network_W] = m_inp[i].keys[Network_W];
+			inp[i].keys[Network_A] = m_inp[i].keys[Network_A];
+			inp[i].keys[Network_S] = m_inp[i].keys[Network_S];
+			inp[i].keys[Network_D] = m_inp[i].keys[Network_D];
+			inp[i].keys[Network_SHIFT] = m_inp[i].keys[Network_SHIFT];
+			inp[i].keys[Network_CONTROL] = m_inp[i].keys[Network_CONTROL];
+			inp[i].keys[Network_SPACE] = m_inp[i].keys[Network_SPACE];
 
-			memcpy(&m_inpAcc, &(newClientInput->input), sizeof(NetworkedInput));
-
-			playerNum = m_clientMessage.playerNumber;
-
-			m_clientAck = m_clientMessage.ack;
-
-			inp->keys[Network_W] = m_inpAcc.keys[Network_W];
-			inp->keys[Network_A] = m_inpAcc.keys[Network_A];
-			inp->keys[Network_S] = m_inpAcc.keys[Network_S];
-			inp->keys[Network_D] = m_inpAcc.keys[Network_D];
-			inp->keys[Network_SHIFT] = m_inpAcc.keys[Network_SHIFT];
-			inp->keys[Network_CONTROL] = m_inpAcc.keys[Network_CONTROL];
-			inp->keys[Network_SPACE] = m_inpAcc.keys[Network_SPACE];
-
-			inp->mouseDX = m_inpAcc.mouseDX;
-			inp->mouseDY = m_inpAcc.mouseDY;
+			inp[i].mouseDX = m_inp[i].mouseDX;
+			inp[i].mouseDY = m_inp[i].mouseDY;
 		}
 	}
-	else
+
+	if (!result) OutputDebugString(L"Could not sync player input.\n");
+	return result;
+}
+
+bool NetworkSyncController::SyncPlayerInputClient(NetworkedInput* inp, int& playerNum)
+{
+	bool result;
+
+	result = true;
+
+	
+	m_inp[m_inpIndex].keys[Network_W] = inp->keys[Network_W];
+	m_inp[m_inpIndex].keys[Network_A] = inp->keys[Network_A];
+	m_inp[m_inpIndex].keys[Network_S] = inp->keys[Network_S];
+	m_inp[m_inpIndex].keys[Network_D] = inp->keys[Network_D];
+	m_inp[m_inpIndex].keys[Network_SHIFT] = inp->keys[Network_SHIFT];
+	m_inp[m_inpIndex].keys[Network_CONTROL] = inp->keys[Network_CONTROL];
+	m_inp[m_inpIndex].keys[Network_SPACE] = inp->keys[Network_SPACE];
+	m_inp[m_inpIndex].mouseDX = inp->mouseDX;
+	m_inp[m_inpIndex].mouseDY = inp->mouseDY;
+	m_inpIndex += 1;
+	if (m_sendInput)
 	{
-		if (m_sendInput)
+		m_clientMessage.messageType = CLIENTSENDINPUT;
+		m_clientMessage.ack = m_clientAck;
+
+		m_clientMessage.playerNumber = playerNum;
+
+		for (int i = 0; i != m_inpIndex; ++i)
 		{
-			m_clientMessage.messageType = CLIENTSENDINPUT;
-			m_clientMessage.ack = m_clientAck;
-
-			m_clientMessage.playerNumber = playerNum;
-
-			m_inpAcc.keys[Network_W] = inp->keys[Network_W] + m_inpAcc.keys[Network_W];
-			m_inpAcc.keys[Network_A] = inp->keys[Network_A] + m_inpAcc.keys[Network_A];
-			m_inpAcc.keys[Network_S] = inp->keys[Network_S] + m_inpAcc.keys[Network_S];
-			m_inpAcc.keys[Network_D] = inp->keys[Network_D] + m_inpAcc.keys[Network_D];
-			m_inpAcc.keys[Network_SHIFT] = inp->keys[Network_SHIFT] + m_inpAcc.keys[Network_SHIFT];
-			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] + m_inpAcc.keys[Network_CONTROL];
-			m_inpAcc.keys[Network_SPACE] = inp->keys[Network_SPACE] + m_inpAcc.keys[Network_SPACE];
-			m_inpAcc.mouseDX += inp->mouseDX;
-			m_inpAcc.mouseDY += inp->mouseDY;
-
-			m_clientMessage.input.keys[Network_W]		=	m_inpAcc.keys[Network_W];
-			m_clientMessage.input.keys[Network_A]		=	m_inpAcc.keys[Network_A];
-			m_clientMessage.input.keys[Network_S]		=	m_inpAcc.keys[Network_S];
-			m_clientMessage.input.keys[Network_D]		=	m_inpAcc.keys[Network_D];
-			m_clientMessage.input.keys[Network_SHIFT]	=	m_inpAcc.keys[Network_SHIFT];
-			m_clientMessage.input.keys[Network_CONTROL] =	m_inpAcc.keys[Network_CONTROL];
-			m_clientMessage.input.keys[Network_SPACE]	=	m_inpAcc.keys[Network_SPACE];
-
-			m_clientMessage.input.mouseDX = m_inpAcc.mouseDX;
-			m_clientMessage.input.mouseDY = m_inpAcc.mouseDY;
-
-			memset(&m_inpAcc, 0, sizeof(m_inpAcc));
-
-			result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
-			
-			m_sendInput = false;
+			m_clientMessage.input[i].keys[Network_W] = m_inp[i].keys[Network_W];
+			m_clientMessage.input[i].keys[Network_A] = m_inp[i].keys[Network_A];
+			m_clientMessage.input[i].keys[Network_S] = m_inp[i].keys[Network_S];
+			m_clientMessage.input[i].keys[Network_D] = m_inp[i].keys[Network_D];
+			m_clientMessage.input[i].keys[Network_SHIFT] = m_inp[i].keys[Network_SHIFT];
+			m_clientMessage.input[i].keys[Network_CONTROL] = m_inp[i].keys[Network_CONTROL];
+			m_clientMessage.input[i].keys[Network_SPACE] = m_inp[i].keys[Network_SPACE];
+			m_clientMessage.input[i].mouseDX = m_inp[i].mouseDX;
+			m_clientMessage.input[i].mouseDY = m_inp[i].mouseDY;
 		}
-		else {
-			m_inpAcc.keys[Network_W] = inp->keys[Network_W] + m_inpAcc.keys[Network_W];
-			m_inpAcc.keys[Network_A] = inp->keys[Network_A] + m_inpAcc.keys[Network_A];
-			m_inpAcc.keys[Network_S] = inp->keys[Network_S] + m_inpAcc.keys[Network_S];
-			m_inpAcc.keys[Network_D] = inp->keys[Network_D] + m_inpAcc.keys[Network_D];
-			m_inpAcc.keys[Network_SHIFT] = inp->keys[Network_SHIFT] + m_inpAcc.keys[Network_SHIFT];
-			m_inpAcc.keys[Network_CONTROL] = inp->keys[Network_CONTROL] + m_inpAcc.keys[Network_CONTROL];
-			m_inpAcc.keys[Network_SPACE] = inp->keys[Network_SPACE] + m_inpAcc.keys[Network_SPACE];
-			m_inpAcc.mouseDX += inp->mouseDX;
-			m_inpAcc.mouseDY += inp->mouseDY;
-		}
+		memset(&m_inp, 0, sizeof(m_inp));
+		m_inpIndex = 0;
+
+		result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
+
+		m_sendInput = false;
 	}
+
 
 	if (!result) OutputDebugString(L"Could not sync player input.\n");
 	return result;

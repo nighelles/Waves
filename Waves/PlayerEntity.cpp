@@ -3,7 +3,7 @@
 
 PlayerEntity::PlayerEntity() : PhysicsEntity()
 {
-	m_maxWalkSpeed = METERS(10);
+	m_maxWalkSpeed = METERS(7);
 	m_jumpStrength = METERS(G_CONST / 2);
 	m_airbornControl = 0.5;
 	m_runMultiplier = 2.0;
@@ -41,27 +41,27 @@ void PlayerEntity::Movement(float x, float y, float z, float dt)
 
 	D3DXVec3TransformCoord(&walkVec, &walkVec, &rot);
 
-	//D3DXVec3Normalize(&walkVec, &walkVec);
+	D3DXVec3Normalize(&walkVec, &walkVec);
 
 	walkVec *= m_maxWalkSpeed;
 	if (m_run) walkVec *= m_runMultiplier;
 
 	if (m_grounded)
 	{
-		ApplyImpulseDirect(walkVec.x, m_velocityY, walkVec.z);
+		SetVelocity(walkVec.x, m_velocityY, walkVec.z);
 	}
 	else
 	{
 		if (m_underwater)
 		{
 			walkVec *= 0.5;
-			ApplyImpulseDirect(walkVec.x, walkVec.y, walkVec.z);
+			ApplyImpulseAccel(walkVec.x, walkVec.y, walkVec.z, dt);
 		}
 		else 
 		{
 			// in the air
 			walkVec *= m_airbornControl;
-			ApplyImpulseDirect(walkVec.x, 0, walkVec.z);
+			ApplyImpulseAccel(walkVec.x, 0, walkVec.z, dt);
 		}
 	}
 	

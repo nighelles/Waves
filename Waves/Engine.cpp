@@ -794,62 +794,64 @@ bool Engine::Update()
 
 #if GAME_BUILD
 
-	if (m_Input->IsKeyPressed(DIK_T))
-	{
-		for (int i = 0; i != MAXENTITIES; ++i)
-		{
-			if (m_entities[i])
-			{
-				m_entities[i]->GetEntityModel()->Animating(true);
-			}
-		}
-		for (int i = 0; i != MAXWEAPONS; ++i)
-		{
-			if (m_weaponEntities[i])
-			{
-				m_weaponEntities[i]->GetEntityModel()->Animating(true);
-			}
-		}
-	}
-
-	bool mouse1, mouse2;
-	m_Input->IsMouseClicked(mouse1, mouse2);
-	if (mouse1)
-	{
-		// "fire" main weapon
-		m_weaponEntities[m_currentWeapon]->GetEntityModel()->Animating(true);
-	}
-
 	NetworkedInput playerInput{};
 
-	if (m_Input->IsKeyPressed(DIK_W))
-		playerInput.keys[Network_W] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_A))
-		playerInput.keys[Network_A] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_S))
-		playerInput.keys[Network_S] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_D))
-		playerInput.keys[Network_D] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_LCONTROL))
-		playerInput.keys[Network_CONTROL] = m_dt;
-	if (m_Input->IsKeyPressed(DIK_LSHIFT))
-		playerInput.keys[Network_SHIFT] = m_dt;
-	if (m_Input->IsKeyDown(DIK_SPACE))
-		playerInput.keys[Network_SPACE] = m_dt;
+	if (m_updatePhysics)
+	{
+		if (m_Input->IsKeyPressed(DIK_T))
+		{
+			for (int i = 0; i != MAXENTITIES; ++i)
+			{
+				if (m_entities[i])
+				{
+					m_entities[i]->GetEntityModel()->Animating(true);
+				}
+			}
+			for (int i = 0; i != MAXWEAPONS; ++i)
+			{
+				if (m_weaponEntities[i])
+				{
+					m_weaponEntities[i]->GetEntityModel()->Animating(true);
+				}
+			}
+		}
 
-	playerInput.mouseDX = mouseDX;
-	playerInput.mouseDY = mouseDY;
+		bool mouse1, mouse2;
+		m_Input->IsMouseClicked(mouse1, mouse2);
+		if (mouse1)
+		{
+			// "fire" main weapon
+			m_weaponEntities[m_currentWeapon]->GetEntityModel()->Animating(true);
+		}
 
-	if (m_Input->IsKeyDown(DIK_P))
-		playerInput.mouseDY = 10;
+		if (m_Input->IsKeyPressed(DIK_W))
+			playerInput.keys[Network_W] = true;
+		if (m_Input->IsKeyPressed(DIK_A))
+			playerInput.keys[Network_A] = true;
+		if (m_Input->IsKeyPressed(DIK_S))
+			playerInput.keys[Network_S] = true;
+		if (m_Input->IsKeyPressed(DIK_D))
+			playerInput.keys[Network_D] = true;
+		if (m_Input->IsKeyPressed(DIK_SPACE))
+			playerInput.keys[Network_SPACE] = true;
+		if (m_Input->IsKeyPressed(DIK_LCONTROL))
+			playerInput.keys[Network_CONTROL] = true;
+		if (m_Input->IsKeyPressed(DIK_LSHIFT))
+			playerInput.keys[Network_SHIFT] = true;
+		if (m_Input->IsKeyDown(DIK_SPACE))
+			playerInput.keys[Network_SPACE] = true;
 
-	//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
+		playerInput.mouseDX = mouseDX;
+		playerInput.mouseDY = mouseDY;
+
+		if (m_Input->IsKeyDown(DIK_P))
+			playerInput.mouseDY = 10;
+
+		//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
 
-	MovePlayer(playerInput, Player(), m_dt);
-
+		MovePlayer(playerInput, Player(), m_dt);
+	}
 #endif // #if GAME_BUILD
 
 #if EDITOR_BUILD
@@ -902,12 +904,26 @@ bool Engine::Update()
 
 #if USE_NETWORKING
 
-		if (m_connectedToServer)
+		if (!m_isServer && m_connectedToServer)
 		{
 			int playerNum = m_playerNumber;
-			m_networkSyncController->SyncPlayerInput(&playerInput, playerNum);
+			m_networkSyncController->SyncPlayerInputClient(&playerInput, playerNum);
 
-			if (m_server && playerNum != m_playerNumber) MovePlayer(playerInput, m_players[playerNum], 0.05f);
+		}
+		if (m_isServer && m_connectedToServer)
+		{
+			NetworkedInput clientInput[20]{};
+			int playerNum = m_playerNumber;
+			int numActions;
+
+			m_networkSyncController->SyncPlayerInputServer(clientInput, playerNum, numActions);
+
+			if (playerNum != m_playerNumber) {
+				for (int i = 0; i != numActions; ++i)
+				{
+					MovePlayer(playerInput, m_players[playerNum], 0.05f);
+				}
+			}
 		}
 
 #endif //#if USE_NETWORKING
@@ -925,27 +941,28 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 	D3DXVECTOR3 dir = D3DXVECTOR3(0, 0, 0);
 
 	if (inp.keys[Network_W])
-		dir.z += inp.keys[Network_W];
+		dir.z += 1;
 	if (inp.keys[Network_A])
-		dir.x -= inp.keys[Network_A];
+		dir.x -= 1;
 	if (inp.keys[Network_S])
-		dir.z -= inp.keys[Network_S];
+		dir.z -= 1;
 	if (inp.keys[Network_D])
-		dir.x += inp.keys[Network_D];
+		dir.x += 1;
 	if (inp.keys[Network_SPACE])
-		dir.y += inp.keys[Network_SPACE];
+		dir.y += 1;
 	if (inp.keys[Network_CONTROL])
-		dir.y -= inp.keys[Network_CONTROL];
-
-	if (inp.keys[Network_SHIFT] > 0)
+		dir.y -= 1;
+	if (inp.keys[Network_SHIFT])
 		player->Run(true);
 	else
 		player->Run(false);
 
-	if (inp.keys[Network_SPACE] > 0)
+	if (inp.keys[Network_SPACE])
 	{
 		player->Jump(dt);
 	}
+
+	dir = dir*dt;
 
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
 		player->Stop(dt);
