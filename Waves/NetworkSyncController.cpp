@@ -206,7 +206,7 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 			{
 				if (DoStatesDiffer(
 					&m_networkStates[m_serverAtIndex],
-					&m_predictedStates[m_serverAtIndex-1],
+					&m_predictedStates[m_currentNetworkState],
 					m_numEntities))
 				{
 					m_correctingError = true;
@@ -247,17 +247,19 @@ bool NetworkSyncController::SyncEntityStates(float dt)
 
 bool NetworkSyncController::DoStatesDiffer(NetworkState *a, NetworkState *b, int num)
 {
+	float thresh = 0.01;
+	float rotthresh = 1;
 	for (int i = 0; i != num; ++i)
 	{
-		if (fabs(a->entities[i].x -  b->entities[i].x) > 0.5) return true;
-		if (fabs(a->entities[i].y -  b->entities[i].y) > 0.5) return true;
-		if (fabs(a->entities[i].z -  b->entities[i].z) > 0.5) return true;
-		if (fabs(a->entities[i].vx - b->entities[i].vx) > 0.5) return true;
-		if (fabs(a->entities[i].vy - b->entities[i].vy) > 0.5) return true;
-		if (fabs(a->entities[i].vz - b->entities[i].vz) > 0.5) return true;
-		if (fabs(a->entities[i].rx - b->entities[i].rx) > 0.5) return true;
-		if (fabs(a->entities[i].ry - b->entities[i].ry) > 0.5) return true;
-		if (fabs(a->entities[i].rz - b->entities[i].rz) > 0.5) return true;
+		if (fabs(a->entities[i].x - b->entities[i].x) > thresh) return true;
+		if (fabs(a->entities[i].y - b->entities[i].y) > thresh) return true;
+		if (fabs(a->entities[i].z - b->entities[i].z) > thresh) return true;
+		if (fabs(a->entities[i].vx - b->entities[i].vx) > thresh) return true;
+		if (fabs(a->entities[i].vy - b->entities[i].vy) > thresh) return true;
+		if (fabs(a->entities[i].vz - b->entities[i].vz) > thresh) return true;
+		if (fabs(a->entities[i].rx - b->entities[i].rx) > rotthresh) return true;
+		if (fabs(a->entities[i].ry - b->entities[i].ry) > rotthresh) return true;
+		if (fabs(a->entities[i].rz - b->entities[i].rz) > rotthresh) return true;
 	}
 	return false;
 }
@@ -296,6 +298,9 @@ bool NetworkSyncController::SyncPlayerInputServer(NetworkedInput* inp, int& play
 		   
 		inp->mouseDY = m_inp.mouseDY;
 		inp->mouseDX = m_inp.mouseDX;
+
+		inp->mouse[0] = m_inp.mouse[0];
+		inp->mouse[1] = m_inp.mouse[1];
 	}
 
 	if (!result) OutputDebugString(L"Could not sync player input.\n");
@@ -322,6 +327,8 @@ bool NetworkSyncController::SyncPlayerInputClient(NetworkedInput inp, int& playe
 	m_clientMessage.input.keys[Network_SPACE] = inp.keys[Network_SPACE];
 	m_clientMessage.input.mouseDX = inp.mouseDX;
 	m_clientMessage.input.mouseDY = inp.mouseDY;
+	m_clientMessage.input.mouse[0] = inp.mouse[0];
+	m_clientMessage.input.mouse[1] = inp.mouse[1];
 
 	result = ((NetworkClient*)m_networkController)->SendDataToServer((char*)&m_clientMessage, sizeof(m_clientMessage));
 

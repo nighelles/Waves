@@ -21,6 +21,7 @@ typedef struct
 {
 	bool keys[7];
 	float mouseDX, mouseDY;
+	bool mouse[2];
 } NetworkedInput;
 
 typedef struct

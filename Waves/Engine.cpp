@@ -848,13 +848,13 @@ bool Engine::Update()
 		playerInput.mouseDX = mouseDX;
 		playerInput.mouseDY = mouseDY;
 
-		if (m_Input->IsKeyDown(DIK_P))
-			playerInput.mouseDY = 10;
+		playerInput.mouse[0] = mouse1;
+		playerInput.mouse[1] = mouse2;
 
 		//m_Graphics->GetPlayerCamera()->ApplyRotation(mouseDY, 0.0, 0.0);
 
 
-		MovePlayer(playerInput, Player(), m_dt);
+		MovePlayer(playerInput, Player(), 0.05f);
 	}
 #endif // #if GAME_BUILD
 
@@ -902,7 +902,7 @@ bool Engine::Update()
 			m_landTerrain->SetVerticalOffset(editorRayIntersection.x, editorRayIntersection.z, 20.0, 5.0f);
 			m_editedSomething = true;
 		}
-	
+	}
 
 #endif
 
@@ -924,6 +924,7 @@ bool Engine::Update()
 
 			if (playerNum != -1) {
 				MovePlayer(clientInput, m_players[playerNum], 0.05f);
+				if (clientInput.mouse[0]) OutputDebugString(L"Network Player Fired\n");
 			}
 		}
 
@@ -969,7 +970,6 @@ void Engine::MovePlayer(NetworkedInput inp, PlayerEntity* player, float dt)
 		player->Stop(dt);
 	else
 		player->Movement(dir.x, dir.y, dir.z, dt);
-
 
 	player->ApplyRotation(inp.mouseDY, inp.mouseDX, 0); // THIS SHOULD BE BASED ON DT ALSO
 }

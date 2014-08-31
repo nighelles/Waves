@@ -47,6 +47,8 @@ PixelInputType ProceduralTerrainVertexShader(VertexInputType input)
 	output.normal.x = 6.28/100*2.0*cos((6.28*output.position.x / 100.0) + (3.14 * 5 * time));
 	output.normal.z = 0.0;
 
+	output.tex.x = output.tex.x+time;
+
 	// Do this after normal so our view doesn't change it
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
