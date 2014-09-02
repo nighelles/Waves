@@ -78,12 +78,19 @@ bool Engine::LoadConfiguration()
 	int argCount = 0;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argCount);
 	
-	CString filename(*(argv+1));
-
 	ifstream fin;
-	char command[256];
+	if (argCount > 1)
+	{
+		CString filename(*(argv + 1));
+		fin.open(filename);
+	}
+	else
+	{
+		fin.open("configclient.txt");
+	}
 
-	fin.open(filename);
+	char command[256];
+	
 	if (fin.fail())
 	{
 		OutputDebugString(L"Could not open config.txt");
