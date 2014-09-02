@@ -2,6 +2,7 @@
 
 #include <atldef.h>
 #include <atlstr.h>
+#include <shellapi.h>
 
 Engine::Engine()
 {
@@ -74,10 +75,15 @@ Engine::~Engine()
 
 bool Engine::LoadConfiguration()
 {
+	int argCount = 0;
+	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argCount);
+	
+	CString filename(*(argv+1));
+
 	ifstream fin;
 	char command[256];
 
-	fin.open("config.txt");
+	fin.open(filename);
 	if (fin.fail())
 	{
 		OutputDebugString(L"Could not open config.txt");
