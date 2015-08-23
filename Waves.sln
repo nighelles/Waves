@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Waves", "Waves\Waves.vcxproj", "{E35C57FE-18D4-4B0F-8A16-E9C147A2D26C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OBJTOBMF", "OBJTOBMF\OBJTOBMF.vcxproj", "{534D5038-42CE-4783-8B24-C11ABB1D9536}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClientInstance", "ClientInstance\ClientInstance.vcxproj", "{6D4B2897-4D1A-4872-83B4-2FC3983A884A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,9 +20,9 @@ Global
 		{E35C57FE-18D4-4B0F-8A16-E9C147A2D26C}.Release|Win32.ActiveCfg = Release|Win32
 		{E35C57FE-18D4-4B0F-8A16-E9C147A2D26C}.Release|Win32.Build.0 = Release|Win32
 		{534D5038-42CE-4783-8B24-C11ABB1D9536}.Debug|Win32.ActiveCfg = Debug|Win32
-		{534D5038-42CE-4783-8B24-C11ABB1D9536}.Debug|Win32.Build.0 = Debug|Win32
 		{534D5038-42CE-4783-8B24-C11ABB1D9536}.Release|Win32.ActiveCfg = Release|Win32
-		{534D5038-42CE-4783-8B24-C11ABB1D9536}.Release|Win32.Build.0 = Release|Win32
+		{6D4B2897-4D1A-4872-83B4-2FC3983A884A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6D4B2897-4D1A-4872-83B4-2FC3983A884A}.Release|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
