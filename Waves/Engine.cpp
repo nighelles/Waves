@@ -369,7 +369,7 @@ bool Engine::InitializeGame()
 	m_editCursor = new PhysicsEntity;
 	result = m_editCursor->Initialize();
 	if (!result) return false;
-	result = m_editCursor->InitializeModel(m_Graphics, "EditorCursor.obj", L"cursor.dds");
+	result = m_editCursor->InitializeModel(m_Graphics, "EditorCursor.obj", "cursor.dds");
 #endif //#if EDITOR_BUILD
 
 	m_landTerrain = new Terrain();

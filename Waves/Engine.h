@@ -24,7 +24,7 @@
 
 #include "Physics.h"
 
-#define USE_NETWORKING 1
+#define USE_NETWORKING 0
 #define EDITOR_BUILD 0
 #define GAME_BUILD 1
 
